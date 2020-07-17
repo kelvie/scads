@@ -12,7 +12,8 @@ snapTolerance = 0.1;
 // Layout spacing between the top and bottom piece
 spacing = 30;
 
-chamfer = false;
+// Whether or not to put a small chamfer in the back of the print
+Chamfer_Back = false;
 
 $fn = 100;
 font = "Ubuntu";
@@ -31,7 +32,7 @@ module squareWithHole(outsideLength, holeDiameter, thickness) {
 module chamferBack(yOffset, width) {
     difference() {
         children(0);
-        if (chamfer) translate([0, yOffset, 0])
+        if (Chamfer_Back) translate([0, yOffset, 0])
             rotate([0, 90, 0])
             linear_extrude(width)
             polygon([[0, 0], [0, -0.2], [-0.2, 0]]);
@@ -127,11 +128,8 @@ module makePart(middleWidth=middleWidth,
 }
 
 module bothParts(nutHeight, nutWidth, holeDiameter, label, screwLength, screwHeadHeight=0) {
-    // Add 0.1mm tolerance to nutHeight in case it won't fit
-    newNutHeight = nutHeight + 0.1;
-
     makePart(nutWidth=nutWidth,
-             nutHeight=newNutHeight,
+             nutHeight=nutHeight,
              holeDiameter=holeDiameter,
              minThickness=minThickness,
              screwHeadHeight=screwHeadHeight,
@@ -140,7 +138,7 @@ module bothParts(nutHeight, nutWidth, holeDiameter, label, screwLength, screwHea
 
     translate([spacing, 0])
         makePart(nutWidth=nutWidth,
-                 nutHeight=newNutHeight,
+                 nutHeight=nutHeight,
                  holeDiameter=holeDiameter,
                  screwHeadHeight=screwHeadHeight,
                  minThickness=minThickness,
