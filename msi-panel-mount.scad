@@ -98,7 +98,7 @@ module makePart(middleWidth=middleWidth,
     outerCube = [(nutWidth*2 + middleWidth + minThickness*2) / 2, nutWidth, screwHeadHeight + screwLength];
 
     if (type == "bottom")
-        finishPart(outerCube, str(label, "-", "BOTTOM")) difference() {
+        finishPart(outerCube, str(label, "  -  ", "BOTTOM")) difference() {
             basePart(outerCube, nutWidth, holeDiameter, nutHeight, minThickness);
             bottomCutOut(outerCube, minThickness, nutWidth, nutHeight);
         }
