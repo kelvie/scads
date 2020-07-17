@@ -1,10 +1,22 @@
 
 
-// distance between holes
+// distance in the middle
 middleWidth = 13;
-thickness = 1;
+
+// Minimum thickness of any beam
+minThickness = 1;
+
+// Tolerance between the parts
+snapTolerance = 0.1;
+
+// Layout spacing between the top and bottom piece
+spacing = 30;
+
+chamfer = false;
+
 $fn = 100;
 font = "Ubuntu";
+
 Screw_Size = "M3"; // [M2.5, M3]
 
 module squareWithHole(outsideLength, holeDiameter, thickness) {
@@ -19,117 +31,121 @@ module squareWithHole(outsideLength, holeDiameter, thickness) {
 module chamferBack(yOffset, width) {
     difference() {
         children(0);
-        # translate([0, yOffset, 0])
-        rotate([0, 90, 0])
+        if (chamfer) translate([0, yOffset, 0])
+            rotate([0, 90, 0])
             linear_extrude(width)
             polygon([[0, 0], [0, -0.2], [-0.2, 0]]);
     }
 
 }
 
-module commonPart(nutHeight,
-                  nutWidth,
-                  holeDiameter,
-                  label,
-                  middleWidth=middleWidth,
-                  extraWidth=0,
-                  sliceBottom=0,
-                  verticalSlice=0,
-                  screwHeadHeight=0,
-                  bottomPlate=0,
-                  screwLength=0,
+// Mirrors the part and does some final translations
+module finishPart(v, label) {
+    union() {
+        chamferBack(v.y, v.x*2) translate ([v.x, 0]) union() {
+            translate([-v.x, 0]) children(0);
+            mirror([1, 0, 0]) translate([-v.x, 0]) children(0);
+        }
+        // Label
+        translate([v.x, 0, 0.2]) rotate([90, 0, 0])
+                      linear_extrude(height=0.1)
+                      text(label, size=0.8, font=font, halign="center");
 
-    ) {
 
-    fullWidth = nutWidth*2 + middleWidth + thickness*2 + extraWidth*2;
 
-    textVOffset = 0.2;
+    }
+}
+module basePart(outerCube, nutWidth, holeDiameter, nutHeight, minThickness) {
+    difference() {
+        cube(outerCube);
 
-    overhangZ = screwLength == 0 ? nutHeight : screwLength - sliceBottom;
+        // screw hole
+        translate([nutWidth / 2, nutWidth/2]) cylinder(h=outerCube.z, d=holeDiameter);
 
-    // Label
-    translate([fullWidth/2, 0, textVOffset]) rotate([90, 0, 0])
-        linear_extrude(height=0.1)
-        text(label, size=thickness-0.2, font=font, halign="center");
+        // nut hole
+        translate([0, 0, minThickness]) cube([nutWidth, nutWidth, nutHeight+2*snapTolerance]);
+    }
 
-    chamferBack(nutWidth, fullWidth) union() {
-        // Bottom plate, if necessary
-        if (bottomPlate != 0) cube([fullWidth, nutWidth, bottomPlate]);
+}
 
-        translate([0, 0, bottomPlate]) union() {
-            translate([0, 0, overhangZ]) {
-                squareWithHole(nutWidth, holeDiameter, thickness);
+module bottomCutOut(outerCube, minThickness, nutWidth, nutHeight) {
+    union() {
+        // Remove the top part
+        translate([0, 0, nutHeight + 2*minThickness]) cube(outerCube);
+
+        // Cut out the middle section
+        translate([nutWidth + minThickness, 0, 2*minThickness]) cube(outerCube);
+    }
+}
+
+module makePart(middleWidth=middleWidth,
+                nutWidth,
+                nutHeight,
+                holeDiameter,
+                screwLength,
+                minThickness,
+                screwHeadHeight,
+                type,
+                label,
+    )
+{
+    // Overall dimensions of cube
+    outerCube = [(nutWidth*2 + middleWidth + minThickness*2) / 2, nutWidth, screwHeadHeight + screwLength];
+
+    if (type == "bottom")
+        finishPart(outerCube, str(label, "-", "BOTTOM")) difference() {
+            basePart(outerCube, nutWidth, holeDiameter, nutHeight, minThickness);
+            bottomCutOut(outerCube, minThickness, nutWidth, nutHeight);
+        }
+
+    if (type == "top")  {
+
+        // 0.25mm is the amount to carve off the bottom to make space for the
+        // piece of steel it's clamping (I measured it at 0.3mm, but we want it to be tight)
+        dz = 2*minThickness+0.25;
+
+        finishPart(outerCube, str(label, "-", "TOP")) translate([0, 0, -dz]) difference() {
+
+            // Start with the opposite of the bottom piece
+            intersection() {
+                basePart(outerCube, nutWidth, holeDiameter, nutHeight, minThickness);
+                bottomCutOut(outerCube, minThickness, nutWidth, nutHeight);
             }
 
-            translate([nutWidth, 0, overhangZ]) {
-                cube([extraWidth+thickness, nutWidth, thickness]);
-            }
+            // Carve out 0.2mm off the bottom to fit the stainless plate (I measured it to be 0.3mm)
+            cube([outerCube.x, outerCube.y, dz]);
 
-            // Vertical part
-            translate([nutWidth + extraWidth + verticalSlice, 0])
-                cube([thickness-verticalSlice, nutWidth, overhangZ + thickness]);
+            // Cut out the screw head height off the side
+            translate([0, 0, screwLength]) cube([nutWidth, outerCube.y, screwHeadHeight]);
 
-            // Middle piece -- slice a bit off the bottom if sliceBottom is set (for
-            // the top piece)
-            midThickness = sliceBottom == 0 ? thickness : overhangZ + thickness;
-            translate([nutWidth+thickness+extraWidth, 0, 0]) union() {
-                cube([middleWidth, nutWidth, midThickness]);
-            }
+            // Carve out the snap tolerance on the side to connect to the bottom piece
+            cube([nutWidth+snapTolerance+minThickness, outerCube.y, 2*minThickness + nutHeight]);
 
-            // Vertical part
-            translate([nutWidth + thickness + middleWidth + extraWidth, 0])
-                cube([thickness-verticalSlice, nutWidth, overhangZ + thickness]);
-
-            translate([nutWidth + thickness + middleWidth + extraWidth, 0, overhangZ])
-                cube([extraWidth+thickness, nutWidth, thickness]);
-
-            translate([nutWidth + 2*thickness + middleWidth + 2*extraWidth, 0, overhangZ]) {
-                squareWithHole(nutWidth, holeDiameter, thickness);
-            }
-
-            if (screwHeadHeight != 0)
-                translate([nutWidth+extraWidth, 0, overhangZ+thickness]) cube([2*thickness+middleWidth, nutWidth, screwHeadHeight]);
         }
     }
-}
 
-// TODO: account for screw length
-module topPart(nutHeight, nutWidth, holeDiameter, label, screwHeadHeight, screwLength) {
-    difference() {
-        // Slice off 0.2mm on the bottom to hold the steel, and 0.1mm on the
-        // sides to fit the bottom part
-        commonPart(nutHeight=nutHeight,
-                   nutWidth=nutWidth,
-                   holeDiameter=holeDiameter,
-                   label=str(label, " - ", "TOP"),
-                   middleWidth=middleWidth-2*thickness,
-                   extraWidth=thickness,
-                   sliceBottom=0.2,
-                   verticalSlice=0.1,
-                   screwHeadHeight=screwHeadHeight,
-                   screwLength=screwLength
-            );
-    }
-}
-
-module bottomPart(nutHeight, nutWidth, holeDiameter, label) {
-    commonPart(nutHeight,
-               nutWidth,
-               holeDiameter,
-               str(label, " - ", "BOTTOM"),
-               bottomPlate=thickness
-        );
 }
 
 module bothParts(nutHeight, nutWidth, holeDiameter, label, screwLength, screwHeadHeight=0) {
     // Add 0.1mm tolerance to nutHeight in case it won't fit
     newNutHeight = nutHeight + 0.1;
-    translate([0, 0, 0]) {
-        rotate([-90, 0]) bottomPart(newNutHeight, nutWidth, holeDiameter, label);
-        translate([30, 0, 0]) {
-            rotate([-90, 0]) topPart(newNutHeight, nutWidth, holeDiameter, label, screwHeadHeight, screwLength);
-        }
-    }
+
+    makePart(nutWidth=nutWidth,
+             nutHeight=newNutHeight,
+             holeDiameter=holeDiameter,
+             minThickness=minThickness,
+             screwHeadHeight=screwHeadHeight,
+             screwLength=screwLength,
+             type="bottom", label=label);
+
+    translate([spacing, 0])
+        makePart(nutWidth=nutWidth,
+                 nutHeight=newNutHeight,
+                 holeDiameter=holeDiameter,
+                 screwHeadHeight=screwHeadHeight,
+                 minThickness=minThickness,
+                 screwLength=screwLength,
+                 type="top", label=label);
 }
 
 
