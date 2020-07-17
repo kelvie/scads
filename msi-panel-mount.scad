@@ -15,7 +15,11 @@ spacing = 30;
 // Whether or not to put a small chamfer in the back of the print
 Chamfer_Back = false;
 
+// The amount to chamfer (45 degree chamfer)
+Chamfer_Height = 0.2;
+
 $fn = 100;
+
 font = "Ubuntu";
 
 Screw_Size = "M3"; // [M2.5, M3]
@@ -35,9 +39,8 @@ module chamferBack(yOffset, width) {
         if (Chamfer_Back) translate([0, yOffset, 0])
             rotate([0, 90, 0])
             linear_extrude(width)
-            polygon([[0, 0], [0, -0.2], [-0.2, 0]]);
+            polygon([[0, 0], [0, -Chamfer_Height], [-Chamfer_Height, 0]]);
     }
-
 }
 
 // Mirrors the part and does some final translations
@@ -102,7 +105,8 @@ module makePart(middleWidth=middleWidth,
     if (type == "top")  {
 
         // 0.25mm is the amount to carve off the bottom to make space for the
-        // piece of steel it's clamping (I measured it at 0.3mm, but we want it to be tight)
+        // piece of steel it's clamping (I measured it at 0.3mm, but we want it
+        // to be tight)
         dz = 2*minThickness+0.25;
 
         finishPart(outerCube, str(label, "-", "TOP")) translate([0, 0, -dz]) difference() {
