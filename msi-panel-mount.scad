@@ -1,4 +1,4 @@
-
+Screw_Size = "M3"; // [M2.5, M3]
 
 // distance in the middle
 middleWidth = 13;
@@ -18,11 +18,12 @@ Chamfer_Back = false;
 // The amount to chamfer (45 degree chamfer)
 Chamfer_Height = 0.2;
 
-$fn = 100;
-
 font = "Ubuntu";
 
-Screw_Size = "M3"; // [M2.5, M3]
+$fn = 100;
+// Epsilon for diffing parts
+$eps = 0.01;
+
 
 module squareWithHole(outsideLength, holeDiameter, thickness) {
     dx = outsideLength / 2;
@@ -64,10 +65,10 @@ module basePart(outerCube, nutWidth, holeDiameter, nutHeight, minThickness) {
         cube(outerCube);
 
         // screw hole
-        translate([nutWidth / 2, nutWidth/2]) cylinder(h=outerCube.z, d=holeDiameter);
+        translate([nutWidth / 2, nutWidth/2, -$eps]) cylinder(h=outerCube.z + 2*$eps, d=holeDiameter);
 
         // nut hole
-        translate([0, 0, minThickness]) cube([nutWidth, nutWidth, nutHeight+snapTolerance]);
+        translate([-$eps, -$eps, minThickness]) cube([nutWidth+$eps, nutWidth+2*$eps, nutHeight+snapTolerance]);
     }
 
 }
@@ -75,10 +76,10 @@ module basePart(outerCube, nutWidth, holeDiameter, nutHeight, minThickness) {
 module bottomCutOut(outerCube, minThickness, nutWidth, nutHeight) {
     union() {
         // Remove the top part
-        translate([0, 0, nutHeight + 2*minThickness]) cube(outerCube);
+        translate([-$eps, -$eps, nutHeight + 2*minThickness]) cube(outerCube + [2*$eps, 2*$eps, 0]);
 
         // Cut out the middle section
-        translate([nutWidth + minThickness, 0, 2*minThickness]) cube(outerCube);
+        translate([nutWidth + minThickness, -$eps, 2*minThickness]) cube(outerCube + [0, 2*$eps, 0]);
     }
 }
 
@@ -118,14 +119,13 @@ module makePart(middleWidth=middleWidth,
             }
 
             // Carve out 0.2mm off the bottom to fit the stainless plate (I measured it to be 0.3mm)
-            cube([outerCube.x, outerCube.y, dz]);
+            translate([-$eps, -$eps]) cube([outerCube.x + 2*$eps, outerCube.y + 2*$eps, dz]);
 
             // Cut out the screw head height off the side
-            translate([0, 0, screwLength]) cube([nutWidth, outerCube.y, screwHeadHeight]);
+            translate([-$eps, -$eps, screwLength]) cube([nutWidth+2*$eps, outerCube.y+2*$eps, screwHeadHeight+$eps]);
 
             // Carve out the snap tolerance on the side to connect to the bottom piece
-            cube([nutWidth+snapTolerance+minThickness, outerCube.y, 2*minThickness + nutHeight]);
-
+            translate([0, -$eps]) cube([nutWidth+snapTolerance/2+minThickness, outerCube.y + 2*$eps, 2*minThickness + nutHeight]);
         }
     }
 
@@ -150,6 +150,7 @@ module bothParts(nutHeight, nutWidth, holeDiameter, label, screwLength, screwHea
                  type="top", label=label);
 }
 
+// TODO: calculate width based on nutWitdh, and cut a smaller hole
 
 // Need 2.9mm hole clearance for M2.5, head size is 4.5
 // M2.5 nut is 2mm high (max)
