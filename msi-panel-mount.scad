@@ -63,7 +63,7 @@ module basePart(outerCube, nutWidth, holeDiameter, nutHeight, minThickness) {
         translate([nutWidth / 2, nutWidth/2]) cylinder(h=outerCube.z, d=holeDiameter);
 
         // nut hole
-        translate([0, 0, minThickness]) cube([nutWidth, nutWidth, nutHeight+2*snapTolerance]);
+        translate([0, 0, minThickness]) cube([nutWidth, nutWidth, nutHeight+snapTolerance]);
     }
 
 }
