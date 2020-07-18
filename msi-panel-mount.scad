@@ -110,7 +110,7 @@ module makePart(middleWidth=middleWidth,
         // to be tight)
         dz = 2*minThickness+0.25;
 
-        finishPart(outerCube, str(label, "-", "TOP")) translate([0, 0, -dz]) difference() {
+        finishPart(outerCube, str(label, "  -  ", "TOP")) translate([0, 0, -dz]) difference() {
 
             // Start with the opposite of the bottom piece
             intersection() {
