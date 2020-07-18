@@ -44,7 +44,7 @@ module innerPart() {
 
 }
 
-module addText() {
+module addLabel() {
     difference() {
         children(0);
         translate([0, 0, Inner_Height - Engraving_Depth])
@@ -56,7 +56,7 @@ module addText() {
 module main() {
     od = 25.4 + 2*Outer_Thickness_Max;
 
-    addText() difference() {
+    addLabel() difference() {
         cylinder(h=Outer_Height, d=od);
         innerPart();
         notches(od);
