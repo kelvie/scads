@@ -53,28 +53,27 @@ module addBottom(height, cut) {
     }
 }
 
+offset = sz.x*2;
 
 // baseline
 makeCube("B");
 
-// tall, medium cut
-translate([sz.x + 2, 0, 0])
-addBottom(0.2, Medium_Cut) makeCube("tm");
-
-// really tall, medium cut
-translate([(sz.x + 2)*2, 0, 0])
-addBottom(0.4, Medium_Cut) makeCube("rtm");
-
 // small cut
-translate([0, sz.y + 2, 0])
+translate([1*offset, 0])
 bottomCut(0.05, Small_Cut) makeCube("S");
 
-
 // medium cut
-translate([sz.x + 2, sz.y + 2, 0])
+translate([2*offset, 0])
 bottomCut(0.05, Medium_Cut) makeCube("M");
 
 // large cut
-translate([2*(sz.x + 2), sz.y + 2, 0])
+translate([3*offset, 0])
 bottomCut(0.05, Large_Cut) makeCube("L");
 
+// tall, medium cut
+translate([4*offset, 0])
+addBottom(0.2, Medium_Cut) makeCube("tm");
+
+// really tall, medium cut
+translate([5*offset, 0])
+addBottom(0.4, Medium_Cut) makeCube("rtm");
