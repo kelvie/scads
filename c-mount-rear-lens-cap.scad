@@ -3,7 +3,7 @@
 /* [Overall dimensions] */
 // Rim thickness
 Outer_Thickness_Min = 1;
-Outer_Thickness_Max = 2;
+Outer_Thickness_Max = 3;
 
 // Overall height
 Outer_Height = 5;
@@ -13,7 +13,7 @@ Inner_Height = 1;
 
 /* [Grip] */
 Notch_Count = 5;
-Notch_Radius = 20;
+Notch_Radius = 15;
 
 /* [Label] */
 Text = "C-mount rear lens cap";
@@ -40,7 +40,7 @@ module notches(od) {
 
 module innerPart() {
     translate([0, 0, Inner_Height])
-        metric_thread(diameter=25.4, pitch=0.794, internal=true, length=Outer_Height-Inner_Height, leadin=1);
+        english_thread(diameter=1, threads_per_inch=32, internal=true, length=Outer_Height-Inner_Height, leadin=1);
 
 }
 
