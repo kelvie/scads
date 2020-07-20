@@ -15,7 +15,7 @@ Inner_Height = 1;
 Extra_Thread_Clearance = 0.1;
 
 // Extra height to add to the bottom if printing directly on the platform (for SLA printers). Set to 0 to disable
-Platform_Print_Height = 0.2;
+Platform_Print_Height = 0.3;
 
 /* [Grip] */
 Notch_Count = 5;
@@ -89,4 +89,4 @@ module mainPart(od) {
 
 od = 25.4 + 2*Outer_Thickness_Max;
 
-addPlatform(Platform_Print_Height, 1, od) mainPart(od);
+addPlatform(Platform_Print_Height, 1.5, od) mainPart(od);
