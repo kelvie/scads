@@ -1,4 +1,11 @@
-// c-mount rear lens cap
+/*
+ * C-mount rear lens cap
+ *
+ * Copyright 2020 Kelvie Wong <kelvie@kelvie.ca>
+ *
+ * Uses Dan Kirshner's threads library.
+ */
+
 
 /* [Overall dimensions] */
 // Rim thickness
