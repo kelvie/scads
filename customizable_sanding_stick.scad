@@ -33,7 +33,7 @@
 part = "all_parts__";  //[all_parts__:All Parts,screws__:Screws,bottom_part__:Bottom,top_part__:Top]
 
 // The width of the Sanding Stick / Sanding Paper Strip
-stick_width_in_millimeter = 15.0; //[9:70]
+stick_width_in_millimeter = 10.0; //[9:70]
 
 // The height of the Stick will not be higher than the Base height. This value influences the width of wedge ends.
 base_height_in_millimeter = 12.0; //[10:40]
@@ -65,6 +65,8 @@ end_2_wedge_angle = 10.0; //[3:135]
 // If you want a sharp end of the wedge, set 0. If you want a round end, set > 0.
 end_2_wedge_round_tip_diameter_in_millimeter = 3.0;
 
+// The gap between the dovetail
+Dovetail_Gap = 0.1;
 
 /* [Screw Settings (Advanced!)] */
 
@@ -72,7 +74,7 @@ end_2_wedge_round_tip_diameter_in_millimeter = 3.0;
 screw_thread_dia_in_millimeter = 6.0;
 
 // Max head diameter of the screw. If the stick width is smaller, the stick width takes place as the head diameter. If you set a higher value, you should also increase the Screw Head Space value for the top part.
-screw_head_dia_in_millimeter = 12.0;
+screw_head_dia_in_millimeter = 10.0;
 
 // Thread hole diameter of the sanding stick bottom part. You should use Screw Thread Dia and add about 0.5-0.8 mm for tolerance. Otherwise the screw won't fit the threaded hole of the bottom part.
 screw_thread_hole_dia_in_millimeter = 6.4;
@@ -157,47 +159,45 @@ module all_parts() {
 
 }
 
-use <dovetails.scad>
+module dovetail(v, angle=15) {
+    y_off = v.x * tan(angle);
+    linear_extrude(v.z)
+        polygon([[0, v.y/4],
+                 [0, v.y / 4 * 3],
+                 [v.x, v.y/ 4 * 3 + y_off],
+                 [v.x, v.y / 4 - y_off]]);
+}
 
-module dovepin(height, pin_length) {
-     union() {
-        translate([base_length * 5 / 10 - pin_length / 2 + 0.2, 0.2, height + 0.1])
-            rotate([-90, 0,-90])
-            dovetail_pins(pin_length = pin_length,
-                          pin_thickness = height + 0.2,
-                          pin_count=2,
-                          angle=15,
-                          pin_width = stick_width / 2 + 0.1,
-                          tail_width=stick_width / 2 + 0.2);
-        translate([base_length / 2 + pin_length / 2 + 0.1, - stick_width -0.1, -0.1])
-            cube([base_length / 2 - pin_length / 2 + 0.2, stick_width + 0.1 + 0.2, height + 0.2]);
-
+module dovetail_left(v, angle=15) {
+    translate([-0.1, - stick_width -0.1, -0.1])
+        union() {
+        translate([base_length/2 - v.x/2, 0, 0]) dovetail(v + [0, 0, 0.2], angle);
+        cube([base_length / 2 - v.x / 2 + 0.2, stick_width + 0.1 + 0.2, v.z + 0.2]);
     }
 }
 
-module dovetail(height, pin_length) {
-    union() {
-        translate([base_length * 5 / 10 - pin_length / 2 - 0.1, 0.1, -0.1])
-            rotate([0, 0,-90])
-            dovetail_tails(tail_length = pin_length,
-                           tail_thickness = height + 0.2,
-                           tail_count=1,
-                           angle=15,
-                           pin_width = stick_width /2 + 0.1,
-                           tail_width=stick_width / 2);
-        translate([-0.1, - stick_width -0.1, -0.1])
-            cube([base_length / 2 - pin_length / 2 + 0.2, stick_width + 0.1 + 0.2, height + 0.2]);
+module dovetail_right(v, angle=15) {
+    // 2x due to how it scales
+    gap = Dovetail_Gap * 2;
+    translate([base_length / 2 - v.x/2, - stick_width -0.1, -0.1])
+    difference() {
+        cube([base_length / 2 + v.x/2 + 0.2, stick_width + 0.1 + 0.2, v.z + 0.2]);
+
+        translate([0, -0.1 -gap, -0.1]) dovetail(v + [0, 0.2 + 2*gap, 0.4], angle);
+
+        translate([-0.1, 0]) cube([0.3, stick_width+0.1 + 0.2, v.z + 0.2]);
     }
 }
 
-module dovetail_split(height, pin_length) {
+module dovetail_split(v, angle) {
     intersection() {
-        dovetail(height, pin_length);
+        dovetail_left(v, angle);
         children(0);
     }
 
-    translate([pin_length + 1, 0]) intersection() {
-        dovepin(height, pin_length);
+    // translate([v.x + 3, 0])
+    intersection() {
+        dovetail_right(v, angle);
         children(0);
     }
 }
@@ -206,7 +206,7 @@ module dovetail_split(height, pin_length) {
 module top_part() {
     height = base_height / 2 - 0.5;
     pin_length = height;
-    dovetail_split(height, pin_length)
+    dovetail_split([pin_length, stick_width, height], angle=15)
         base_top(base_length, base_height / 2 - 0.5, stick_width);
 
 
