@@ -108,6 +108,27 @@ max_thread_height = max_thread_height_in_millimeter;
 
 $fn=100;
 
+
+// projection to figure out the shape of the base
+module addBase(height, inset=-1, chamfer=false) {
+    // epsilon to make sure layers merge without coplanar surfaces
+    layers = chamfer ? height / $fs : 1;
+    $eps = height / layers / 100;
+
+    for (i = [0:layers-1])
+        translate([0, 0, i*height/layers])
+            linear_extrude(height/layers + $eps)
+            offset(delta=-(inset -i*inset/layers), chamfer=true)
+            if ($children > 1)
+                children(1);
+            else
+                projection(cut=true)
+                    children(0);
+
+    translate([0, 0, height])
+        children(0);
+}
+
  // Program Section //
 //-----------------//
 
@@ -116,7 +137,7 @@ if(part == "bottom_part__") {
 } else if(part == "top_part__") {
     top_part();
 } else if(part == "screws__") {
-    screws();
+    addBase(0.2, 0.7) screws();
 } else if(part == "all_parts__") {
     all_parts();
 } else {
@@ -195,7 +216,7 @@ module dovetail_split(v, angle) {
         children(0);
     }
 
-    // translate([v.x + 3, 0])
+    translate([v.x + 3, 0])
     intersection() {
         dovetail_right(v, angle);
         children(0);
