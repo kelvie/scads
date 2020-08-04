@@ -1,5 +1,5 @@
 
-Face_length = 17;
+Face_length = 16.9;
 Height = 6.63;
 Thickness = 3;
 Label = "M10";
