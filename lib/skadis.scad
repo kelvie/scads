@@ -17,8 +17,6 @@ module negativeChamfer(id, od) {
 // Creates a hook peg centered at origin, going out the y-axis (and the hookgoes
 // down the z-access)
 module hookPeg(pegTolerance=0.1, pegAngle=80, backLength=10, rounding=1.6) {
-
-    // TODO: add negative chamfer to connect
     t = pegHoleThickness - pegTolerance;
 
     angle = 90 - pegAngle;
