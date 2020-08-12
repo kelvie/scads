@@ -7,174 +7,179 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="8.5in"
-   height="11in"
-   viewBox="0 0 215.9 279.4"
-   version="1.1"
-   id="svg8"
-   inkscape:export-filename="/home/kelvie/Downloads/deck tiles.png"
-   inkscape:export-xdpi="96"
+   sodipodi:docname="trig-math-offset-corner-rectangle.svg"
+   inkscape:version="1.0 (1.0+r73+1)"
    inkscape:export-ydpi="96"
-   inkscape:version="1.0 (9f2f71dc58, 2020-08-02)"
-   sodipodi:docname="trig-math-offset-corner-rectangle.svg">
+   inkscape:export-xdpi="96"
+   inkscape:export-filename="/home/kelvie/Downloads/deck tiles.png"
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 102.69939 84.921778"
+   height="84.921776mm"
+   width="102.6994mm">
   <defs
      id="defs2">
     <rect
-       x="98.349518"
-       y="102.74503"
-       width="20.624545"
+       id="rect992"
        height="11.470106"
-       id="rect992" />
+       width="20.624544"
+       y="102.74503"
+       x="98.349518" />
     <rect
-       x="86.915053"
-       y="119.40856"
-       width="12.250437"
+       id="rect940"
        height="14.378996"
-       id="rect940" />
+       width="12.250437"
+       y="119.40856"
+       x="86.915054" />
     <inkscape:path-effect
-       effect="powerstroke"
+       end_linecap_type="zerowidth"
+       scale_width="1"
+       miter_limit="4"
+       linejoin_type="extrp_arc"
+       start_linecap_type="zerowidth"
+       interpolator_beta="0.2"
+       interpolator_type="CubicBezierJohan"
+       sort_points="true"
+       offset_points="0,0.02645835"
+       lpeversion="1"
+       is_visible="true"
        id="path-effect3895"
-       is_visible="true"
-       lpeversion="1"
-       offset_points="0,0.02645835"
-       sort_points="true"
-       interpolator_type="CubicBezierJohan"
-       interpolator_beta="0.2"
-       start_linecap_type="zerowidth"
-       linejoin_type="extrp_arc"
-       miter_limit="4"
-       scale_width="1"
-       end_linecap_type="zerowidth" />
+       effect="powerstroke" />
     <inkscape:path-effect
-       effect="powerstroke"
+       end_linecap_type="zerowidth"
+       scale_width="1"
+       miter_limit="4"
+       linejoin_type="extrp_arc"
+       start_linecap_type="zerowidth"
+       interpolator_beta="0.2"
+       interpolator_type="CubicBezierJohan"
+       sort_points="true"
+       offset_points="0,0.02645835"
+       lpeversion="1"
+       is_visible="true"
        id="path-effect3479"
-       is_visible="true"
-       lpeversion="1"
-       offset_points="0,0.02645835"
-       sort_points="true"
-       interpolator_type="CubicBezierJohan"
-       interpolator_beta="0.2"
-       start_linecap_type="zerowidth"
-       linejoin_type="extrp_arc"
-       miter_limit="4"
-       scale_width="1"
-       end_linecap_type="zerowidth" />
+       effect="powerstroke" />
     <inkscape:path-effect
-       effect="powerstroke"
+       end_linecap_type="zerowidth"
+       scale_width="1"
+       miter_limit="4"
+       linejoin_type="extrp_arc"
+       start_linecap_type="zerowidth"
+       interpolator_beta="0.2"
+       interpolator_type="CubicBezierJohan"
+       sort_points="true"
+       offset_points="0,0.02645835"
+       lpeversion="1"
+       is_visible="true"
        id="path-effect3473"
-       is_visible="true"
-       lpeversion="1"
-       offset_points="0,0.02645835"
-       sort_points="true"
-       interpolator_type="CubicBezierJohan"
-       interpolator_beta="0.2"
-       start_linecap_type="zerowidth"
-       linejoin_type="extrp_arc"
-       miter_limit="4"
-       scale_width="1"
-       end_linecap_type="zerowidth" />
+       effect="powerstroke" />
     <inkscape:path-effect
-       effect="powerstroke"
-       id="path-effect3469"
-       is_visible="true"
-       lpeversion="1"
-       offset_points="1,0.02645835"
-       sort_points="true"
-       interpolator_type="CubicBezierJohan"
-       interpolator_beta="0.2"
-       start_linecap_type="zerowidth"
-       linejoin_type="extrp_arc"
-       miter_limit="4"
+       end_linecap_type="zerowidth"
        scale_width="1"
-       end_linecap_type="zerowidth" />
+       miter_limit="4"
+       linejoin_type="extrp_arc"
+       start_linecap_type="zerowidth"
+       interpolator_beta="0.2"
+       interpolator_type="CubicBezierJohan"
+       sort_points="true"
+       offset_points="1,0.02645835"
+       lpeversion="1"
+       is_visible="true"
+       id="path-effect3469"
+       effect="powerstroke" />
     <rect
-       x="83.924335"
-       y="115.86031"
-       width="4.240778"
+       id="rect890"
        height="4.8455133"
-       id="rect890" />
+       width="4.240778"
+       y="115.86031"
+       x="83.924332" />
     <rect
-       x="85.270667"
-       y="107.69505"
+       id="rect2078"
+       height="5.1495485"
        width="3.453213"
-       height="5.1495484"
-       id="rect2078" />
+       y="107.69505"
+       x="85.270668" />
     <rect
-       x="13.117797"
-       y="87.27177"
+       id="rect1962"
+       height="32.280201"
        width="1.1626621"
-       height="32.280202"
-       id="rect1962" />
+       y="87.271767"
+       x="13.117797" />
   </defs>
   <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="5.6568543"
-     inkscape:cx="302.99674"
-     inkscape:cy="453.97802"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     inkscape:window-width="2445"
-     inkscape:window-height="1444"
-     inkscape:window-x="133"
-     inkscape:window-y="138"
-     inkscape:window-maximized="0"
-     units="in"
-     inkscape:document-rotation="0"
-     showguides="true"
-     inkscape:guide-bbox="true"
-     inkscape:object-paths="true"
+     fit-margin-bottom="5"
+     fit-margin-right="5"
+     fit-margin-left="5"
+     fit-margin-top="5"
+     lock-margins="true"
+     inkscape:snap-intersection-paths="true"
      guidetolerance="8"
-     inkscape:snap-intersection-paths="true">
+     inkscape:object-paths="true"
+     inkscape:guide-bbox="true"
+     showguides="true"
+     inkscape:document-rotation="0"
+     units="mm"
+     inkscape:window-maximized="0"
+     inkscape:window-y="138"
+     inkscape:window-x="133"
+     inkscape:window-height="1706"
+     inkscape:window-width="2910"
+     showgrid="false"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="mm"
+     inkscape:cy="147.207"
+     inkscape:cx="105.74557"
+     inkscape:zoom="4"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="1"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base">
     <sodipodi:guide
-       position="40.138176,151.1158"
+       id="guide1905"
        orientation="1,0"
-       id="guide1905" />
+       position="15.271736,18.882557" />
     <sodipodi:guide
-       position="40.138176,209.72823"
+       id="guide1907"
        orientation="0,-1"
-       id="guide1907" />
+       position="15.271736,77.494985" />
     <sodipodi:guide
-       position="40.138176,151.1158"
+       id="guide1911"
        orientation="0,-1"
-       id="guide1911" />
+       position="15.271736,18.882557" />
     <sodipodi:guide
-       position="80.860657,151.1158"
+       id="guide872"
        orientation="1,0"
-       id="guide872" />
+       position="55.994215,18.882557" />
     <sodipodi:guide
-       position="69.993173,144.90219"
+       id="guide874"
        orientation="1,0"
-       id="guide874" />
+       position="45.12673,12.668948" />
     <sodipodi:guide
-       position="76.560795,181.91229"
+       id="guide924"
        orientation="-0.98461722,0.17472529"
-       id="guide924" />
+       position="51.694352,49.679046" />
     <sodipodi:guide
-       position="69.993173,144.90223"
+       id="guide3232"
        orientation="0,-1"
-       id="guide3232" />
+       position="45.12673,12.668988" />
     <sodipodi:guide
-       position="80.860657,206.143"
+       id="guide3284"
        orientation="0,-1"
-       id="guide3284" />
+       position="55.994215,73.909755" />
     <sodipodi:guide
-       position="71.095803,151.1158"
+       id="guide3300"
        orientation="1,0"
-       id="guide3300" />
+       position="46.22936,18.882557" />
     <sodipodi:guide
-       position="80.234234,202.61299"
+       id="guide3364"
        orientation="1,0"
-       id="guide3364" />
+       position="55.367792,70.379745" />
     <sodipodi:guide
-       position="80.234234,202.61296"
+       id="guide3366"
        orientation="0,-1"
-       id="guide3366" />
+       position="55.367792,70.379715" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -189,429 +194,429 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
+     transform="translate(-24.866441,-79.844983)"
      id="layer1"
-     transform="translate(0,-17.6)">
+     inkscape:groupmode="layer"
+     inkscape:label="Layer 1">
     <rect
-       style="fill:none;stroke:#000000;stroke-width:0.05291667;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect1886"
-       width="40.722481"
-       height="58.612423"
+       y="87.271774"
        x="40.138176"
-       y="87.271774" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.05291667;stroke-miterlimit:4;stroke-dasharray:none"
-       id="rect1886-0"
-       width="40.722481"
        height="58.612423"
-       x="54.76931"
+       width="40.722481"
+       id="rect1886"
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none" />
+    <rect
+       transform="rotate(10.062661)"
        y="78.916145"
-       transform="rotate(10.062661)" />
+       x="54.76931"
+       height="58.612423"
+       width="40.722481"
+       id="rect1886-0"
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none" />
     <text
-       xml:space="preserve"
+       style="font-size:2.11667px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect1962);"
        id="text1960"
-       style="font-family:Oxygen-Sans;font-size:2.11666667px;line-height:1.25;letter-spacing:0px;word-spacing:0px;-inkscape-font-specification:'Oxygen-Sans, Normal';white-space:pre;shape-inside:url(#rect1962);" />
+       xml:space="preserve" />
     <text
-       xml:space="preserve"
-       style="font-size:2.11667px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="21.525063"
+       id="text1976"
        y="144.43005"
-       id="text1976"><tspan
-         sodipodi:role="line"
-         id="tspan1974"
-         x="21.525063"
+       x="21.525063"
+       style="font-size:2.11667px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="144.43005"
-         style="stroke-width:0.264583" /></text>
+         x="21.525063"
+         id="tspan1974"
+         sodipodi:role="line" /></text>
     <text
-       xml:space="preserve"
+       style="font-size:0.264583px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect2078);"
        id="text2076"
-       style="font-family:Oxygen-Sans;font-size:0.26458333px;line-height:1.25;letter-spacing:0px;word-spacing:0px;-inkscape-font-specification:'Oxygen-Sans, Normal';white-space:pre;shape-inside:url(#rect2078);" />
+       xml:space="preserve" />
     <text
-       xml:space="preserve"
-       style="font-size:0.264583px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="69.993172"
+       id="text882"
        y="155.85818"
-       id="text882"><tspan
-         sodipodi:role="line"
-         id="tspan880"
-         x="69.993172"
+       x="69.993172"
+       style="font-size:0.264583px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="155.85818"
-         style="stroke-width:0.264583">t</tspan></text>
+         x="69.993172"
+         id="tspan880"
+         sodipodi:role="line">t</tspan></text>
     <text
-       xml:space="preserve"
+       style="font-size:0.264583px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect890);"
        id="text888"
-       style="font-family:Oxygen-Sans;font-size:0.26458333px;line-height:1.25;letter-spacing:0px;word-spacing:0px;-inkscape-font-specification:'Oxygen-Sans, Normal';white-space:pre;shape-inside:url(#rect890);" />
+       xml:space="preserve" />
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="53.65554"
+       id="text900"
        y="85.255035"
-       id="text900"><tspan
-         sodipodi:role="line"
-         id="tspan898"
-         x="53.65554"
+       x="53.65554"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="85.255035"
-         style="stroke-width:0.264583">w</tspan></text>
+         x="53.65554"
+         id="tspan898"
+         sodipodi:role="line">w</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="48.395859"
+       id="text912"
        y="88.368355"
-       id="text912"><tspan
-         sodipodi:role="line"
-         id="tspan910"
-         x="48.395859"
+       x="48.395859"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="88.368355"
-         style="stroke-width:0.264583">angle</tspan></text>
+         x="48.395859"
+         id="tspan910"
+         sodipodi:role="line">angle</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="81.110405"
+       id="text922"
        y="118.39217"
-       id="text922"><tspan
-         sodipodi:role="line"
-         id="tspan920"
-         x="81.110405"
+       x="81.110405"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="118.39217"
-         style="stroke-width:0.264583">h</tspan></text>
+         x="81.110405"
+         id="tspan920"
+         sodipodi:role="line">h</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="71.433998"
+       id="text3240"
        y="151.47713"
-       id="text3240"><tspan
-         sodipodi:role="line"
-         id="tspan3238"
-         x="71.433998"
+       x="71.433998"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="151.47713"
-         style="stroke-width:0.264583">90-angle</tspan></text>
+         x="71.433998"
+         id="tspan3238"
+         sodipodi:role="line">90-angle</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.05291667;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path3242"
        d="M 69.992922,152.09777 H 80.860656"
-       id="path3242" />
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="68.580681"
+       id="text3246"
        y="153.03893"
-       id="text3246"><tspan
-         sodipodi:role="line"
-         id="tspan3244"
-         x="68.580681"
+       x="68.580681"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="153.03893"
-         style="stroke-width:0.264583">x' = w cos(-angle) + h sin(-angle)</tspan><tspan
-         sodipodi:role="line"
          x="68.580681"
+         id="tspan3244"
+         sodipodi:role="line">x' = w cos(-angle) + h sin(-angle)</tspan><tspan
+         id="tspan3248"
+         style="stroke-width:0.264583"
          y="154.03111"
-         style="stroke-width:0.264583"
-         id="tspan3248">y' = w sin(-angle) - h cos(-angle)</tspan></text>
+         x="68.580681"
+         sodipodi:role="line">y' = w sin(-angle) - h cos(-angle)</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.05291667;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path3250"
        d="m 87.088656,145.8842 v 6.21357"
-       id="path3250" />
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="87.643867"
+       id="text3258"
        y="148.97498"
-       id="text3258"><tspan
-         sodipodi:role="line"
-         id="tspan3256"
-         x="87.643867"
+       x="87.643867"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="148.97498"
-         style="stroke-width:0.264583">h' - h</tspan></text>
+         x="87.643867"
+         id="tspan3256"
+         sodipodi:role="line">h' - h</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="68.634995"
+       id="text3262"
        y="155.88646"
-       id="text3262"><tspan
-         sodipodi:role="line"
-         id="tspan3260"
-         x="68.634995"
+       x="68.634995"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="155.88646"
-         style="stroke-width:0.264583">x' = w cos(angle)  - h sin(angle)</tspan><tspan
-         sodipodi:role="line"
          x="68.634995"
+         id="tspan3260"
+         sodipodi:role="line">x' = w cos(angle)  - h sin(angle)</tspan><tspan
+         id="tspan3264"
+         style="stroke-width:0.264583"
          y="156.87865"
-         style="stroke-width:0.264583"
-         id="tspan3264">y' = - (w sin(angle) + h cos(angle)) </tspan></text>
+         x="68.634995"
+         sodipodi:role="line">y' = - (w sin(angle) + h cos(angle)) </tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="70.957382"
+       id="text3268"
        y="158.36211"
-       id="text3268"><tspan
-         sodipodi:role="line"
-         id="tspan3266"
-         x="70.957382"
+       x="70.957382"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="158.36211"
-         style="stroke-width:0.264583">h' = |y'| = w sin(angle) + h cos(angle)</tspan></text>
+         x="70.957382"
+         id="tspan3266"
+         sodipodi:role="line">h' = |y'| = w sin(angle) + h cos(angle)</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="64.196663"
+       id="text3272"
        y="131.39767"
-       id="text3272"><tspan
-         sodipodi:role="line"
-         id="tspan3270"
-         x="64.196663"
+       x="64.196663"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="131.39767"
-         style="stroke-width:0.264583">y = x *tan(90 - angle)</tspan><tspan
-         sodipodi:role="line"
          x="64.196663"
+         id="tspan3270"
+         sodipodi:role="line">y = x *tan(90 - angle)</tspan><tspan
+         id="tspan3282"
+         style="stroke-width:0.264583"
          y="132.38986"
-         style="stroke-width:0.264583"
-         id="tspan3282">y =  x / tan(angle)</tspan></text>
+         x="64.196663"
+         sodipodi:role="line">y =  x / tan(angle)</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="61.226284"
+       id="text3276"
        y="128.67154"
-       id="text3276"><tspan
-         sodipodi:role="line"
-         id="tspan3274"
-         x="61.226284"
+       x="61.226284"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="128.67154"
-         style="stroke-width:0.264583">with origin @ (0, -h')</tspan><tspan
-         sodipodi:role="line"
          x="61.226284"
+         id="tspan3274"
+         sodipodi:role="line">with origin @ (0, -h')</tspan><tspan
+         id="tspan3278"
+         style="stroke-width:0.264583"
          y="129.66373"
-         style="stroke-width:0.264583"
-         id="tspan3278">this line is:</tspan><tspan
-         sodipodi:role="line"
          x="61.226284"
+         sodipodi:role="line">this line is:</tspan><tspan
+         id="tspan3280"
+         style="stroke-width:0.264583"
          y="130.65591"
-         style="stroke-width:0.264583"
-         id="tspan3280" /></text>
+         x="61.226284"
+         sodipodi:role="line" /></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="71.048279"
+       id="text3288"
        y="159.58228"
-       id="text3288"><tspan
-         sodipodi:role="line"
-         id="tspan3286"
-         x="71.048279"
+       x="71.048279"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="159.58228"
-         style="stroke-width:0.264583">w' = w cos(angle) - h sin(angle)</tspan></text>
+         x="71.048279"
+         id="tspan3286"
+         sodipodi:role="line">w' = w cos(angle) - h sin(angle)</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="88.898918"
+       id="text3292"
        y="156.26657"
-       id="text3292"><tspan
-         sodipodi:role="line"
-         id="tspan3290"
-         x="88.898918"
+       x="88.898918"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="156.26657"
-         style="stroke-width:0.264583" /></text>
+         x="88.898918"
+         id="tspan3290"
+         sodipodi:role="line" /></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="62.356014"
+       id="text3296"
        y="143.99591"
-       id="text3296"><tspan
-         sodipodi:role="line"
-         id="tspan3294"
-         x="62.356014"
+       x="62.356014"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="143.99591"
-         style="stroke-width:0.264583">(h' - h) * tan(angle)</tspan></text>
+         x="62.356014"
+         id="tspan3294"
+         sodipodi:role="line">(h' - h) * tan(angle)</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="90.162239"
+       id="text3306"
        y="156.05658"
-       id="text3306"><tspan
-         sodipodi:role="line"
-         id="tspan3304"
-         x="90.162239"
+       x="90.162239"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="156.05658"
-         style="stroke-width:0.264583" /></text>
+         x="90.162239"
+         id="tspan3304"
+         sodipodi:role="line" /></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="90.685555"
+       id="text3332"
        y="155.07863"
-       id="text3332"><tspan
-         sodipodi:role="line"
-         id="tspan3330"
-         x="90.685555"
+       x="90.685555"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="155.07863"
-         style="stroke-width:0.264583">(h-h') tan(angle)</tspan></text>
+         x="90.685555"
+         id="tspan3330"
+         sodipodi:role="line">(h-h') tan(angle)</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="90.771271"
+       id="text3336"
        y="156.26746"
-       id="text3336"><tspan
-         sodipodi:role="line"
-         id="tspan3334"
-         x="90.771271"
+       x="90.771271"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="156.26746"
-         style="stroke-width:0.264583" /></text>
+         x="90.771271"
+         id="tspan3334"
+         sodipodi:role="line" /></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="64.61515"
+       id="text3344"
        y="134.06181"
-       id="text3344"><tspan
-         sodipodi:role="line"
-         id="tspan3342"
-         x="64.61515"
+       x="64.61515"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="134.06181"
-         style="stroke-width:0.264583">x = y * tan(angle)</tspan></text>
+         x="64.61515"
+         id="tspan3342"
+         sodipodi:role="line">x = y * tan(angle)</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="91.921837"
+       id="text3348"
        y="156.38321"
-       id="text3348"><tspan
-         sodipodi:role="line"
-         id="tspan3346"
-         x="91.921837"
+       x="91.921837"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="156.38321"
-         style="stroke-width:0.264583">h (w/h sin(angle) + cos(angle) - 1 ) * tan(angle)</tspan></text>
+         x="91.921837"
+         id="tspan3346"
+         sodipodi:role="line">h (w/h sin(angle) + cos(angle) - 1 ) * tan(angle)</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path3350"
        d="m 69.993173,144.98257 h 1.10263"
-       id="path3350" />
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path3368"
        d="m 71.095803,147.83887 h 9.764853"
-       id="path3368" />
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none" />
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="75.192596"
+       id="text3372"
        y="148.40585"
-       id="text3372"><tspan
-         sodipodi:role="line"
-         id="tspan3370"
-         x="75.192596"
+       x="75.192596"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="148.40585"
-         style="stroke-width:0.264583">goal</tspan></text>
+         x="75.192596"
+         id="tspan3370"
+         sodipodi:role="line">goal</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path3455"
        d="m 45.602469,87.271773 c 0.252166,0.389088 -0.08157,0.955188 -0.08157,0.955188"
-       id="path3455" />
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path3459"
        d="m 68.356339,144.26373 c 0.276458,0.4837 0.696502,0.54916 1.12659,0.38224 0.430089,-0.16692 1.023949,0.3366 1.023949,0.3366"
-       id="path3459" />
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path3461"
        d="m 70.090556,151.54903 c 0.536596,-0.004 0.447114,0.54874 0.447114,0.54874"
-       id="path3461" />
+       style="fill:none;stroke:#000000;stroke-width:0.0529167;stroke-miterlimit:4;stroke-dasharray:none" />
     <text
-       xml:space="preserve"
+       style="font-size:0.264583px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect940);"
        id="text938"
-       style="font-family:Oxygen-Sans;font-size:0.26458333px;line-height:1.25;letter-spacing:0px;word-spacing:0px;-inkscape-font-specification:'Oxygen-Sans, Normal';white-space:pre;shape-inside:url(#rect940);" />
+       xml:space="preserve" />
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="87.18325"
+       id="text946"
        y="122.76048"
-       id="text946"><tspan
-         sodipodi:role="line"
-         id="tspan944"
-         x="87.18325"
+       x="87.18325"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="122.76048"
-         style="stroke-width:0.264583" /></text>
+         x="87.18325"
+         id="tspan944"
+         sodipodi:role="line" /></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="90.436668"
+       id="text950"
        y="122.21566"
-       id="text950"><tspan
-         sodipodi:role="line"
-         id="tspan948"
-         x="90.436668"
+       x="90.436668"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="122.21566"
-         style="stroke-width:0.264583">goal =  w - x' - (h-h') * tan(angle)</tspan><tspan
-         sodipodi:role="line"
          x="90.436668"
+         id="tspan948"
+         sodipodi:role="line">goal =  w - x' - (h-h') * tan(angle)</tspan><tspan
+         id="tspan952"
+         style="stroke-width:0.264583"
          y="123.20785"
-         style="stroke-width:0.264583"
-         id="tspan952" /></text>
+         x="90.436668"
+         sodipodi:role="line" /></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="92.350243"
+       id="text956"
        y="123.5369"
-       id="text956"><tspan
-         sodipodi:role="line"
-         id="tspan954"
-         x="92.350243"
+       x="92.350243"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="123.5369"
-         style="stroke-width:0.264583">= w - (w cos (angle) - h sin(angle)) - h(w/h sin(angle) + cos(angle) - 1) * tan(angle)</tspan><tspan
-         sodipodi:role="line"
          x="92.350243"
+         id="tspan954"
+         sodipodi:role="line">= w - (w cos (angle) - h sin(angle)) - h(w/h sin(angle) + cos(angle) - 1) * tan(angle)</tspan><tspan
+         id="tspan958"
+         style="stroke-width:0.264583"
          y="124.52909"
-         style="stroke-width:0.264583"
-         id="tspan958">= w - h ( w/h cos (angle) - sin (angle) - tan(angle) * (w/h sin(angle) + cos(angle) - 1)</tspan><tspan
-         sodipodi:role="line"
          x="92.350243"
+         sodipodi:role="line">= w - h ( w/h cos (angle) - sin (angle) - tan(angle) * (w/h sin(angle) + cos(angle) - 1)</tspan><tspan
+         id="tspan960"
+         style="stroke-width:0.264583"
          y="125.52128"
-         style="stroke-width:0.264583"
-         id="tspan960">= h (w/h - (w/h cos(angle) - sin(angle) - tan(angle) * (w/h sin(angle) + cos(angle) - 1)</tspan><tspan
-         sodipodi:role="line"
          x="92.350243"
+         sodipodi:role="line">= h (w/h - (w/h cos(angle) - sin(angle) - tan(angle) * (w/h sin(angle) + cos(angle) - 1)</tspan><tspan
+         id="tspan980"
+         style="stroke-width:0.264583"
          y="126.51347"
-         style="stroke-width:0.264583"
-         id="tspan980">= h (w/h - w/h cos(angle) + sin(angle) - tan(angle) * (w/h sin(angle) + cos(angle) - 1)</tspan></text>
+         x="92.350243"
+         sodipodi:role="line">= h (w/h - w/h cos(angle) + sin(angle) - tan(angle) * (w/h sin(angle) + cos(angle) - 1)</tspan></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="91.236992"
+       id="text964"
        y="128.67787"
-       id="text964"><tspan
-         sodipodi:role="line"
-         id="tspan962"
-         x="91.236992"
+       x="91.236992"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
          y="128.67787"
-         style="stroke-width:0.264583">for h = w:</tspan><tspan
-         sodipodi:role="line"
          x="91.236992"
+         id="tspan962"
+         sodipodi:role="line">for h = w:</tspan><tspan
+         id="tspan968"
+         style="stroke-width:0.264583"
          y="129.67006"
-         style="stroke-width:0.264583"
-         id="tspan968" /><tspan
-         sodipodi:role="line"
          x="91.236992"
+         sodipodi:role="line" /><tspan
+         id="tspan972"
+         style="stroke-width:0.264583"
          y="130.66225"
-         style="stroke-width:0.264583"
-         id="tspan972">goal = h ( (1 - cos(angle) + sin(angle) - tan(angle) * (sin(angle) + cos(angle) - 1)</tspan><tspan
-         sodipodi:role="line"
          x="91.236992"
-         y="131.65443"
+         sodipodi:role="line">goal = h ( (1 - cos(angle) + sin(angle) - tan(angle) * (sin(angle) + cos(angle) - 1)</tspan><tspan
+         id="tspan974"
          style="stroke-width:0.264583"
-         id="tspan974" /></text>
+         y="131.65443"
+         x="91.236992"
+         sodipodi:role="line" /></text>
     <text
-       xml:space="preserve"
-       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="91.17852"
+       id="text984"
        y="149.13445"
-       id="text984"><tspan
-         sodipodi:role="line"
-         id="tspan982"
-         x="91.17852"
-         y="149.13445"
-         style="stroke-width:0.264583">w sin(angle) + h cos(angle) - h</tspan></text>
-    <text
-       xml:space="preserve"
+       x="91.17852"
        style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="91.488808"
-       y="150.97153"
-       id="text988"><tspan
-         sodipodi:role="line"
-         id="tspan986"
-         x="91.488808"
-         y="150.97153"
-         style="stroke-width:0.264583">h ( w/h sin(angle) + cos(angle) - 1)</tspan></text>
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
+         y="149.13445"
+         x="91.17852"
+         id="tspan982"
+         sodipodi:role="line">w sin(angle) + h cos(angle) - h</tspan></text>
     <text
-       xml:space="preserve"
+       id="text988"
+       y="150.97153"
+       x="91.488808"
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
+         y="150.97153"
+         x="91.488808"
+         id="tspan986"
+         sodipodi:role="line">h ( w/h sin(angle) + cos(angle) - 1)</tspan></text>
+    <text
+       style="font-size:0.79375px;line-height:1.25;font-family:Oxygen-Sans;-inkscape-font-specification:'Oxygen-Sans, Normal';letter-spacing:0px;word-spacing:0px;white-space:pre;shape-inside:url(#rect992);"
        id="text990"
-       style="font-family:Oxygen-Sans;font-size:0.79375px;line-height:1.25;letter-spacing:0px;word-spacing:0px;-inkscape-font-specification:'Oxygen-Sans, Normal';white-space:pre;shape-inside:url(#rect992);" />
+       xml:space="preserve" />
   </g>
 </svg>
