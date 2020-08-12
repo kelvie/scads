@@ -4,13 +4,21 @@ include <BOSL2/std.scad>
 pegboardThickness = 5;
 pegHoleThickness = 5;
 
+module negativeChamfer(id, od) {
+
+    rounding = - (od - id) * od / (id + od);
+    // negative chamfers only can be on the top or bottom, so we gotta rotate it
+    // after
+    back((id)/2)
+        xrot(90)
+        cuboid((id) * [1, 1, 1], rounding=rounding, edges=TOP);
+}
+
 // Creates a hook peg centered at origin, going out the y-axis (and the hookgoes
 // down the z-access)
 module hookPeg(pegTolerance=0.1, pegAngle=80, backLength=10, rounding=1.6) {
 
-    // TODO: add chamfer to connect
-
-
+    // TODO: add negative chamfer to connect
     t = pegHoleThickness - pegTolerance;
 
     angle = 90 - pegAngle;
@@ -26,6 +34,7 @@ module hookPeg(pegTolerance=0.1, pegAngle=80, backLength=10, rounding=1.6) {
             cuboid([t, depth, t],
                    anchor=BACK+BOTTOM,
                    rounding=rounding, edges=edges("ALL", except=FRONT));
+
             // Back peg part
             up(t-rounding)
                 fwd(rounding)
@@ -35,13 +44,19 @@ module hookPeg(pegTolerance=0.1, pegAngle=80, backLength=10, rounding=1.6) {
                 cuboid([t, backLength, t],
                        rounding=rounding, anchor=TOP+FRONT);
         }
+    negativeChamfer(t - rounding, t);
+
 }
 
 module straightPeg(pegTolerance=0.1, rounding=1.6) {
     pegHoleThickness = 5;
     t = pegHoleThickness - pegTolerance;
     depth = pegboardThickness;
-    cuboid([t, depth, t],
-           anchor=FRONT,
-           rounding=rounding, edges=edges("ALL", except=FRONT));
+    union() {
+        cuboid([t, depth, t],
+               anchor=FRONT,
+               rounding=rounding, edges=edges("ALL", except=FRONT));
+
+        negativeChamfer(t-rounding, t);
+    }
 }
