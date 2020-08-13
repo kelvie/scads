@@ -1,11 +1,16 @@
 include <BOSL2/std.scad>
 include <BOSL2/hull.scad>
-include <lib/skadis.scad>
 
+use <lib/skadis.scad>
+
+
+Full_width = true;
+Back_plate_width = 20;
 Square_width = 20;
 Square_thickness = 2;
 Tolerance = 0.2;
 Wall_size = 2;
+Holder_height = 8;
 Rounding = 0.4;
 Text = "20mm square";
 
@@ -13,25 +18,31 @@ Text = "20mm square";
 $fs = 0.025;
 $fa = $preview ? 10 : 5;
 
-module addText() {
+// TODO: ease-in square, it's hard to insert (how do knife sheaths do it?)
+module addText(vec=[0,0,0]) {
     difference() {
         children(0);
-        back(0.2 - 0.001) up(0.5) fwd(Wall_size)
-            xrot(90) linear_extrude(0.2)
-            text(text=Text, size=1, halign="center", font="Roboto Slab");
+        translate(vec) back(0.2 - 0.001) up(0.5) fwd(Wall_size)
+            xrot(90) linear_extrude(0.5)
+            text(text=Text, size=2, halign="center", valign="center", font="Roboto Slab");
     }
 }
 
-addText() union() {
+width = Full_width ? Square_width + Tolerance + 2*Wall_size : Back_plate_width;
+echo("Back plate width is ", width);
+
+union() {
+    h = Holder_height;
     hookPeg();
-    up(5) cuboid([10, 2, 40], anchor=BACK+TOP, rounding=Rounding);
+
+    up(5) cuboid([width, Wall_size, 40], anchor=BACK+TOP, rounding=Rounding);
     down(30) straightPeg();
-    rect_tube(
-        isize=[Square_width + Tolerance, Square_thickness + Tolerance],
-        wall=Wall_size,
-        h=8,
-        anchor=TOP+BACK,
-        rounding=Rounding,
-        irounding=Rounding
-        );
+    addText([0, -(Square_thickness+Tolerance + Wall_size), -h/2])
+        rect_tube(isize=[Square_width + Tolerance, Square_thickness + Tolerance],
+                  wall=Wall_size,
+                  h=h,
+                  anchor=TOP+BACK,
+                  rounding=Rounding,
+                  irounding=Rounding
+            );
 }
