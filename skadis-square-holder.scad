@@ -12,6 +12,7 @@ Tolerance = 0.2;
 Wall_size = 2;
 Holder_height = 8;
 Rounding = 0.4;
+Peg_angle = 67.5; // [0:7.5:90]
 Text = "20mm square";
 
 /* [Hidden] */
@@ -33,7 +34,7 @@ echo("Back plate width is ", width);
 
 union() {
     h = Holder_height;
-    hookPeg();
+    hookPeg(pegAngle=Peg_angle);
 
     up(5) cuboid([width, Wall_size, 40], anchor=BACK+TOP, rounding=Rounding);
     down(30) straightPeg();
