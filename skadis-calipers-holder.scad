@@ -18,6 +18,8 @@ Guard_height = 5;
 // Extra thickness to add to the thickness
 Tolerance = 1;
 
+Left_platform_width = 10;
+Right_platform_width = 10;
 
 /* [Calipers specs (see diagrams/calipers.svg)] */
 
@@ -28,8 +30,6 @@ Left_height = 27;
 Right_height = 12.5;
 Mid_width = 28;
 Left_side_angle = 13.134;
-Left_platform_width = 10;
-Right_platform_width = 10;
 
 // Left_side_angle calculation
 // point1 = [0.5, 1.2];
@@ -44,6 +44,7 @@ use <lib/text.scad> // addText
 $fa=$preview ? 10 : 5;
 $fs=0.025;
 
+// TODO: auto calculate width?
 
 // corner rounding for pegs for some reason openscad/BOSL crashes when it's too big
 pegRounding = 1.6;
