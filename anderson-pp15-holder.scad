@@ -17,8 +17,8 @@ Print_tolerance = true;
 // Housing type -- plugs don't cover the areas that mate
 Housing_type = 0; // [0: Jack, 1: Plug]
 
-// Which way the dovetail should point -- use both if you want to fit both, but the fit will be looser
-Dovetail_direction = 0; // [0: Both, 1: Left, 2: Right]
+// Which way the dovetail should point -- use "Either" if you want to fit either, but the fit will be looser
+Dovetail_direction = 0; // [0: Either, 1: Left, 2: Right]
 
 /* [ hidden ] */
 $fs = 0.025;
