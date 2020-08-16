@@ -36,9 +36,9 @@ module nutCutout(id, h, holeDiameter=0, holeHeight=0, holeSink=0) {
 bs = Box_size;
 hh = 2;
 
-module nut(size=3, h) {
-    id_ = get_metric_nut_size(size) + Tolerance;
-    h_ = (h == undef ? get_metric_nut_thickness(size) : h) + Tolerance;
+module nut(size=3, h, tolerance=Tolerance) {
+    id_ = get_metric_nut_size(size) + tolerance;
+    h_ = (h == undef ? get_metric_nut_thickness(size) : h) + tolerance;
     hd = size*1.08;
 
     nutCutout(id=id_, h=h_, holeDiameter=hd, holeHeight=hh, holeSink=10);
@@ -61,8 +61,8 @@ addBase(0.3, 1.5) up(bs.z) difference() {
 
     down(hh) {
         fwd(bs.y/2) {
-            left(5) nut(3, h=M3_nut_thickness);
-            right(5) nut(3, h=M3_nut_thickness);
+            left(5) nut(3, h=M3_nut_thickness, tolerance=0.2);
+            right(5) nut(3, h=M3_nut_thickness, tolerance=0.2);
         }
 
         zrot(180) fwd(bs.y/2) {
