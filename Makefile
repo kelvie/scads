@@ -16,8 +16,11 @@ clean:
 	cat $(shell tac $< | grep -v 'out.echo' | sed 's/\\//g') | grep -v -e '^\s*include\>' -e '^\s*use\>' > $@
 
 png/%.png: %.scad
+	mkdir -p png
 	openscad -o $@ $^
 
 pngs: $(PNGS)
-	mkdir -p png
 
+wiki-gallery:
+	scripts/make-gallery ../scads.wiki/Gallery.md
+	cp -r png/ ../scads.wiki/

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+baseUrl="https://github.com/kelvie/scads/blob/master"
+wikiBaseUrl="https://github.com/kelvie/scads/wiki"
+
+outFile=Gallery.md
+if test -n "$1"; then
+    outFile=$1
+fi
+
+echo '# Gallery' > $outFile
+
+for file in *.scad; do
+    git ls-files --error-unmatch "$file" >/dev/null 2>&1 || continue
+    baseName="${file%%.scad}"
+    pngfile="png/${baseName}.png"
+    make "$pngfile"
+    printf '## [%s](%s/%s)\n' "$file" "$baseUrl" "$file" >> $outFile
+    printf '![%s](%s/%s)\n' "$baseName" "$wikiBaseUrl" "$pngfile" >> $outFile
+    echo >> $outFile
+done
