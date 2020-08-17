@@ -12,14 +12,14 @@ Include_roll_pin = true;
 // Add a base in the bottom to account for compression in the first layers
 Add_bottom_base = true;
 
-// Whether or not to engrave the tolerance on the part
-Print_tolerance = true;
+// Whether or not to engrave the tolerance on the part (mainly used for testing)
+Print_tolerance = false;
 
 // Housing type -- plugs don't cover the areas that mate
 Housing_type = 0; // [0: Jack, 1: Plug]
 
 // Which way the dovetail should point -- use "Either" if you want to fit either, but the fit will be looser
-Dovetail_direction = 0; // [0: Either, 1: Left, 2: Right]
+Dovetail_direction = 1; // [0: Either, 1: Left, 2: Right]
 
 /* [ hidden ] */
 $fs = 0.025;
@@ -71,30 +71,37 @@ module pp15_casing(middlePin=true, tolerance=Tolerance, dovetailDirection=Doveta
     $eps = Wall_thickness / 100;
 
     pinR = rollPinRadius - tolerance/2;
-    rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
 
     // Left+right walls
-    difference() {
-        mirrorCopy(LEFT)
-            right(outsideSz.x/2)
+    leftWallThickness = dovetailDirection != 2 ? Wall_thickness : Wall_thickness + dovetailWidth;
+    rightWallThickness = dovetailDirection != 1 ? Wall_thickness : Wall_thickness + dovetailWidth;
+
+    // left wall
+    left(outsideSz.x/2)
             cuboid(
-                size=[Wall_thickness+dovetailWidth, outsideSz.y, outsideSz.z],
-                anchor=BOTTOM+BACK+RIGHT,
+                size=[leftWallThickness, outsideSz.y, outsideSz.z],
+                anchor=BOTTOM+BACK+LEFT,
                 chamfer=chamfer
                 );
 
-        // Cut out an extra width for the dovetails near the front
-        fwd(outsideSz.y-Wall_thickness)
-            mirrorDovetail(dovetailDirection)
-            cuboid(size=[widthWithDovetail, dovetailHeight + tolerance+chamfer, outsideSz.z],
-                   anchor=FRONT+BOTTOM+ LEFT,
-                   chamfer=chamfer,
-                   edges=BACK);
-    }
+    right(outsideSz.x/2)
+        cuboid(
+            size=[rightWallThickness, outsideSz.y, outsideSz.z],
+            anchor=BOTTOM+BACK+RIGHT,
+            chamfer=chamfer
+            );
+
+
+    // Add thickness for sides that don't have a dovetail sticking out
+    mirrorDovetail(dovetailDirection)
+        right(outsideSz.x / 2)
+        cuboid(size=[Wall_thickness + dovetailWidth, outsideSz.y - dovetailHeight - Wall_thickness, outsideSz.z],
+               anchor=BOTTOM+BACK+RIGHT,
+               chamfer=chamfer
+             );
 
     // Bottom wall
     difference() {
-        // If this is a jack, we should
         cuboid(
             size=[outsideSz.x, outsideSz.y, Wall_thickness],
             chamfer=chamfer,
@@ -116,6 +123,8 @@ module pp15_casing(middlePin=true, tolerance=Tolerance, dovetailDirection=Doveta
                 down($eps)
                 cyl(r=rollPinRadius + tolerance / 2, h=outsideSz.z+2*$eps, anchor=BOTTOM);
     }
+
+    rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
 
     // Side roll pins
     fwd(rollPinYOffset) {
