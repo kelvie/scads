@@ -7,8 +7,8 @@ Wall_thickness = 2;
 
 // 0.2 seems to be a good balance between removability and stability
 Tolerance = 0.2; // [0.1:0.05:0.31]
-// Include a pin in the middle for attaching the connectors (WARNING: this makes it difficult to take out unless you increase the tolerance)
-Include_roll_pin = false;
+// Include a pin in the middle for attaching the connectors (WARNING: this makes it more difficult to take out for the same tolerance)
+Include_roll_pin = true;
 // Add a base in the bottom to account for compression in the first layers
 Add_bottom_base = true;
 
@@ -58,10 +58,12 @@ module mirrorDovetail(direction=Dovetail_direction) {
 
 // Creates a holder for a pair of PP15 connectors
 module pp15_casing(middlePin=true, tolerance=Tolerance, dovetailDirection=Dovetail_direction, jack=Housing_type == 0) {
+    dovetailWidth = widthWithDovetail - width;
     housingLength = jack ? fullLength : matedFullLength - fullLength;
 
-    outsideSz = [2*widthWithDovetail + 2*Wall_thickness, housingLength+Wall_thickness, widthWithDovetail + Wall_thickness];
-    insideSz = [2*width, housingLength+Wall_thickness, widthWithDovetail] + tolerance * [1, 1, 1];
+    insideSz = [2*widthWithDovetail, housingLength, widthWithDovetail];
+    outsideSz = insideSz + Wall_thickness * [2, 1, 1] + tolerance * [1, 1, 1];
+
     chamfer = Wall_thickness / 3;
 
     echo("o: ", outsideSz, "i: ", insideSz, "chamfer:", chamfer);
@@ -70,73 +72,39 @@ module pp15_casing(middlePin=true, tolerance=Tolerance, dovetailDirection=Doveta
 
     pinR = rollPinRadius - tolerance/2;
     rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
+
+    // Left+right walls
     difference() {
-        cuboid(size=outsideSz, anchor=BACK+BOTTOM, chamfer=chamfer);
-
-        difference() {
-            // Connectors' bounding box
-            up(outsideSz.z)
-                union () {
-                // Possible BOSL bug? If I comment out this line it leaves thin faces on render
-                up(0.1) back(0.1) cuboid(size=insideSz + 0.1*[0, 1, 1], anchor=BACK+TOP);
-
-                cuboid(size=insideSz, anchor=BACK+TOP) {
-                    edge_mask(edges=TOP, except=[FRONT, BACK])
-                        chamfer_mask(insideSz.y, chamfer);
-
-                    edge_mask(edges=[BACK], except=[TOP, BOTTOM])
-                        chamfer_mask(insideSz.z -0.1, chamfer);
-
-                    // Don't want the front chamfer for type == plug as it'll chamfer into the hole
-                    if (jack) {
-                        edge_mask(edges=[BACK], except=[LEFT, RIGHT])
-                            chamfer_mask(insideSz.x - 0.1, chamfer);
-
-                        // Corners are the intersections of both of these chamfers
-                        intersection() {
-                            edge_mask(edges=[BACK], except=[TOP, BOTTOM])
-                                chamfer_mask(insideSz.z -0.1+2*chamfer, chamfer);
-                            edge_mask(edges=[BACK], except=[LEFT, RIGHT])
-                                chamfer_mask(insideSz.x - 0.1+2*chamfer, chamfer);
-                        }
-                    }
-                }
-            }
-
-
-
-            // Side roll pins
-            fwd(rollPinYOffset) {
-                mirrorCopy(LEFT) left(width)
-                    cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
-
-                // Optional middle roll pin
-                if (middlePin)
-                    cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
-
-            }
-
-            wireHoleWallWidth = (width - wireHoleWidth) / 2;
-            // Add a back wall for the wire holes
-            fwd(outsideSz.y) mirrorCopy(LEFT) left(outsideSz.x/2)
-                cuboid(size=[wireHoleWallWidth+Wall_thickness, Wall_thickness, outsideSz.z],
-                       anchor=FRONT+BOTTOM+LEFT,
-                       chamfer = chamfer
-                    );
-        }
+        mirrorCopy(LEFT)
+            right(outsideSz.x/2)
+            cuboid(
+                size=[Wall_thickness+dovetailWidth, outsideSz.y, outsideSz.z],
+                anchor=BOTTOM+BACK+RIGHT,
+                chamfer=chamfer
+                );
 
         // Cut out an extra width for the dovetails near the front
         fwd(outsideSz.y-Wall_thickness)
-        up(outsideSz.z)
             mirrorDovetail(dovetailDirection)
-            cuboid(size=[widthWithDovetail, dovetailHeight + tolerance + chamfer, insideSz.z],
-                   anchor=FRONT+TOP+LEFT,
+            cuboid(size=[widthWithDovetail, dovetailHeight + tolerance+chamfer, outsideSz.z],
+                   anchor=FRONT+BOTTOM+ LEFT,
                    chamfer=chamfer,
                    edges=BACK);
+    }
+
+    // Bottom wall
+    difference() {
+        // If this is a jack, we should
+        cuboid(
+            size=[outsideSz.x, outsideSz.y, Wall_thickness],
+            chamfer=chamfer,
+            anchor=BOTTOM+BACK,
+            edges=edges("ALL")
+            );
 
         // Draw an icon indicating which side to put in the connectors
         if (dovetailDirection != 0)
-            up(Wall_thickness - 0.4) fwd(outsideSz.y-dovetailHeight / 2)
+            up(Wall_thickness - 0.4 + $eps) fwd(outsideSz.y-dovetailHeight / 2)
                 mirrorDovetail(dovetailDirection)
                 mirror(LEFT) // clearly should have drawn the icon pointing to the right
                 linear_extrude(0.4) import("icons/pp15-dovetail-left.svg", center=true);
@@ -148,6 +116,29 @@ module pp15_casing(middlePin=true, tolerance=Tolerance, dovetailDirection=Doveta
                 down($eps)
                 cyl(r=rollPinRadius + tolerance / 2, h=outsideSz.z+2*$eps, anchor=BOTTOM);
     }
+
+    // Side roll pins
+    fwd(rollPinYOffset) {
+        mirrorCopy(LEFT) left(width)
+            cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
+
+        // Optional middle roll pin
+        if (middlePin)
+            cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
+
+    }
+
+    wireHoleWallWidth = (width - wireHoleWidth) / 2;
+    // Add a back wall for the wire holes
+    fwd(outsideSz.y) mirrorCopy(LEFT) left(outsideSz.x/2)
+        cuboid(size=[wireHoleWallWidth+Wall_thickness, Wall_thickness, outsideSz.z],
+               anchor=FRONT+BOTTOM+LEFT,
+               chamfer = chamfer
+            );
+
+
+
+
 }
 
 addBase(0.3, 1.5, enable=Add_bottom_base)
