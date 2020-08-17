@@ -35,10 +35,6 @@ wireHoleWidth = 5; // x
 dovetailHeight = 12.3; // y
 matedFullLength = 41.2; // y
 
-
-// This version of BOSL2 has a bug with chamfering
-boslFudgeFactor = 0.1;
-
 module mirrorCopy(n) {
     children(0);
     mirror(n) children(0);
