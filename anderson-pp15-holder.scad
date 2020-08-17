@@ -5,7 +5,8 @@ use <lib/text.scad>
 
 Wall_thickness = 2;
 
-Tolerance = 0.1; // [0.1:0.05:0.2]
+// 0.2 seems to be a good balance between removability and stability
+Tolerance = 0.2; // [0.1:0.05:0.31]
 // Include a pin in the middle for attaching the connectors (WARNING: this makes it difficult to take out unless you increase the tolerance)
 Include_roll_pin = false;
 // Add a base in the bottom to account for compression in the first layers
