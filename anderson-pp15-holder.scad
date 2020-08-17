@@ -34,6 +34,10 @@ wireHoleWidth = 5; // x
 dovetailHeight = 12.3; // y
 matedFullLength = 41.2; // y
 
+
+// This version of BOSL2 has a bug with chamfering
+boslFudgeFactor = 0.1;
+
 module mirrorCopy(n) {
     children(0);
     mirror(n) children(0);
@@ -59,6 +63,8 @@ module pp15_casing(middlePin=true, tolerance=Tolerance, dovetailDirection=Doveta
     insideSz = [2*width, housingLength+Wall_thickness, widthWithDovetail] + tolerance * [1, 1, 1];
     chamfer = Wall_thickness / 3;
 
+    echo("o: ", outsideSz, "i: ", insideSz, "chamfer:", chamfer);
+
     $eps = Wall_thickness / 100;
 
     pinR = rollPinRadius - tolerance/2;
@@ -71,19 +77,28 @@ module pp15_casing(middlePin=true, tolerance=Tolerance, dovetailDirection=Doveta
             up(outsideSz.z)
                 union () {
                 // Possible BOSL bug? If I comment out this line it leaves thin faces on render
-                up($eps) back($eps)
-                    cuboid(size=insideSz + 2*$eps*[0, 1, 1], anchor=BACK+TOP);
+                up(0.1) back(0.1) cuboid(size=insideSz + 0.1*[0, 1, 1], anchor=BACK+TOP);
 
                 cuboid(size=insideSz, anchor=BACK+TOP) {
                     edge_mask(edges=TOP, except=[FRONT, BACK])
                         chamfer_mask(insideSz.y, chamfer);
 
-                    // TODO: this doesn't chamfer correctly, bug in BOSL2?
+                    edge_mask(edges=[BACK], except=[TOP, BOTTOM])
+                        chamfer_mask(insideSz.z -0.1, chamfer);
 
-                    // TODO: this chamfer doesn't make sense for housingType == jack, the hole gets chamfered
+                    // Don't want the front chamfer for type == plug as it'll chamfer into the hole
+                    if (jack) {
+                        edge_mask(edges=[BACK], except=[LEFT, RIGHT])
+                            chamfer_mask(insideSz.x - 0.1, chamfer);
 
-                    // edge_mask(edges=[FRONT, BACK], except=[TOP, BOTTOM])
-                    //     chamfer_mask(insideSz.z, chamfer);
+                        // Corners are the intersections of both of these chamfers
+                        intersection() {
+                            edge_mask(edges=[BACK], except=[TOP, BOTTOM])
+                                chamfer_mask(insideSz.z -0.1+2*chamfer, chamfer);
+                            edge_mask(edges=[BACK], except=[LEFT, RIGHT])
+                                chamfer_mask(insideSz.x - 0.1+2*chamfer, chamfer);
+                        }
+                    }
                 }
             }
 
@@ -141,5 +156,7 @@ difference() {
     if (Print_tolerance)
         fwd(housingLength - dovetailHeight*3/4 - 1)
             up(Wall_thickness)
-            addText(text=str("t: ", Tolerance));
+            addText(text=str("t: ", Tolerance), h=3);
 }
+
+
