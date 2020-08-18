@@ -52,5 +52,3 @@ difference() {
             up(Wall_thickness)
             addText(text=str("t: ", Tolerance), h=3);
 }
-
-
