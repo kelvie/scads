@@ -6,7 +6,8 @@ module _mirror_copy(n) {
 }
 
 
-// TODO: don't chamfer top (or even use negative chamfers) so it connects better?
+// TODO: Negative chamfer to connect better?
+// TODO: some way to cut out an entry path
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
 //
@@ -16,7 +17,8 @@ module _mirror_copy(n) {
 //       a hole will be created instead)
 //
 //   `tolerance` is the amount of tolerance. It is added to the main cutout as
-//       well as subtracted from the pins' diameters
+//       well as subtracted from the pins' diameters. A middlePin will allow you
+//       to make the tolerance looser for the same fit.
 //
 //   `dovetailLeft` will only create a cutout for the dovetail on the left side
 //       if set to true, otherwise both are cut. If you want a dovetail cutout
@@ -60,14 +62,16 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
             cuboid(
                 size=[leftWallThickness, outsideSz.y, outsideSz.z],
                 anchor=BOTTOM+BACK+LEFT,
-                chamfer=chamfer
+                chamfer=chamfer,
+                edges=edges("ALL", except=TOP)
                 );
 
         right(outsideSz.x/2)
             cuboid(
                 size=[rightWallThickness, outsideSz.y, outsideSz.z],
                 anchor=BOTTOM+BACK+RIGHT,
-                chamfer=chamfer
+                chamfer=chamfer,
+                edges=edges("ALL", except=TOP)
                 );
 
 
@@ -76,7 +80,8 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
             left(outsideSz.x / 2)
             cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, outsideSz.z],
                    anchor=BOTTOM+BACK+LEFT,
-                   chamfer=chamfer
+                   chamfer=chamfer,
+                   edges=edges("ALL", except=TOP)
                 );
 
         // Bottom wall
@@ -119,7 +124,8 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
         fwd(outsideSz.y) _mirror_copy(LEFT) left(outsideSz.x/2)
             cuboid(size=[wireHoleWallWidth+wall, wall, outsideSz.z],
                    anchor=FRONT+BOTTOM+LEFT,
-                   chamfer = chamfer
+                   chamfer = chamfer,
+                   edges=edges("ALL", except=TOP)
                 );
     }
 
