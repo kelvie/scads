@@ -5,8 +5,9 @@ module _mirror_copy(n) {
     mirror(n) children(0);
 }
 
-// TODO: Negative chamfer to connect better?
+// TODO: Negative chamfer / overlap to connect better?
 // TODO: some way to cut out an entry path
+// TODO: add tolerance to the top (so mirrored connectors can fit)
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
 //
@@ -15,9 +16,9 @@ module _mirror_copy(n) {
 //   `middlePin` will determine whether or not to create a middle pin (if false,
 //       a hole will be created instead)
 //
-//   `tolerance` is the amount of tolerance. It is added to the main cutout as
-//       well as subtracted from the pins' diameters. A middlePin will allow you
-//       to make the tolerance looser for the same fit.
+//   `tolerance` is the amount of tolerance. It is subtracted from the roll
+//       pins' radii as well as increases the width to fit the connectors. A
+//       middlePin will allow you to make the tolerance looser for the same fit.
 //
 //   `dovetailLeft` will only create a cutout for the dovetail on the left side
 //       if set to true, otherwise both are cut. If you want a dovetail cutout
@@ -43,7 +44,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     housingLength = jack ? fullLength : matedFullLength - fullLength;
 
     insideSz = [2*widthWithDovetail, housingLength, widthWithDovetail];
-    outsideSz = insideSz + wall * [2, 1, 1] + tolerance * [1, 1, 1];
+    outsideSz = insideSz + wall * [2, 1, 2] + tolerance * [1, 0, 1];
     fullOutsideSz = outsideSz + (matedFullLength-housingLength)*[0,1,0];
 
     chamfer = wall / 3;
@@ -117,15 +118,16 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
         }
 
         rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
+        rollPinHeight = widthWithDovetail + tolerance + wall;
 
         // Side roll pins
         fwd(rollPinYOffset) {
             _mirror_copy(LEFT) left(width)
-                cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
+                cyl(r=pinR, h=rollPinHeight, chamfer=chamfer, anchor=BOTTOM);
 
             // Optional middle roll pin
             if (middlePin)
-                cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
+                cyl(r=pinR, h=rollPinHeight, chamfer=chamfer, anchor=BOTTOM);
 
         }
 
@@ -141,7 +143,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
     attachable(anchor=anchor, spin=spin, orient=orient, size=fullOutsideSz) {
         down(fullOutsideSz.z/2)
-            back(outsideSz.y - fullOutsideSz.y/2)
+            back(outsideSz.y - wall - matedFullLength/2)
             make();
         children();
     }
