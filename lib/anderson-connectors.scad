@@ -26,7 +26,8 @@ module _mirror_copy(n) {
 //       connector is covered)
 //
 //   `wall` is the minimum thickness of the walls generated
-module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false, wall=2, anchor=CENTER) {
+module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false, wall=2,
+                   anchor=CENTER, spin=0, orient=UP) {
     // These are from the official drawings for the 1237 series
     width = 7.9; // x and y
     widthWithDovetail = 8.4; // x
@@ -122,8 +123,8 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 );
     }
 
-    attachable(anchor=anchor, size=outsideSz) {
-        down(outsideSz.z/2) make();
+    attachable(anchor=anchor, spin=spin, orient=orient, size=outsideSz) {
+        down(outsideSz.z/2) back(outsideSz.y/2) make();
         children();
     }
 }
