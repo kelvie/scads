@@ -44,6 +44,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
     insideSz = [2*widthWithDovetail, housingLength, widthWithDovetail];
     outsideSz = insideSz + wall * [2, 1, 1] + tolerance * [1, 1, 1];
+    fullOutsideSz = jack ? outsideSz : outsideSz + (fullLength-housingLength)*[0,1,0];
 
     chamfer = wall / 3;
 
@@ -56,6 +57,16 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     rightWallThickness = dovetailLeft ? wall + dovetailWidth : wall;
 
     module make() {
+        // cutouts to show connectors
+        % color("red", 0.2) fwd(outsideSz.y - wall) up(wall) cuboid(
+            size=[widthWithDovetail, fullLength, widthWithDovetail],
+            anchor=FRONT+BOTTOM+LEFT
+            );
+        % color("black", 0.2) fwd(outsideSz.y - wall) up(wall) cuboid(
+            size=[widthWithDovetail, fullLength, widthWithDovetail],
+            anchor=FRONT+BOTTOM+RIGHT
+            );
+
         // left wall
         left(outsideSz.x/2)
             cuboid(
@@ -128,8 +139,10 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 );
     }
 
-    attachable(anchor=anchor, spin=spin, orient=orient, size=outsideSz) {
-        down(outsideSz.z/2) back(outsideSz.y/2) make();
+    attachable(anchor=anchor, spin=spin, orient=orient, size=fullOutsideSz) {
+        down(fullOutsideSz.z/2)
+            back(jack ? fullOutsideSz.y/2 : outsideSz.y - fullOutsideSz.y/2)
+            make();
         children();
     }
 }
