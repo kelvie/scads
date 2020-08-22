@@ -1,6 +1,6 @@
 include <lib/BOSL2/std.scad>
 
-use <lib/anderson-connectors.scad> // pp15_casing
+include <lib/anderson-connectors.scad> // pp15_casing
 include <lib/addBase.scad> // addBase
 use <lib/text.scad>
 
@@ -42,7 +42,8 @@ difference() {
         jack=Housing_type == 0,
         tolerance=Tolerance,
         wall=Wall_thickness,
-        dovetailLeft=Dovetail_direction != 0
+        dovetailLeft=Dovetail_direction != 0,
+        anchor=BOTTOM
         );
 
     // Print the tolerance for test fits

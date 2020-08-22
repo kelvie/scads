@@ -1,9 +1,12 @@
 include <BOSL2/std.scad>
 
-module mirrorCopy(n) {
+module _mirror_copy(n) {
     children(0);
     mirror(n) children(0);
 }
+
+
+// TODO: don't chamfer top (or even use negative chamfers) so it connects better?
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
 //
@@ -23,9 +26,7 @@ module mirrorCopy(n) {
 //       connector is covered)
 //
 //   `wall` is the minimum thickness of the walls generated
-module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false, wall=2) {
-
-
+module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false, wall=2, anchor=CENTER) {
     // These are from the official drawings for the 1237 series
     width = 7.9; // x and y
     widthWithDovetail = 8.4; // x
@@ -44,8 +45,6 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
     chamfer = wall / 3;
 
-    echo("o: ", outsideSz, "i: ", insideSz, "chamfer:", chamfer);
-
     $eps = wall / 100;
 
     pinR = rollPinRadius - tolerance/2;
@@ -54,70 +53,77 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     leftWallThickness = wall;
     rightWallThickness = dovetailLeft ? wall + dovetailWidth : wall;
 
-    // left wall
-    left(outsideSz.x/2)
+    module make() {
+        // left wall
+        left(outsideSz.x/2)
             cuboid(
                 size=[leftWallThickness, outsideSz.y, outsideSz.z],
                 anchor=BOTTOM+BACK+LEFT,
                 chamfer=chamfer
                 );
 
-    right(outsideSz.x/2)
-        cuboid(
-            size=[rightWallThickness, outsideSz.y, outsideSz.z],
-            anchor=BOTTOM+BACK+RIGHT,
-            chamfer=chamfer
-            );
+        right(outsideSz.x/2)
+            cuboid(
+                size=[rightWallThickness, outsideSz.y, outsideSz.z],
+                anchor=BOTTOM+BACK+RIGHT,
+                chamfer=chamfer
+                );
 
 
-    // Add thickness for sides that don't have a dovetail sticking out
-    mirrorCopy(LEFT)
-    left(outsideSz.x / 2)
-        cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, outsideSz.z],
-               anchor=BOTTOM+BACK+LEFT,
-               chamfer=chamfer
-             );
+        // Add thickness for sides that don't have a dovetail sticking out
+        _mirror_copy(LEFT)
+            left(outsideSz.x / 2)
+            cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, outsideSz.z],
+                   anchor=BOTTOM+BACK+LEFT,
+                   chamfer=chamfer
+                );
 
-    // Bottom wall
-    difference() {
-        cuboid(
-            size=[outsideSz.x, outsideSz.y, wall],
-            chamfer=chamfer,
-            anchor=BOTTOM+BACK,
-            edges=edges("ALL")
-            );
+        // Bottom wall
+        difference() {
+            cuboid(
+                size=[outsideSz.x, outsideSz.y, wall],
+                chamfer=chamfer,
+                anchor=BOTTOM+BACK,
+                edges=edges("ALL")
+                );
 
-        // Draw an icon indicating which side to put in the connectors
-        if (dovetailLeft)
-            up(wall - 0.4 + $eps) fwd(outsideSz.y-dovetailHeight / 2)
-                linear_extrude(0.4) import("../icons/pp15-dovetail-left.svg", center=true);
+            // Draw an icon indicating which side to put in the connectors
+            if (dovetailLeft)
+                up(wall - 0.4 + $eps) fwd(outsideSz.y-dovetailHeight / 2)
+                    linear_extrude(0.4) import("icons/pp15-dovetail-left.svg", center=true);
 
 
-        // If there's no built-in middle roll pin, we cut out a hole instead
-        if (!middlePin)
-            fwd(rollPinYOffset)
-                down($eps)
-                cyl(r=rollPinRadius + tolerance / 2, h=outsideSz.z+2*$eps, anchor=BOTTOM);
+            // If there's no built-in middle roll pin, we cut out a hole instead
+            if (!middlePin)
+                fwd(rollPinYOffset)
+                    down($eps)
+                    cyl(r=rollPinRadius + tolerance / 2, h=outsideSz.z+2*$eps, anchor=BOTTOM);
+        }
+
+        rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
+
+        // Side roll pins
+        fwd(rollPinYOffset) {
+            _mirror_copy(LEFT) left(width)
+                cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
+
+            // Optional middle roll pin
+            if (middlePin)
+                cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
+
+        }
+
+        // Add a back wall for the wire holes
+        wireHoleWallWidth = (width - wireHoleWidth) / 2;
+        fwd(outsideSz.y) _mirror_copy(LEFT) left(outsideSz.x/2)
+            cuboid(size=[wireHoleWallWidth+wall, wall, outsideSz.z],
+                   anchor=FRONT+BOTTOM+LEFT,
+                   chamfer = chamfer
+                );
     }
 
-    rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
-
-    // Side roll pins
-    fwd(rollPinYOffset) {
-        mirrorCopy(LEFT) left(width)
-            cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
-
-        // Optional middle roll pin
-        if (middlePin)
-            cyl(r=pinR, h=outsideSz.z, chamfer=chamfer, anchor=BOTTOM);
-
+    attachable(anchor=anchor, size=outsideSz) {
+        down(outsideSz.z/2) make();
+        children();
     }
-
-    // Add a back wall for the wire holes
-    wireHoleWallWidth = (width - wireHoleWidth) / 2;
-    fwd(outsideSz.y) mirrorCopy(LEFT) left(outsideSz.x/2)
-        cuboid(size=[wireHoleWallWidth+wall, wall, outsideSz.z],
-               anchor=FRONT+BOTTOM+LEFT,
-               chamfer = chamfer
-            );
 }
