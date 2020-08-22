@@ -44,7 +44,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
     insideSz = [2*widthWithDovetail, housingLength, widthWithDovetail];
     outsideSz = insideSz + wall * [2, 1, 1] + tolerance * [1, 1, 1];
-    fullOutsideSz = jack ? outsideSz : outsideSz + (fullLength-housingLength)*[0,1,0];
+    fullOutsideSz = outsideSz + (matedFullLength-housingLength)*[0,1,0];
 
     chamfer = wall / 3;
 
@@ -141,7 +141,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
     attachable(anchor=anchor, spin=spin, orient=orient, size=fullOutsideSz) {
         down(fullOutsideSz.z/2)
-            back(jack ? fullOutsideSz.y/2 : outsideSz.y - fullOutsideSz.y/2)
+            back(outsideSz.y - fullOutsideSz.y/2)
             make();
         children();
     }

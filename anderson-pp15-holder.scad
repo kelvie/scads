@@ -47,9 +47,8 @@ difference() {
         );
 
     // Print the tolerance for test fits
-    housingLength = Housing_type == 0 ? 24.6 : 16.6;
     if (Print_tolerance)
-        fwd(housingLength - 12.3 *3/4 - 1)
+        fwd(9)
             up(Wall_thickness)
             addText(text=str("t: ", Tolerance), h=3);
 }
