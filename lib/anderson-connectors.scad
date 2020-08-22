@@ -5,7 +5,6 @@ module _mirror_copy(n) {
     mirror(n) children(0);
 }
 
-
 // TODO: Negative chamfer to connect better?
 // TODO: some way to cut out an entry path
 
