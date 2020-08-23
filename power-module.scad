@@ -150,13 +150,13 @@ module make_part() {
 
         }
 
-        recolor(palette[3]) tags("top") position(TOP)
+        tags("top") position(TOP)
             fwd(wt/2)
             cuboid([bd.x, bd.y, 0] + wt*[0,1,1],
                    anchor=BOTTOM, chamfer=chamf,
                    edges=edges(TOP, except=[LEFT, RIGHT, BACK]));
 
-        recolor(palette[4]) tags("front") position(FRONT)
+        tags("front") position(FRONT)
             difference() {
             cuboid([bd.x, 0, bd.z] + wt*[0, 1, 0],
                    anchor=BACK,
@@ -190,14 +190,14 @@ module explode_out(direction) {
 // Optionally show the pieces exploded for "All"
 if (Piece == 0) {
     explode_out(FORWARD)
-        show("front") make_part();
+        color(palette[4]) show("front") make_part();
     explode_out(UP)
-        show("top") make_part();
+        color(palette[3]) show("top") make_part();
     explode_out(LEFT)
         show("left-c") make_part();
     explode_out(RIGHT)
         show("right-c") make_part();
-    show("main") make_part();
+    color(palette[1]) show("main") make_part();
 
 } else
     show(tags) make_part();
