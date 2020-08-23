@@ -178,6 +178,7 @@ module explode_out(direction) {
     explode_offset = Explode_offset;
 
     if (Explode_parts && explode_offset > 0) {
+        // This creates an outline to the exploded part but it's too distracting
         // % hull() {
         //     children(0);
         //     translate(explode_offset * direction * 0.99) children(0);
