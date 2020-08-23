@@ -35,6 +35,7 @@ module changeDirection(direction=Dovetail_direction) {
         children(0);
 }
 
+// this adds 0.22mm ...
 addBase(0.3, 1.5, enable=Add_bottom_base)
 difference() {
     changeDirection() pp15_casing(
