@@ -64,14 +64,18 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
     module make() {
         // cutouts to show connectors
-        % color("red", 0.2) fwd(outsideSz.y - wall) up(wall) cuboid(
-            size=[widthWithDovetail, fullLength, widthWithDovetail],
-            anchor=FRONT+BOTTOM+LEFT
-            );
-        % color("black", 0.2) fwd(outsideSz.y - wall) up(wall) cuboid(
-            size=[widthWithDovetail, fullLength, widthWithDovetail],
-            anchor=FRONT+BOTTOM+RIGHT
-            );
+        % recolor("#ff000033") fwd(outsideSz.y - wall) up(wall)
+            cuboid(
+                size=[widthWithDovetail, fullLength, widthWithDovetail],
+                anchor=FRONT+BOTTOM+LEFT,
+                $color="#ff000033"
+
+                );
+        % recolor("#00000033") fwd(outsideSz.y - wall) up(wall)
+              cuboid(
+                  size=[widthWithDovetail, fullLength, widthWithDovetail],
+                  anchor=FRONT+BOTTOM+RIGHT
+                  );
 
         // left wall
         left(outsideSz.x/2)
