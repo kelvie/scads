@@ -7,7 +7,6 @@ module _mirror_copy(n) {
 
 // TODO: Negative chamfer / overlap to connect better?
 // TODO: some way to cut out an entry path
-// TODO: add tolerance to the top (so mirrored connectors can fit)
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
 //
@@ -28,8 +27,14 @@ module _mirror_copy(n) {
 //       connector is covered)
 //
 //   `wall` is the minimum thickness of the walls generated
+//
+//   `anchor`, `spin`, and `orient` have their normal meanings within BOSL2 (see
+//       attachments.scad)
+//
+//   `mask` when nonzero creates a cutout mask of the specified height, suitable
+//          for cutting holes to mount this onto
 module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false, wall=2,
-                   anchor=CENTER, spin=0, orient=UP) {
+                   anchor=CENTER, spin=0, orient=UP, mask=0) {
     // These are from the official drawings for the 1237 series
     width = 7.9; // x and y
     widthWithDovetail = 8.4; // x
@@ -144,7 +149,12 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     attachable(anchor=anchor, spin=spin, orient=orient, size=fullOutsideSz) {
         down(fullOutsideSz.z/2)
             back(outsideSz.y - wall - matedFullLength/2)
-            make();
+            if (mask == 0)
+                make();
+            else {
+                sz = [insideSz.x, insideSz.y, mask];
+                cuboid(sz, anchor=BOTTOM+BACK);
+            }
         children();
     }
 }
