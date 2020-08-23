@@ -54,11 +54,13 @@ chamf=Wall_thickness/3;
 palette = ["#e6efe9","#c5f4e0","#c2eaba","#a7c4a0","#8f8389"];
 
 pds = Predefined_size;
+
+// TODO: calculate based on pcb size + appropriate minimums
 // Get the box dimensions
 // `CTP2` is this module I found on aliexpress: https://www.aliexpress.com/item/4000089427329.htm
 function get_box_dimensions() =
     pds == "Custom" ? Box_dimensions :
-    pds == "CTP2" ? [18, 70, 20] :
+    pds == "CTP2" ? [18, 100, 20] :
     [];
 
 module mirror_copy(v) {
@@ -79,6 +81,10 @@ module mirror_copy(v) {
 module make_part() {
     bd = get_box_dimensions();
     wt = Wall_thickness;
+
+    // Whether or not to cover all the connectors... I don't think this is
+    // helpful as it hides the colours.
+    connector_jack = false;
 
     hide("hidden")
         cuboid(size=bd,
@@ -112,7 +118,8 @@ module make_part() {
                                 mask=3);
 
                 tags("left-c connector")
-                pp15_casing(jack=false, anchor=TOP, spin=180, orient=RIGHT);
+                pp15_casing(jack=false, anchor=TOP, spin=180,
+                            orient=RIGHT);
             }
 
             // Right connector
@@ -126,13 +133,13 @@ module make_part() {
                     // cutout into wall
                 tags("mask")
                     right(0.01)
-                    pp15_casing(jack=false,
+                    pp15_casing(jack=connector_jack,
                                 anchor=BOTTOM,
                                 orient=LEFT,
                                 mask=3);
 
                 tags("right-c connector")
-                    pp15_casing(jack=false, anchor=TOP, orient=LEFT);
+                    pp15_casing(jack=connector_jack, anchor=TOP, orient=LEFT);
             }
 
             position(BACK)

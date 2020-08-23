@@ -5,7 +5,7 @@ module _mirror_copy(n) {
     mirror(n) children(0);
 }
 
-// TODO: Negative chamfer / overlap to connect better?
+// TODO: some way to attach...
 // TODO: some way to cut out an entry path
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
@@ -28,12 +28,15 @@ module _mirror_copy(n) {
 //
 //   `wall` is the minimum thickness of the walls generated
 //
+//   `wireHider` if set to true will add a part to the back that hides the wires
+//
 //   `anchor`, `spin`, and `orient` have their normal meanings within BOSL2 (see
 //       attachments.scad)
 //
 //   `mask` when nonzero creates a cutout mask of the specified height, suitable
-//          for cutting holes to mount this onto
+//          for cutting openings to mount this onto
 module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false, wall=2,
+                   wireHider=true,
                    anchor=CENTER, spin=0, orient=UP, mask=0) {
     // These are from the official drawings for the 1237 series
     width = 7.9; // x and y
@@ -50,9 +53,14 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
     insideSz = [2*widthWithDovetail, housingLength, widthWithDovetail];
     outsideSz = insideSz + wall * [2, 1, 2] + tolerance * [1, 0, 1];
-    fullOutsideSz = outsideSz + (matedFullLength-housingLength)*[0,1,0];
+
+    wireHiderWidth = wireHider ? outsideSz.z : 0;
+
+    fullOutsideSz = outsideSz + (matedFullLength-housingLength+wall)*[0,1,0] +
+        wireHiderWidth*[0,2,0];
 
     chamfer = wall / 3;
+    edge_nochamf = wireHider ? [TOP, FRONT] : [TOP];
 
     $eps = wall / 100;
 
@@ -83,7 +91,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 size=[leftWallThickness, outsideSz.y, outsideSz.z],
                 anchor=BOTTOM+BACK+LEFT,
                 chamfer=chamfer,
-                edges=edges("ALL", except=TOP)
+                edges=edges("ALL", except=edge_nochamf)
                 );
 
         right(outsideSz.x/2)
@@ -91,7 +99,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 size=[rightWallThickness, outsideSz.y, outsideSz.z],
                 anchor=BOTTOM+BACK+RIGHT,
                 chamfer=chamfer,
-                edges=edges("ALL", except=TOP)
+                edges=edges("ALL", except=edge_nochamf)
                 );
 
 
@@ -101,7 +109,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
             cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, outsideSz.z],
                    anchor=BOTTOM+BACK+LEFT,
                    chamfer=chamfer,
-                   edges=edges("ALL", except=TOP)
+                   edges=edges("ALL", except=edge_nochamf)
                 );
 
         // Bottom wall
@@ -110,7 +118,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 size=[outsideSz.x, outsideSz.y, wall],
                 chamfer=chamfer,
                 anchor=BOTTOM+BACK,
-                edges=edges("ALL")
+                edges=edges("ALL", except=wireHider ? FRONT : [])
                 );
 
             // Draw an icon indicating which side to put in the connectors
@@ -146,19 +154,54 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
             cuboid(size=[wireHoleWallWidth+wall, wall, outsideSz.z],
                    anchor=FRONT+BOTTOM+LEFT,
                    chamfer = chamfer,
-                   edges=edges("ALL", except=TOP)
+                   edges=edges("ALL", except=edge_nochamf)
                 );
+
+
+        // wire hider cube
+        module wh_cube() {
+            cuboid(size=[outsideSz.x, outsideSz.z, outsideSz.z],
+                   anchor=BACK+BOTTOM)
+                tags("children") children();
+        }
+
+        if (wireHider) {
+            diag = wireHiderWidth * sqrt(2);
+            diag_nowall = diag - wall * sqrt(2);
+            diag_chamfer = chamfer/sqrt(2);
+
+            fwd(outsideSz.y)
+                difference() {
+                intersection() {
+                    wh_cube();
+                    show("children") wh_cube() {
+                        attach(TOP+BACK)
+                        cuboid(size=[outsideSz.x + 0.01, diag+2*chamfer, diag],
+                               chamfer=diag_chamfer);
+                    }
+                }
+                show("children") wh_cube() {
+                    attach(TOP+BACK)
+                        cuboid(size=[outsideSz.x-2*wall, diag_nowall , diag_nowall]);
+                }
+            }
+        }
     }
 
     attachable(anchor=anchor, spin=spin, orient=orient, size=fullOutsideSz) {
-        down(fullOutsideSz.z/2)
-            back(outsideSz.y - wall - matedFullLength/2)
-            if (mask == 0)
-                make();
-            else {
-                sz = [insideSz.x, insideSz.y, mask];
-                cuboid(sz, anchor=BOTTOM+BACK);
-            }
+        union() {
+            down(fullOutsideSz.z/2)
+                back(outsideSz.y - wall - matedFullLength/2)
+                if (mask == 0) {
+                    make();
+                } else {
+                    sz = [insideSz.x, insideSz.y + wireHiderWidth, mask];
+                    cuboid(sz, anchor=BOTTOM+BACK);
+                }
+
+            // For debugging
+            // % cuboid(fullOutsideSz);
+        }
         children();
     }
 }
