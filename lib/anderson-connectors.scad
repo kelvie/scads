@@ -1,12 +1,13 @@
 include <BOSL2/std.scad>
+include <BOSL2/joiners.scad>
 
 module _mirror_copy(n) {
     children(0);
     mirror(n) children(0);
 }
 
-// TODO: some way to attach...
-// TODO: some way to cut out an entry path
+// TODO: some way to cut out an entry path for the other connector rather than
+//       having it stick out (graduated thickness)
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
 //
@@ -70,6 +71,36 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     leftWallThickness = wall;
     rightWallThickness = dovetailLeft ? wall + dovetailWidth : wall;
 
+    module make_dovetail(type, length, width=2, taper=1) {
+        module create_mask() {
+            newlength = 2*length;
+            right((newlength - length)/2)
+                yrot(180) dovetail(type == "male" ? "female" : "male",
+                                   length=newlength,
+                                   height=wall,
+                                   width=width + (newlength - length)*tan(taper),
+                                   spin=90,
+                                   chamfer=wall / 8,
+                                   anchor=BOTTOM,
+                                   taper=taper, $slop=0.05);
+        }
+        dovetail(type,
+                 length=length,
+                 height=wall,
+                 width=width,
+                 spin=90,
+                 chamfer=wall/8,
+                 anchor=BOTTOM,
+                 taper=taper,
+                 $slop=0.05
+            );
+
+        tags("mask") create_mask();
+
+        // For debugging
+        // % create_mask();
+    }
+
     module make() {
         // cutouts to show connectors
         % recolor("#ff000033") fwd(outsideSz.y - wall) up(wall)
@@ -92,7 +123,11 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 anchor=BOTTOM+BACK+LEFT,
                 chamfer=chamfer,
                 edges=edges("ALL", except=edge_nochamf)
-                );
+                )
+            attach(TOP) {
+            mirror_copy(BACK)
+                fwd((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
+        }
 
         right(outsideSz.x/2)
             cuboid(
@@ -100,8 +135,11 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 anchor=BOTTOM+BACK+RIGHT,
                 chamfer=chamfer,
                 edges=edges("ALL", except=edge_nochamf)
-                );
-
+                )
+            attach(TOP) {
+            mirror_copy(BACK)
+                fwd((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
+        }
 
         // Add thickness for sides that don't have a dovetail sticking out
         _mirror_copy(LEFT)
@@ -113,7 +151,8 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 );
 
         // Bottom wall
-        difference() {
+        if (attachment_is_shown($tags)) // to workaround weird diff bugs
+            difference() {
             cuboid(
                 size=[outsideSz.x, outsideSz.y, wall],
                 chamfer=chamfer,
@@ -165,7 +204,8 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 tags("children") children();
         }
 
-        if (wireHider) {
+
+        if (mask == 0 && wireHider) {
             diag = wireHiderWidth * sqrt(2);
             diag_nowall = diag - wall * sqrt(2);
             diag_chamfer = chamfer/sqrt(2);
@@ -176,7 +216,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                     wh_cube();
                     show("children") wh_cube() {
                         attach(TOP+BACK)
-                        cuboid(size=[outsideSz.x + 0.01, diag+2*chamfer, diag],
+                                  cuboid(size=[outsideSz.x + 0.01, diag+2*chamfer, diag],
                                chamfer=diag_chamfer);
                     }
                 }
@@ -186,6 +226,13 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 }
             }
         }
+        if (mask != 0)
+            tags("mask")
+                fwd(outsideSz.y)
+                up(outsideSz.z+mask)
+                cuboid(size=[insideSz.x, insideSz.z, mask + 0.01],
+                           anchor=BACK+TOP);
+
     }
 
     attachable(anchor=anchor, spin=spin, orient=orient, size=fullOutsideSz) {
@@ -193,10 +240,9 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
             down(fullOutsideSz.z/2)
                 back(outsideSz.y - wall - matedFullLength/2)
                 if (mask == 0) {
-                    make();
+                    hide("mask") make();
                 } else {
-                    sz = [insideSz.x, insideSz.y + wireHiderWidth, mask];
-                    cuboid(sz, anchor=BOTTOM+BACK);
+                    show("mask") make($tags="notmask");
                 }
 
             // For debugging

@@ -60,13 +60,8 @@ pds = Predefined_size;
 // `CTP2` is this module I found on aliexpress: https://www.aliexpress.com/item/4000089427329.htm
 function get_box_dimensions() =
     pds == "Custom" ? Box_dimensions :
-    pds == "CTP2" ? [18, 100, 20] :
+    pds == "CTP2" ? [18, 100, 40] :
     [];
-
-module mirror_copy(v) {
-    children(0);
-    mirror(v) children();
-}
 
 // TODO: think about printability
 // TODO: cut dovetails for front/top plate
@@ -85,6 +80,7 @@ module make_part() {
     // Whether or not to cover all the connectors... I don't think this is
     // helpful as it hides the colours.
     connector_jack = false;
+    connector_spin = 0;
 
     hide("hidden")
         cuboid(size=bd,
@@ -109,16 +105,17 @@ module make_part() {
                 position(LEFT) {
 
                 // cutout into wall
-                tags("mask")
-                    left(0.01)
-                    pp15_casing(jack=false,
-                                anchor=BOTTOM,
-                                spin=180,
-                                orient=RIGHT,
-                                mask=3);
+                 tags("mask")
+                     left(0.01)
+                     pp15_casing(jack=false,
+                                 anchor=TOP,
+                                 spin=180-connector_spin,
+                                 orient=RIGHT,
+                                 mask=3);
 
                 tags("left-c connector")
-                pp15_casing(jack=false, anchor=TOP, spin=180,
+                pp15_casing(jack=false, anchor=TOP,
+                            spin=180 - connector_spin,
                             orient=RIGHT);
             }
 
@@ -134,12 +131,16 @@ module make_part() {
                 tags("mask")
                     right(0.01)
                     pp15_casing(jack=connector_jack,
-                                anchor=BOTTOM,
+                                anchor=TOP,
                                 orient=LEFT,
+                                spin=connector_spin,
                                 mask=3);
 
                 tags("right-c connector")
-                    pp15_casing(jack=connector_jack, anchor=TOP, orient=LEFT);
+                    pp15_casing(jack=connector_jack,
+                                anchor=TOP,
+                                spin=connector_spin,
+                                orient=LEFT);
             }
 
             position(BACK)
