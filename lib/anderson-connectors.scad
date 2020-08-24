@@ -196,7 +196,6 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                    edges=edges("ALL", except=edge_nochamf)
                 );
 
-
         // wire hider cube
         module wh_cube() {
             cuboid(size=[outsideSz.x, outsideSz.z, outsideSz.z],
