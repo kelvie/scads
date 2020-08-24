@@ -24,6 +24,8 @@ Housing_type = 0; // [0: Jack, 1: Plug]
 // Which way the dovetail should point -- use "Either" if you want to fit either, but the fit will be looser
 Dovetail_direction = 1; // [0: Either, 1: Left, 2: Right]
 
+Show_mask = false;
+
 /* [ hidden ] */
 $fs = 0.025;
 $fa = $preview ? 10 : 5;
@@ -44,7 +46,8 @@ difference() {
         tolerance=Tolerance,
         wall=Wall_thickness,
         dovetailLeft=Dovetail_direction != 0,
-        anchor=BOTTOM
+        anchor=BOTTOM,
+        mask=Show_mask ? 3 : 0
         );
 
     // Print the tolerance for test fits
