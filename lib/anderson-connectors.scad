@@ -6,8 +6,12 @@ module _mirror_copy(n) {
     mirror(n) children(0);
 }
 
+// TODO: make sure taper angle is enough for the thing to fit (or just cut out a square)
+// TODO: add text argument
 // TODO: some way to cut out an entry path for the other connector rather than
-//       having it stick out (graduated thickness)
+//       having it stick out (graduated thickness?)
+// TODO: make all variables camelcase
+// TODO: chamfer the mask
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
 //
@@ -71,19 +75,24 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     leftWallThickness = wall;
     rightWallThickness = dovetailLeft ? wall + dovetailWidth : wall;
 
-    module make_dovetail(type, length, width=2, taper=1) {
+    module make_dovetail(type, length, width=2, taper=3) {
+        slop=0.05;
+
         module create_mask() {
-            newlength = 2*length;
+            newlength = length;
             right((newlength - length)/2)
                 yrot(180) dovetail(type == "male" ? "female" : "male",
                                    length=newlength,
                                    height=wall,
                                    width=width + (newlength - length)*tan(taper),
                                    spin=90,
-                                   chamfer=wall / 8,
+                                   chamfer=wall/8,
                                    anchor=BOTTOM,
-                                   taper=taper, $slop=0.05);
+                                   taper=taper, $slop=slop) {
+                position(FRONT) cuboid($parent_size + 4*slop * [1,0,0], anchor=BACK);
+            }
         }
+
         dovetail(type,
                  length=length,
                  height=wall,
@@ -95,7 +104,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                  $slop=0.05
             );
 
-        tags("mask") create_mask();
+        if (mask > 0) tags("mask") create_mask();
 
         // For debugging
         // % create_mask();
@@ -123,21 +132,22 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 anchor=BOTTOM+BACK+LEFT,
                 chamfer=chamfer,
                 edges=edges("ALL", except=edge_nochamf)
-                )
-            attach(TOP) {
-            mirror_copy(BACK)
+                ) {
+            attach(TOP)
+                mirror_copy(BACK)
                 fwd((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
         }
 
+        // right wall, with connectors on the back
         right(outsideSz.x/2)
             cuboid(
                 size=[rightWallThickness, outsideSz.y, outsideSz.z],
                 anchor=BOTTOM+BACK+RIGHT,
                 chamfer=chamfer,
                 edges=edges("ALL", except=edge_nochamf)
-                )
-            attach(TOP) {
-            mirror_copy(BACK)
+                ) {
+            attach(TOP)
+                mirror_copy(BACK)
                 fwd((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
         }
 
@@ -225,12 +235,15 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 }
             }
         }
-        if (mask != 0)
+
+        if (mask != 0) {
+            offset = wall;
             tags("mask")
-                fwd(outsideSz.y)
+                fwd(outsideSz.y + wall)
                 up(outsideSz.z+mask)
-                cuboid(size=[insideSz.x, insideSz.z, mask + 0.01],
+                cuboid(size=[insideSz.x, insideSz.z - wall, mask + 0.01],
                            anchor=BACK+TOP);
+        }
 
     }
 

@@ -7,6 +7,7 @@
 
 include <lib/BOSL2/hull.scad>
 include <lib/BOSL2/std.scad>
+include <lib/BOSL2/joiners.scad>
 
 include <lib/anderson-connectors.scad>
 include <lib/usb-c.scad>
@@ -25,8 +26,8 @@ Explode_offset = 15; // [0:1:30]
 
 Predefined_size = "CTP2"; // [Custom, CTP2: USB-C step down module]
 
-// Only applicable when predefined size is Custom
-Box_dimensions = [18, 70, 20];
+// Only applicable when predefined size is Custom. Keep Y and Z the same if you want them to connect nicely...
+Box_dimensions = [50, 70, 40];
 
 Wall_thickness = 2;
 
@@ -60,22 +61,36 @@ pds = Predefined_size;
 // `CTP2` is this module I found on aliexpress: https://www.aliexpress.com/item/4000089427329.htm
 function get_box_dimensions() =
     pds == "Custom" ? Box_dimensions :
-    pds == "CTP2" ? [18, 100, 40] :
+    pds == "CTP2" ? [18, 70, 40] :
     [];
 
+
 // TODO: think about printability
-// TODO: cut dovetails for front/top plate
+// TODO: stack 2-up (need to think about adjustability, or have them easy to slide out)
 // TODO: cut slots for PCB
 // TODO: holder for PCBs to be able to resist pulling + pushing in plugs
 // TODO: nut holder for the front part
-// TODO: cut vents
+// TODO: cut vents on the back and sides (perhaps move connectors up near the top)
 // TODO: adjust usb port dimension
-// TODO: power plugs -- have these snap on or attach on some other way? it's
-//       hard to print
-// TODO: make side pieces reusable by settling on a length
+// TODO: slot for bottom of front plate to prevent movement
+// TODO: text on side connectors to know which one's which
 module make_part() {
     bd = get_box_dimensions();
     wt = Wall_thickness;
+
+    module edge_dovetail(type, length) {
+        dovetail(type,
+                 length=length,
+                 height=wt/2,
+                 width=wt/2,
+                 chamfer=wt/16,
+                 spin=180,
+                 anchor=BOTTOM,
+                 back_width = 0.9 * wt/2,
+                 $slop=0.1,
+                 $tags=$tags
+            );
+    }
 
     // Whether or not to cover all the connectors... I don't think this is
     // helpful as it hides the colours.
@@ -95,52 +110,82 @@ module make_part() {
                        anchor=TOP, chamfer=chamf,
                        edges=edges("ALL", except=[TOP]));
 
-            // Left connector
+            // Left wall
             position(LEFT)
+                down(wt/2)
                 diff("mask", "main")
-                cuboid([0, bd.y, bd.z] + wt*[1,2,2],
+                cuboid([0, bd.y, bd.z] + wt*[1,2,1],
                        anchor=RIGHT,
                        chamfer=chamf,
-                       edges=edges("ALL", except=[RIGHT]))
-                position(LEFT) {
+                       edges=edges("ALL", except=[RIGHT, TOP])) {
 
-                // cutout into wall
-                 tags("mask")
-                     left(0.01)
-                     pp15_casing(jack=false,
-                                 anchor=TOP,
-                                 spin=180-connector_spin,
-                                 orient=RIGHT,
-                                 mask=3);
 
-                tags("left-c connector")
-                pp15_casing(jack=false, anchor=TOP,
-                            spin=180 - connector_spin,
-                            orient=RIGHT);
+                // Dovetails for top
+                attach(TOP) edge_dovetail("male", bd.y);
+
+                // Dovetails for front
+                up(wt/2)
+                fwd(bd.y/2 + wt/2)
+                    attach(RIGHT)
+                    tags("mask")
+                    edge_dovetail("female", bd.z);
+
+                position(LEFT+TOP) {
+                    // PP15 connector
+                    tags("left-c connector")
+                        pp15_casing(jack=false, anchor=TOP+RIGHT,
+                                    spin=180 - connector_spin,
+                                    orient=RIGHT);
+                    // cutout into wall
+                    tags("mask")
+                        left(0.01)
+                        pp15_casing(jack=false,
+                                    anchor=TOP+RIGHT,
+                                    spin=180-connector_spin,
+                                    orient=RIGHT,
+                                    mask=3);
+                }
             }
 
-            // Right connector
+            // Right wall
             position(RIGHT)
+                down(wt/2)
                 diff("mask", "main")
-                cuboid([0, bd.y, bd.z] + wt*[1,2,2],
+                cuboid([0, bd.y, bd.z] + wt*[1,2,1],
                        anchor=LEFT,
                        chamfer=chamf,
-                       edges=edges("ALL", except=[LEFT]))
-                position(RIGHT) {
-                    // cutout into wall
-                tags("mask")
-                    right(0.01)
-                    pp15_casing(jack=connector_jack,
-                                anchor=TOP,
-                                orient=LEFT,
-                                spin=connector_spin,
-                                mask=3);
+                       edges=edges("ALL", except=[LEFT, TOP])) {
 
-                tags("right-c connector")
-                    pp15_casing(jack=connector_jack,
-                                anchor=TOP,
-                                spin=connector_spin,
-                                orient=LEFT);
+                // Dovetails for top
+                attach(TOP) edge_dovetail("male", bd.y);
+
+                // Dovetails for front
+                up(wt/2)
+                    fwd(bd.y/2 + wt/2)
+                    attach(LEFT)
+                    tags("mask")
+                    edge_dovetail("female", bd.z);
+
+
+                position(RIGHT+TOP) {
+
+                    // PP15 connector
+                    tags("right-c connector")
+                        pp15_casing(jack=connector_jack,
+                                    anchor=TOP+RIGHT,
+                                    spin=connector_spin,
+                                    orient=LEFT);
+
+                    // cutout into wall
+                    tags("mask")
+                        right(0.01)
+                        pp15_casing(jack=connector_jack,
+                                    anchor=TOP+RIGHT,
+                                    orient=LEFT,
+                                    spin=connector_spin,
+                                    mask=3);
+
+                }
             }
 
             position(BACK)
@@ -153,15 +198,23 @@ module make_part() {
 
         tags("top") position(TOP)
             fwd(wt/2)
-            cuboid([bd.x, bd.y, 0] + wt*[0,1,1],
+            diff("diffme")
+            cuboid([bd.x, bd.y, 0] + wt*[2,1,1],
                    anchor=BOTTOM, chamfer=chamf,
-                   edges=edges(TOP, except=[LEFT, RIGHT, BACK]));
+                   edges=edges("ALL", except=[BACK, BOTTOM])) {
+            attach(BOTTOM) {
+                mirror_copy(LEFT) left(bd.x/2 + wt/2) back(wt/2) edge_dovetail("female", bd.y, $tags="diffme");
+            }
+        };
 
         tags("front") position(FRONT)
             difference() {
             cuboid([bd.x, 0, bd.z] + wt*[0, 1, 0],
                    anchor=BACK,
-                   edges=edges("ALL", except=BACK,BOTTOM));
+                   edges=edges("ALL", except=BACK,BOTTOM)) {
+                mirror_copy(LEFT) attach(LEFT)
+                    edge_dovetail("male", bd.z);
+            };
             down(USB_C_port_offset) usb_c_jack_hole(l=Box_dimensions.y);
         }
     }
