@@ -1,11 +1,6 @@
 include <BOSL2/std.scad>
 include <BOSL2/joiners.scad>
 
-module _mirror_copy(n) {
-    children(0);
-    mirror(n) children(0);
-}
-
 // TODO: make sure taper angle is enough for the thing to fit (or just cut out a square)
 // TODO: add text argument
 // TODO: some way to cut out an entry path for the other connector rather than
@@ -133,9 +128,10 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 chamfer=chamfer,
                 edges=edges("ALL", except=edge_nochamf)
                 ) {
-            attach(TOP)
-                mirror_copy(BACK)
-                fwd((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
+            attach(TOP){
+                fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
+                back((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
+            }
         }
 
         // right wall, with connectors on the back
@@ -146,13 +142,14 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                 chamfer=chamfer,
                 edges=edges("ALL", except=edge_nochamf)
                 ) {
-            attach(TOP)
-                mirror_copy(BACK)
-                fwd((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
+            attach(TOP) {
+                fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
+                back((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
+            }
         }
 
         // Add thickness for sides that don't have a dovetail sticking out
-        _mirror_copy(LEFT)
+       mirror_copy(LEFT)
             left(outsideSz.x / 2)
             cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, outsideSz.z],
                    anchor=BOTTOM+BACK+LEFT,
@@ -188,7 +185,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
         // Side roll pins
         fwd(rollPinYOffset) {
-            _mirror_copy(LEFT) left(width)
+            mirror_copy(LEFT) left(width)
                 cyl(r=pinR, h=rollPinHeight, chamfer=chamfer, anchor=BOTTOM);
 
             // Optional middle roll pin
@@ -199,7 +196,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
 
         // Add a back wall for the wire holes
         wireHoleWallWidth = (width - wireHoleWidth) / 2;
-        fwd(outsideSz.y) _mirror_copy(LEFT) left(outsideSz.x/2)
+        fwd(outsideSz.y) mirror_copy(LEFT) left(outsideSz.x/2)
             cuboid(size=[wireHoleWallWidth+wall, wall, outsideSz.z],
                    anchor=FRONT+BOTTOM+LEFT,
                    chamfer = chamfer,
@@ -239,9 +236,9 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
         if (mask != 0) {
             offset = wall;
             tags("mask")
-                fwd(outsideSz.y + wall)
+                fwd(outsideSz.y + offset)
                 up(outsideSz.z+mask)
-                cuboid(size=[insideSz.x, insideSz.z - wall, mask + 0.01],
+                    cuboid(size=[insideSz.x, insideSz.z, mask + 0.01],
                            anchor=BACK+TOP);
         }
 
