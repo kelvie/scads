@@ -65,15 +65,15 @@ function get_box_dimensions() =
     [];
 
 
-// TODO: think about printability
 // TODO: stack 2-up (need to think about adjustability, or have them easy to slide out)
 // TODO: cut slots for PCB
 // TODO: holder for PCBs to be able to resist pulling + pushing in plugs
-// TODO: nut holder for the front part
 // TODO: cut vents on the back and sides (perhaps move connectors up near the top)
-// TODO: adjust usb port dimension
 // TODO: slot for bottom of front plate to prevent movement
+// TODO: adjust usb port dimension
+// TODO: nut holder for the front part
 // TODO: text on side connectors to know which one's which
+// TODO: think about printability
 module make_part() {
     bd = get_box_dimensions();
     wt = Wall_thickness;
