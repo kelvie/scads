@@ -19,12 +19,12 @@ Piece = 0; // [0: All, 1: Front, 2: Main, 3: Top, 4: Left connector, 5: Right co
 
 // Separate all the parts when viewing All pieces
 Explode_parts = true;
-Explode_offset = 15; // [0:1:30]
+Explode_offset = 15; // [0:1:60]
 
 /* [Measurements] */
 // Inner dimensions of the enclosure
 
-Predefined_size = "CTP2"; // [Custom, CTP2: USB-C step down module]
+Predefined_size = "25mm"; // [Custom, CTP2: USB-C step down module, 25mm: 25mm wide, 55mm: 55mm wide]
 
 // Only applicable when predefined size is Custom. Keep Y and Z the same if you want them to connect nicely...
 Box_dimensions = [50, 70, 40];
@@ -33,7 +33,7 @@ Wall_thickness = 2;
 
 PCB_width = 18;
 PCB_depth = 50;
-PCB_thickness = 1;
+PCB_thickness = 1.57;
 
 /* [Front Connector options] */
 Opening_type = 0; // [0:USB A+C combo, 1: Anderson PP]
@@ -56,24 +56,44 @@ palette = ["#e6efe9","#c5f4e0","#c2eaba","#a7c4a0","#8f8389"];
 
 pds = Predefined_size;
 
+
+// TODO: just do 2 sizes, 25mm and 50mm, then put inserts for them
+common_yz = [0, 80, 40];
+
 // TODO: calculate based on pcb size + appropriate minimums
 // Get the box dimensions
 // `CTP2` is this module I found on aliexpress: https://www.aliexpress.com/item/4000089427329.htm
 function get_box_dimensions() =
     pds == "Custom" ? Box_dimensions :
-    pds == "CTP2" ? [18, 70, 40] :
-    [];
+    common_yz + [1, 0, 0] * (
+        pds == "25mm" ? 25 :
+        pds == "55mm" ? 55 :
+        pds == "CTP2" ? 18 : // tight fit, don't think we're going this route
+        0);
 
 
-// TODO: stack 2-up (need to think about adjustability, or have them easy to slide out)
-// TODO: cut slots for PCB
+// TODO: think of how to mount PCBs... maybe a standoff like
+//       https://www.thingiverse.com/thing:47369. Or just have it clamp down on
+//       the capacitors so it doesn't move in the Z direction, and use the front
+//       plate and something in the back to keep it in place in the Y direction.
+//       Or something that can solder onto the bottom plate.
+// TODO: just a clamp on top, and screws to adjust on the bottom, with vertical
+//       rails. Just use rails in general, and foam tape
+// TODO: PCB card guides? doesn't seem like there's enough clearance. Put them
+//       in, then print front plate later
+// TODO: removeable inner plate to swap in and out... this way I can swap this
+//       between the buck convertor and this
+// TODO: stack 2-up (need to think about adjustability, or have them easy to
+//       slide out)
 // TODO: holder for PCBs to be able to resist pulling + pushing in plugs
-// TODO: cut vents on the back and sides (perhaps move connectors up near the top)
+// TODO: cut vents on the back and sides (perhaps move connectors up near the
+//       top)
 // TODO: slot for bottom of front plate to prevent movement
 // TODO: adjust usb port dimension
 // TODO: nut holder for the front part
 // TODO: text on side connectors to know which one's which
-// TODO: think about printability
+// TODO: final printability check
+// TODO: customize front plate
 module make_part() {
     bd = get_box_dimensions();
     wt = Wall_thickness;
