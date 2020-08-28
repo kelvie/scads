@@ -1,7 +1,8 @@
 include <lib/BOSL2/hull.scad>
 include <lib/BOSL2/std.scad>
+include <lib/BOSL2/partitions.scad>
 
-Part_to_show = "All"; // [All, Clamp, Mount, Back holder: Back holder - unused]
+Part_to_show = "All"; // [All, Clamp, Clamp - top, Clamp - bottom, Mount, Back holder: Back holder - unused]
 PCB_size = [18.22, 49.2, 1.57];
 Power_module_size = [25, 80, 40];
 
@@ -31,7 +32,7 @@ Slop = 0.1;
 Show_power_module_dimensions = false;
 Show_PCB = true;
 
-/* [hidden] */
+/* [Hidden] */
 $fs = 0.025;
 $fa = $preview ? 10 : 5;
 
@@ -108,9 +109,11 @@ module mirror_copy_yflip(v) {
     mirror(v) mirror(FORWARD) children(0);
 }
 
-// TODO: this part is hard to print
 // TODO: 7 nuts for a single PCB seems a bit nuts, maybe consider snaps or
 //       something 3d printed
+// TODO: Or consider using screws in the z direction to mount to the power
+//       module casing, and use an adjustable spacer for the Z-spacing of the
+//       USB port
 module make_clamp_side() {
     // Clamp wall
     diff("cutme")
@@ -125,7 +128,6 @@ module make_clamp_side() {
         up(wall/2) attach(RIGHT, $overlap=0)
             grip_mask([Clamp_wall_height, Clamp_depth, Grip_size],
                       spin=90, $tags="cutme");
-
 
         // This part holds the bottom of the PCB
         position(LEFT+BOTTOM)
@@ -221,6 +223,20 @@ echo(str("This adds at least ", Nut_width+wall, "mm in height"));
 
 echo(str("Minimum screw length: ", nut_wall_t + Middle_gap + 2*wall + Nut_thickness/2, "mm"));
 
+module clamp_mask() {
+    left(ps.x / 4 + wall + wall/2 - 0.1)
+    back(Clamp_depth/2)
+        down(wall/2)
+        partition_mask(l=(ps.x - nut_wall_t - Middle_gap)/2 + wall + 0.2,
+                       h=Clamp_depth,
+                       w=wall + Clamp_wall_height,
+                       cutpath="jigsaw",
+                       cutsize=wall/4,
+                       orient=FRONT,
+                       $slop=0.1
+            );
+}
+
 difference() {
     union() {
         if (Part_to_show == "All") {
@@ -230,12 +246,21 @@ difference() {
             // No longer necessary
             // back(PCB_size.y/2 + 5) pcb_back_holder();
         } else if (Part_to_show == "Clamp") {
-            make_clamp_side();
+                make_clamp_side();
+        } else if (Part_to_show == "Clamp - top") {
+            intersection() {
+                make_clamp_side();
+                clamp_mask();
+            }
+        } else if (Part_to_show == "Clamp - bottom") {
+            difference() {
+                make_clamp_side();
+                clamp_mask();
+            }
         } else if (Part_to_show == "Mount") {
             make_mount();
         } else if (Part_to_show == "Back holder") {
             pcb_back_holder();
-
         }
     }
 
