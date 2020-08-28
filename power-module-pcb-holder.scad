@@ -1,7 +1,7 @@
 include <lib/BOSL2/hull.scad>
 include <lib/BOSL2/std.scad>
 
-Part_to_show = "All"; // [All, Clamp, Mount, Back holder]
+Part_to_show = "All"; // [All, Clamp, Mount, Back holder: Back holder - unused]
 PCB_size = [18.22, 49.2, 1.57];
 Power_module_size = [25, 80, 40];
 
@@ -9,6 +9,10 @@ Wall_thickness = 2;
 
 Clamp_wall_height = 5;
 Clamp_wall_thickness = 2;
+
+Back_plate_height = 5;
+Back_plate_width = 10;
+
 Grip_size = 0.15; // [0.025:0.025:0.4]
 
 // Square nut side, or flat to flat for hex
@@ -37,13 +41,13 @@ ps = PCB_size;
 wall = Wall_thickness;
 chamf = wall / 4;
 
-// Use 1mm walls for these...
+// This includes two 1mm walls, should be OK
 nut_wall_t = Nut_thickness + 2;
 Clamp_depth = 4*Wall_thickness + 3 * Nut_width;
 
 module pcb_back_holder() {
     // This will hold up the PCB from the back side, but will need to be screwed
-    // in with a M3 screw
+    // in with a M3 screw. Unused currently.
     diff("cutme")
         cyl(d=5, h=3, orient=FRONT) {
         attach(BOTTOM) cyl(d=3.5, h=$parent_size.z);
@@ -54,11 +58,13 @@ module pcb_back_holder() {
 }
 
 if ($preview) {
-    // Spacing in the power module
     if (Show_power_module_dimensions) %cuboid(Power_module_size);
 
     // PCB
-    if (Show_PCB) color("green", 0.2) cuboid(size=ps);
+    if (Show_PCB)
+        color("green", 0.2)
+            fwd(wall)
+            cuboid(size=ps, anchor=BOTTOM);
 }
 
 // Creates a grip mask
@@ -80,7 +86,7 @@ slop = Slop;
 nt = Nut_thickness;
 nw = Nut_width;
 module attach_nut_cutout() {
-    position(BOTTOM) down(slop) cuboid([nt, nw, nw] + slop * [1,1,1],
+    position(BOTTOM) down(slop) cuboid([nt, nw, 2*nw] + slop * [1,1,1],
                                        chamfer=-chamf,
                                        edges=BOTTOM,
                                        $tags="cutme",
@@ -97,27 +103,26 @@ module attach_screw_head_cutout() {
 
 clt = Clamp_wall_thickness;
 
-// TODO: 2 rails on the walls to adjust Z and Y orientation?
-// XY rails on both? then just clamp to keep it in place?
-
 module mirror_copy_yflip(v) {
     children(0);
     mirror(v) mirror(FORWARD) children(0);
 }
 
-
-// TODO: reposition screw holes so they can be tapered to print on its side
-module make_clamp() {
+// TODO: this part is hard to print
+// TODO: 7 nuts for a single PCB seems a bit nuts, maybe consider snaps or
+//       something 3d printed
+module make_clamp_side() {
     // Clamp wall
     diff("cutme")
         left(ps.x / 2)
+        down(wall)
         cuboid([clt, Clamp_depth, Clamp_wall_height+wall],
                chamfer=chamf,
                edges=edges("ALL", except=BOTTOM+RIGHT),
-               anchor=RIGHT) {
+               anchor=RIGHT+BOTTOM) {
 
         // Make the clamp wall grippy
-        up(wall/2)attach(RIGHT, $overlap=0)
+        up(wall/2) attach(RIGHT, $overlap=0)
             grip_mask([Clamp_wall_height, Clamp_depth, Grip_size],
                       spin=90, $tags="cutme");
 
@@ -139,12 +144,7 @@ module make_clamp() {
                 left(wall)
                     attach_screw_head_cutout();
 
-
-                // Nut holder for other side of clamp
-                // fwd(Clamp_depth / 4)
-                //     attach_nut_cutout();
-
-                // To center the
+                // Screws for centering the clamps within the mount
                 back(Clamp_depth / 3)
                     left(wall)
                     attach_screw_head_cutout();
@@ -154,13 +154,20 @@ module make_clamp() {
 }
 
 module make_mount() {
-    // TODO: make this more printable... maybe use vertical mounts somehow
-    // TODO: hold nuts in rails somehow
-    down((Clamp_wall_height-wall)/2)
         diff("cutme")
         cuboid([nut_wall_t, ps.y, Nut_width+wall],
                chamfer=chamf,
                anchor=TOP) {
+
+            // Hold the back of the PCB in place
+            position(BACK+TOP)
+                down(chamf + slop)
+                cuboid([Back_plate_width, wall, Back_plate_height + chamf + slop],
+                       anchor=BOTTOM+BACK,
+                       chamfer=chamf,
+                       edges=edges("ALL", except=BOTTOM)
+                    );
+
         mirror_copy(BACK)
             fwd(Clamp_depth/3) attach_nut_cutout($tags="cutme");
 
@@ -168,50 +175,62 @@ module make_mount() {
             cuboid([Power_module_size.x, wall, Nut_width+wall],
                    chamfer=chamf,
                    anchor=FRONT+BOTTOM) {
+
+
+            // Create rails to mount onto the side of the power module
             dy = (ps.y - Clamp_depth)/2 - 2*slop;
             position(FRONT)
                 back(dy)
                 cuboid(size=$parent_size,
                        chamfer=chamf,
                        anchor=BACK);
-                mirror_copy(LEFT) position(RIGHT+FRONT)
-                cuboid([wall, dy, Nut_width+wall],
-                       chamfer=chamf,
-                       anchor=RIGHT+FRONT
+                mirror_copy(LEFT)
+                    position(RIGHT+FRONT)
+                    cuboid([wall, dy, Nut_width+wall],
+                            chamfer=chamf,
+                            edges=edges("ALL", except=LEFT),
+                            anchor=RIGHT+FRONT
                     ) {
-                    % position(LEFT) cuboid([2.4, 5.5, 5.5], anchor=RIGHT);
+                    // Show where the nut would go
+                    % position(LEFT) cuboid([nt, nw, nw], anchor=RIGHT);
+
+                    // Add guides for the nut
+                    mirror_copy(TOP)
+                    position(TOP+LEFT)
+                        cuboid([nt/2, dy - wall, ($parent_size.z - nw) / 2 - slop],
+                               anchor=TOP+RIGHT
+                            );
+
                     tags("cutme") hull() {
-                    right(slop) back(wall) position(RIGHT+FRONT)
-                        cyl(d=Screw_hole_diameter,
-                            h=wall+2*slop,
-                            anchor=FORWARD+TOP,
-                            orient=RIGHT);
-                    right(slop) fwd(wall) position(RIGHT+BACK)
-                        cyl(d=Screw_hole_diameter,
-                            h=wall+2*slop,
-                            anchor=BACK+TOP,
-                            orient=RIGHT);
+                        right(slop) back(wall) position(RIGHT+FRONT)
+                            cyl(d=Screw_hole_diameter,
+                                h=wall+2*slop,
+                                anchor=FORWARD+TOP,
+                                orient=RIGHT);
+                        right(slop) fwd(wall) position(RIGHT+BACK)
+                            cyl(d=Screw_hole_diameter,
+                                h=wall+2*slop,
+                                anchor=BACK+TOP,
+                                orient=RIGHT);
                     }
                 }
         }
     };
-
-    // TODO: do something to hold the back of the pcb
 }
 echo(str("This adds at least ", Nut_width+wall, "mm in height"));
 
 echo(str("Minimum screw length: ", nut_wall_t + Middle_gap + 2*wall + Nut_thickness/2, "mm"));
 
-
 difference() {
     union() {
         if (Part_to_show == "All") {
-            mirror_copy_yflip(LEFT)
-                make_clamp();
+            zrot_copies(n=2)
+                make_clamp_side();
             make_mount();
-            back(max(Power_module_size.y, PCB_size.y + 10)/2) pcb_back_holder();
+            // No longer necessary
+            // back(PCB_size.y/2 + 5) pcb_back_holder();
         } else if (Part_to_show == "Clamp") {
-            make_clamp();
+            make_clamp_side();
         } else if (Part_to_show == "Mount") {
             make_mount();
         } else if (Part_to_show == "Back holder") {
@@ -221,7 +240,7 @@ difference() {
     }
 
     // Cut out screw holes
-     down((Clamp_wall_height + wall)/2 + Nut_width / 2) {
+     down(wall + Nut_width / 2) {
          mirror_copy(BACK) fwd(Clamp_depth / 3)
              cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
          cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
