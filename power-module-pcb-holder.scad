@@ -10,10 +10,10 @@ Power_module_size = [25, 80, 40];
 
 Wall_thickness = 2;
 
-Clamp_wall_height = 5;
+Clamp_wall_height = 8;
 Clamp_wall_thickness = 2;
 
-Back_plate_height = 5;
+Back_plate_height = 8;
 Back_plate_width = 10;
 
 Grip_size = 0.15; // [0.025:0.025:0.4]
@@ -93,7 +93,7 @@ slop = Slop;
 nt = Nut_thickness;
 nw = Nut_width;
 module attach_nut_cutout() {
-    position(BOTTOM) down(slop) cuboid([nt, nw, 2*nw] + slop * [2,2,2],
+    position(BOTTOM) down(slop) cuboid([nt, nw, 2*nw] + slop * [1,1,1],
                                        chamfer=-chamf,
                                        edges=BOTTOM,
                                        $tags="cutme",
@@ -101,7 +101,7 @@ module attach_nut_cutout() {
 }
 
 module attach_screw_head_cutout() {
-    position(BOTTOM) down(slop) cuboid([nut_wall_t, nw, nw] + slop * [2,2,2],
+    position(BOTTOM) down(slop) cuboid([nut_wall_t, nw, nw] + slop * [1,1,1],
                                        chamfer=-chamf,
                                        edges=BOTTOM,
                                        $tags="cutme",
@@ -175,7 +175,9 @@ module make_clamp_side(anchor=CENTER, spin=0, orient=TOP) {
 // TODO: Or consider using screws in the z direction to mount to the power
 //       module casing, and use an adjustable spacer for the Z-spacing of the
 //       USB port
-// TODO: middle part of the mount is prone to snapping...
+// TODO: make shorter to allow USB port hanging down the front
+// TODO: make front screw rail just a screw holder, back can be a rail for
+//       adjustment
 module make_mount() {
     cut_screwholes()
         diff("cutme")
@@ -246,7 +248,10 @@ echo(str("This adds at least ", Nut_width+wall, "mm in height"));
 echo(str("Minimum screw length: ", nut_wall_t + Middle_gap + 2*wall + Nut_thickness/2, "mm"));
 
 
-// TODO: floating bars? just ignore it?
+// TODO: floating bars on the bottom piece, need a way to remove it
+// TODO: dovetails are way to small. Maybe just use wider ones, or just have a
+//       couple of them and just glue. Or even a couple of pegs instead to hold
+//       the piece in place until the glue sets via friction fit
 module clamp_mask(inverse=false) {
     $eps = 0.001;
 
@@ -258,17 +263,20 @@ module clamp_mask(inverse=false) {
           wall + Clamp_wall_height
         ];
 
-    right(back_stop) up(wall/2) {
+    cutsize = wall/4;
+    right(back_stop)
+    up(wall/2) {
         zrot(90) partition_mask(l=sz.y+2*$eps + 2*$slop,
                        h=sz.x + 2*$slop,
                        w=sz.z,
                        cutpath="dovetail",
-                       cutsize=wall/4,
+                       cutsize=cutsize,
+                                gap=sz.y/3,
                        orient=FRONT,
                        inverse=inverse
             );
-            down((inverse ? 1 : -1) * (sz.z/2 +$slop) + wall/8)
-            cuboid([back_stop, sz.y, sz.z], anchor=RIGHT);
+        down((inverse ? 1 : -1) * (sz.z/2 +$slop) - cutsize/2)
+                cuboid([back_stop, sz.y, sz.z], anchor=RIGHT);
     }
 }
 
@@ -285,7 +293,7 @@ module clamp_section(top=true, orient=TOP, anchor=CENTER) {
         clamp();
 
         show("intersect") clamp() {
-            position(LEFT) clamp_mask($slop=0.025, inverse=!top, $tags="intersect");
+            position(LEFT) clamp_mask($slop=0.1, inverse=!top, $tags="intersect");
         }
     }
 }
@@ -326,8 +334,6 @@ module cut_screwholes() {
     }
 }
 
-// TODO: rotate pieces on their side and add a base to the part directly on the
-//       platform
 union() {
     if (Part_to_show == "All") {
         zrot_copies(n=2)
@@ -344,6 +350,7 @@ union() {
         addBase(0.3, 1.5)
         clamp_section(top=true, orient=LEFT, anchor=LEFT);
     } else if (Part_to_show == "Clamp - bottom") {
+        // TODO: this base causes a lot of deformity due to non-adherence
         addBase(0.3, 1.5)
             down(0.001) clamp_section(top=false, orient=RIGHT, anchor=RIGHT);
     } else if (Part_to_show == "Mount") {
