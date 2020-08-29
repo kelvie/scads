@@ -2,10 +2,15 @@ include <../lib/BOSL2/std.scad>
 include <../lib/BOSL2/joiners.scad>
 include <../lib/addBase.scad>
 
+
+slop=0.15; // [0:0.05:0.3]
 wall=2;
 chamfer=2/4;
 
 wt = wall;
+
+$fs= 0.025;
+$fa = $preview ? 10 : 5;
 
 module edge_dovetail(type, length) {
     dovetail(type,
@@ -16,7 +21,7 @@ module edge_dovetail(type, length) {
              spin=180,
              anchor=BOTTOM,
              back_width = 0.9 * wt/2,
-             $slop=0.1,
+             $slop=slop,
              $tags=$tags
         );
 }
