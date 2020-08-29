@@ -143,6 +143,9 @@ module make_clamp_side() {
                        anchor=TOP+RIGHT)
                 tags("cutme") {
 
+                position(RIGHT)
+                    down(wall/2)
+                    screwhole_mask(h=nut_wall_t, anchor=RIGHT, thin_outset=1.5);
                 // For a nut + bolt to clamp the PCB
                 left(wall)
                     attach_screw_head_cutout();
@@ -158,6 +161,7 @@ module make_clamp_side() {
 
 // TODO: middle part of the mount is prone to snapping...
 module make_mount() {
+    cut_screwholes()
         diff("cutme")
         cuboid([nut_wall_t, ps.y, Nut_width+wall],
                chamfer=chamf,
@@ -256,21 +260,44 @@ module clamp_section(top=true) {
     }
 }
 
-module cut_screwholes() {
+// thin_outset creates a thin outset cylinder at the edges. The idea is that
+// there will be a small plane there for slicing software to add thickness to
+// compensate for z-compression, and avoid excess resin making the hole too small
+module screwhole_mask(h=Power_module_size.x,
+                      thin_outset=0,
+                      anchor=CENTER, spin=0, orient=TOP) {
+    eps=$fs/2;
+    d = Screw_hole_diameter;
+    sz = [h, 2*hole_spacing + d, d];
 
+    module space_holes() {
+        mirror_copy(BACK) fwd(hole_spacing)
+            children(0);
+        children(0);
+
+    }
+    attachable(size=sz, anchor=anchor, spin=spin, orient=orient) {
+        space_holes()
+            cyl(orient=RIGHT, h=h, d=d) {
+            if (thin_outset > 0) {
+                mirror_copy(TOP) up(eps) position(TOP)
+                    cyl(h=2*eps, d=d+thin_outset, anchor=TOP);
+            }
+        }
+        children();
+    }
+}
+
+module cut_screwholes() {
     difference() {
         children(0);
-        down(wall + Nut_width / 2) {
-            mirror_copy(BACK) fwd(hole_spacing)
-                cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
-            cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
-        }
+        down(wall + nw/2) screwhole_mask();
     }
 }
 
 // TODO: rotate pieces on their side and add a base to the part directly on the
 //       platform
-cut_screwholes()
+//cut_screwholes()
     union() {
         if (Part_to_show == "All") {
             zrot_copies(n=2)
