@@ -88,24 +88,15 @@ module edge_dovetail(type, length) {
         );
 }
 
-// TODO: think of how to mount PCBs... maybe a standoff like
-//       https://www.thingiverse.com/thing:47369. Or just have it clamp down on
-//       the capacitors so it doesn't move in the Z direction, and use the front
-//       plate and something in the back to keep it in place in the Y direction.
-//       Or something that can solder onto the bottom plate.
-// TODO: just a clamp on top, and screws to adjust on the bottom, with vertical
-//       rails. Just use rails in general, and foam tape
-// TODO: PCB card guides? doesn't seem like there's enough clearance. Put them
-//       in, then print front plate later
+// TODO: Add slop to the inner box dimensions, so the pcb holder can fit
 // TODO: removeable inner plate to swap in and out... this way I can swap this
 //       between the buck convertor and this
 // TODO: stack 2-up (need to think about adjustability, or have them easy to
 //       slide out)
-// TODO: holder for PCBs to be able to resist pulling + pushing in plugs
 // TODO: cut vents on the back and sides (perhaps move connectors up near the
 //       top)
 // TODO: slot for bottom of front plate to prevent movement
-// TODO: adjust usb port dimension
+// TODO: adjust usb port dimensions
 // TODO: nut holder for the front part
 // TODO: text on side connectors to know which one's which
 // TODO: final printability check
