@@ -185,14 +185,14 @@ module make_mount() {
                chamfer=chamf,
                anchor=TOP) {
 
-            // Hold the back of the PCB in place
-            position(BACK+TOP)
-                down(chamf + slop)
-                cuboid([Back_plate_width, wall, Back_plate_height + chamf + slop],
-                       anchor=BOTTOM+BACK,
-                       chamfer=chamf,
-                       edges=edges("ALL", except=BOTTOM)
-                    );
+        // Hold the back of the PCB in place
+        position(BACK+TOP)
+            down(chamf + slop)
+            cuboid([Back_plate_width, wall, Back_plate_height + chamf + slop],
+                   anchor=BOTTOM+BACK,
+                   chamfer=chamf,
+                   edges=edges("ALL", except=BOTTOM)
+                );
 
         mirror_copy(BACK)
             fwd(hole_spacing) attach_nut_cutout($tags="cutme");
@@ -202,7 +202,6 @@ module make_mount() {
                    chamfer=chamf,
                    anchor=FRONT+BOTTOM) {
 
-
             // Create rails to mount onto the side of the power module
             dy = (ps.y - Clamp_depth)/2 - 2*slop;
             position(FRONT)
@@ -210,38 +209,38 @@ module make_mount() {
                 cuboid(size=$parent_size,
                        chamfer=chamf,
                        anchor=BACK);
-                mirror_copy(LEFT)
-                    position(RIGHT+FRONT)
-                    cuboid([wall, dy, Nut_width+wall],
-                            chamfer=chamf,
-                            edges=edges("ALL", except=LEFT),
-                            anchor=RIGHT+FRONT
+            mirror_copy(LEFT)
+                position(RIGHT+FRONT)
+                cuboid([wall, dy, Nut_width+wall],
+                       chamfer=chamf,
+                       edges=edges("ALL", except=LEFT),
+                       anchor=RIGHT+FRONT
                     ) {
-                    // Show where the nut would go
-                    % position(LEFT) cuboid([nt, nw, nw], anchor=RIGHT);
+                // Show where the nut would go
+                % position(LEFT) cuboid([nt, nw, nw], anchor=RIGHT);
 
-                    // Add guides for the nut
-                    mirror_copy(TOP)
+                // Add guides for the nut
+                mirror_copy(TOP)
                     position(TOP+LEFT)
-                        cuboid([nt/2, dy - wall, ($parent_size.z - nw) / 2 - 2*slop],
-                               anchor=TOP+RIGHT
-                            );
+                    cuboid([nt/2, dy - wall, ($parent_size.z - nw) / 2 - 2*slop],
+                           anchor=TOP+RIGHT
+                        );
 
-                    tags("cutme") hull() {
-                        right(slop) back(wall) position(RIGHT+FRONT)
-                            cyl(d=Screw_hole_diameter,
-                                h=wall+2*slop,
-                                anchor=FORWARD+TOP,
-                                orient=RIGHT);
-                        right(slop) fwd(wall) position(RIGHT+BACK)
-                            cyl(d=Screw_hole_diameter,
-                                h=wall+2*slop,
-                                anchor=BACK+TOP,
-                                orient=RIGHT);
-                    }
+                tags("cutme") hull() {
+                    right(slop) back(wall) position(RIGHT+FRONT)
+                        cyl(d=Screw_hole_diameter,
+                            h=wall+2*slop,
+                            anchor=FORWARD+TOP,
+                            orient=RIGHT);
+                    right(slop) fwd(wall) position(RIGHT+BACK)
+                        cyl(d=Screw_hole_diameter,
+                            h=wall+2*slop,
+                            anchor=BACK+TOP,
+                            orient=RIGHT);
                 }
+            }
         }
-    };
+    }
 }
 echo(str("This adds at least ", Nut_width+wall, "mm in height"));
 
