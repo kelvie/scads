@@ -156,6 +156,7 @@ module make_clamp_side() {
     }
 }
 
+// TODO: middle part of the mount is prone to snapping...
 module make_mount() {
         diff("cutme")
         cuboid([nut_wall_t, ps.y, Nut_width+wall],
@@ -234,9 +235,9 @@ module clamp_mask(inverse=false) {
     left((ps.x + clt) / 2 - (sz.x-wall)/2)
         back(Clamp_depth/2+$eps - back_stop)
         down(wall/2) {
-        partition_mask(l=sz.x+2*$eps,
-                       h=sz.y+2*$eps,
-                       w=sz.z,
+        partition_mask(l=sz.x+2*$eps + 2*$slop,
+                       h=sz.y+2*$eps + 2*$slop,
+                       w=sz.z + 2*$slop,
                        cutpath="dovetail",
                        cutsize=wall/4,
                        orient=FRONT,
@@ -255,10 +256,21 @@ module clamp_section(top=true) {
     }
 }
 
+module cut_screwholes() {
+
+    difference() {
+        children(0);
+        down(wall + Nut_width / 2) {
+            mirror_copy(BACK) fwd(hole_spacing)
+                cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
+            cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
+        }
+    }
+}
 
 // TODO: rotate pieces on their side and add a base to the part directly on the
 //       platform
-difference() {
+cut_screwholes()
     union() {
         if (Part_to_show == "All") {
             zrot_copies(n=2)
@@ -279,11 +291,3 @@ difference() {
             pcb_back_holder();
         }
     }
-
-    // Cut out screw holes
-     down(wall + Nut_width / 2) {
-         mirror_copy(BACK) fwd(hole_spacing)
-             cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
-         cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
-     }
-}
