@@ -30,7 +30,7 @@ Screw_hole_diameter = 3.2;
 Slop = 0.1;
 
 Show_power_module_dimensions = false;
-Show_PCB = true;
+Show_PCB = false;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -88,7 +88,7 @@ slop = Slop;
 nt = Nut_thickness;
 nw = Nut_width;
 module attach_nut_cutout() {
-    position(BOTTOM) down(slop) cuboid([nt, nw, 2*nw] + slop * [1,1,1],
+    position(BOTTOM) down(slop) cuboid([nt, nw, 2*nw] + slop * [2,2,2],
                                        chamfer=-chamf,
                                        edges=BOTTOM,
                                        $tags="cutme",
@@ -96,7 +96,7 @@ module attach_nut_cutout() {
 }
 
 module attach_screw_head_cutout() {
-    position(BOTTOM) down(slop) cuboid([nut_wall_t, nw, nw] + slop * [1,1,1],
+    position(BOTTOM) down(slop) cuboid([nut_wall_t, nw, nw] + slop * [2,2,2],
                                        chamfer=-chamf,
                                        edges=BOTTOM,
                                        $tags="cutme",
@@ -200,7 +200,7 @@ module make_mount() {
                     // Add guides for the nut
                     mirror_copy(TOP)
                     position(TOP+LEFT)
-                        cuboid([nt/2, dy - wall, ($parent_size.z - nw) / 2 - slop],
+                        cuboid([nt/2, dy - wall, ($parent_size.z - nw) / 2 - 2*slop],
                                anchor=TOP+RIGHT
                             );
 
@@ -255,6 +255,9 @@ module clamp_section(top=true) {
     }
 }
 
+
+// TODO: rotate pieces on their side and add a base to the part directly on the
+//       platform
 difference() {
     union() {
         if (Part_to_show == "All") {
