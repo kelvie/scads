@@ -247,11 +247,6 @@ echo(str("This adds at least ", Nut_width+wall, "mm in height"));
 
 echo(str("Minimum screw length: ", nut_wall_t + Middle_gap + 2*wall + Nut_thickness/2, "mm"));
 
-
-// TODO: floating bars on the bottom piece, need a way to remove it
-// TODO: dovetails are way to small. Maybe just use wider ones, or just have a
-//       couple of them and just glue. Or even a couple of pegs instead to hold
-//       the piece in place until the glue sets via friction fit
 module clamp_mask(inverse=false) {
     $eps = 0.001;
 
@@ -265,9 +260,10 @@ module clamp_mask(inverse=false) {
 
     cutsize = wall/4;
     right(back_stop)
-    up(wall/2) {
+        left(inverse ? 2*$slop : 0)
+        up(wall/2) {
         zrot(90) partition_mask(l=sz.y+2*$eps + 2*$slop,
-                       h=sz.x + 2*$slop,
+                       h=sz.x + 4*$slop,
                        w=sz.z,
                        cutpath="dovetail",
                        cutsize=cutsize,
@@ -276,13 +272,11 @@ module clamp_mask(inverse=false) {
                        inverse=inverse
             );
         down((inverse ? 1 : -1) * (sz.z/2 +$slop) - cutsize/2)
-                cuboid([back_stop, sz.y, sz.z], anchor=RIGHT);
+                cuboid([back_stop + 2*$slop, sz.y, sz.z], anchor=RIGHT);
     }
 }
 
 module clamp_section(top=true, orient=TOP, anchor=CENTER) {
-    // 0.05 slop on both sides makes 0.1
-
     module clamp() {
         make_clamp_side(orient=orient, anchor=anchor) {
             children();
@@ -292,8 +286,9 @@ module clamp_section(top=true, orient=TOP, anchor=CENTER) {
     intersection() {
         clamp();
 
+        // 0.05 slop on both sides makes 0.1
         show("intersect") clamp() {
-            position(LEFT) clamp_mask($slop=0.1, inverse=!top, $tags="intersect");
+            position(LEFT) clamp_mask($slop=0.05, inverse=!top, $tags="intersect");
         }
     }
 }
