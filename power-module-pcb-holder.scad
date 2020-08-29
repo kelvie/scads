@@ -30,7 +30,7 @@ Screw_hole_diameter = 3.2;
 Slop = 0.1;
 
 Show_power_module_dimensions = false;
-Show_PCB = true;
+Show_PCB = false;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -45,6 +45,7 @@ chamf = wall / 4;
 // This includes two 1mm walls, should be OK
 nut_wall_t = Nut_thickness + 2;
 Clamp_depth = 4*Wall_thickness + 3 * Nut_width;
+hole_spacing = (Clamp_depth - wall) / 3;
 
 module pcb_back_holder() {
     // This will hold up the PCB from the back side, but will need to be screwed
@@ -87,7 +88,7 @@ slop = Slop;
 nt = Nut_thickness;
 nw = Nut_width;
 module attach_nut_cutout() {
-    position(BOTTOM) down(slop) cuboid([nt, nw, 2*nw] + slop * [1,1,1],
+    position(BOTTOM) down(slop) cuboid([nt, nw, 2*nw] + slop * [2,2,2],
                                        chamfer=-chamf,
                                        edges=BOTTOM,
                                        $tags="cutme",
@@ -95,7 +96,7 @@ module attach_nut_cutout() {
 }
 
 module attach_screw_head_cutout() {
-    position(BOTTOM) down(slop) cuboid([nut_wall_t, nw, nw] + slop * [1,1,1],
+    position(BOTTOM) down(slop) cuboid([nut_wall_t, nw, nw] + slop * [2,2,2],
                                        chamfer=-chamf,
                                        edges=BOTTOM,
                                        $tags="cutme",
@@ -147,7 +148,7 @@ module make_clamp_side() {
                     attach_screw_head_cutout();
 
                 // Screws for centering the clamps within the mount
-                back(Clamp_depth / 3)
+                back(hole_spacing)
                     left(wall)
                     attach_screw_head_cutout();
             }
@@ -171,7 +172,7 @@ module make_mount() {
                     );
 
         mirror_copy(BACK)
-            fwd(Clamp_depth/3) attach_nut_cutout($tags="cutme");
+            fwd(hole_spacing) attach_nut_cutout($tags="cutme");
 
         mirror_copy(BACK) position(FRONT+BOTTOM)
             cuboid([Power_module_size.x, wall, Nut_width+wall],
@@ -199,7 +200,7 @@ module make_mount() {
                     // Add guides for the nut
                     mirror_copy(TOP)
                     position(TOP+LEFT)
-                        cuboid([nt/2, dy - wall, ($parent_size.z - nw) / 2 - slop],
+                        cuboid([nt/2, dy - wall, ($parent_size.z - nw) / 2 - 2*slop],
                                anchor=TOP+RIGHT
                             );
 
@@ -223,20 +224,40 @@ echo(str("This adds at least ", Nut_width+wall, "mm in height"));
 
 echo(str("Minimum screw length: ", nut_wall_t + Middle_gap + 2*wall + Nut_thickness/2, "mm"));
 
-module clamp_mask() {
-    left(ps.x / 4 + wall + wall/2 - 0.1)
-    back(Clamp_depth/2)
-        down(wall/2)
-        partition_mask(l=(ps.x - nut_wall_t - Middle_gap)/2 + wall + 0.2,
-                       h=Clamp_depth,
-                       w=wall + Clamp_wall_height,
-                       cutpath="jigsaw",
+module clamp_mask(inverse=false) {
+    $eps = 0.001;
+    back_stop = wall;
+    sz = [(ps.x - nut_wall_t - Middle_gap)/2 + wall,
+          Clamp_depth - back_stop,
+          wall + Clamp_wall_height
+        ];
+    left((ps.x + clt) / 2 - (sz.x-wall)/2)
+        back(Clamp_depth/2+$eps - back_stop)
+        down(wall/2) {
+        partition_mask(l=sz.x+2*$eps,
+                       h=sz.y+2*$eps,
+                       w=sz.z,
+                       cutpath="dovetail",
                        cutsize=wall/4,
                        orient=FRONT,
-                       $slop=0.1
+                       inverse=inverse
             );
+        down((inverse ? 1 : -1) * (sz.z/2 +$slop))
+            cuboid([sz.x, back_stop, sz.z], anchor=FRONT);
+    }
 }
 
+module clamp_section(top=true) {
+    // 0.05 slop on both sides makes 0.1
+    intersection() {
+        make_clamp_side();
+        clamp_mask($slop=0.05, inverse=!top);
+    }
+}
+
+
+// TODO: rotate pieces on their side and add a base to the part directly on the
+//       platform
 difference() {
     union() {
         if (Part_to_show == "All") {
@@ -246,17 +267,12 @@ difference() {
             // No longer necessary
             // back(PCB_size.y/2 + 5) pcb_back_holder();
         } else if (Part_to_show == "Clamp") {
-                make_clamp_side();
+                clamp_section(top=true);
+            clamp_section(top=false);
         } else if (Part_to_show == "Clamp - top") {
-            intersection() {
-                make_clamp_side();
-                clamp_mask();
-            }
+            clamp_section(top=true);
         } else if (Part_to_show == "Clamp - bottom") {
-            difference() {
-                make_clamp_side();
-                clamp_mask();
-            }
+            clamp_section(top=false);
         } else if (Part_to_show == "Mount") {
             make_mount();
         } else if (Part_to_show == "Back holder") {
@@ -266,7 +282,7 @@ difference() {
 
     // Cut out screw holes
      down(wall + Nut_width / 2) {
-         mirror_copy(BACK) fwd(Clamp_depth / 3)
+         mirror_copy(BACK) fwd(hole_spacing)
              cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
          cyl(orient=RIGHT, h=Power_module_size.x, d=Screw_hole_diameter);
      }
