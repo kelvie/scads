@@ -14,6 +14,8 @@ module addBase(height, inset=-1, chamfer=false, enable=true) {
     $eps = height / layers / 100;
 
     // TODO: do a hull instead with a thin top and bottom layer
+    // TODO: add a argument to actually remove the bottom 0.1mm before doing
+    //       this, for a larger platform while keeping same z-height
     for (i = [0:layers-1])
         translate([0, 0, i*height/layers])
             linear_extrude(height/layers + $eps)

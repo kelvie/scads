@@ -2,6 +2,8 @@ include <lib/BOSL2/hull.scad>
 include <lib/BOSL2/std.scad>
 include <lib/BOSL2/partitions.scad>
 
+include <lib/addBase.scad>
+
 Part_to_show = "All"; // [All, Clamp, Clamp - top, Clamp - bottom, Mount, Back holder: Back holder - unused]
 PCB_size = [18.22, 49.2, 1.57];
 Power_module_size = [25, 80, 40];
@@ -29,7 +31,10 @@ Screw_hole_diameter = 3.2;
 // Extra tolerance for push-in nuts, etc
 Slop = 0.1;
 
+// Only when showing all parts
 Show_power_module_dimensions = false;
+
+// Only when showing all parts
 Show_PCB = false;
 
 /* [Hidden] */
@@ -59,7 +64,7 @@ module pcb_back_holder() {
     };
 }
 
-if ($preview) {
+if ($preview && Part_to_show == "All") {
     if (Show_power_module_dimensions) %cuboid(Power_module_size);
 
     // PCB
@@ -110,55 +115,66 @@ module mirror_copy_yflip(v) {
     mirror(v) mirror(FORWARD) children(0);
 }
 
+module make_clamp_side(anchor=CENTER, spin=0, orient=TOP) {
+    sz = [(ps.x - nut_wall_t - Middle_gap)/2 + wall, // x
+          Clamp_depth,                               // y
+          2*max(wall + Clamp_wall_height, nw)];      // z
+
+    // For debug
+    // %cuboid(sz, anchor=anchor, spin=spin, orient=orient);
+
+    eps=$fs/2;
+    attachable(size=sz, anchor=anchor, spin=spin, orient=orient) {
+        left(sz.x/2)
+            diff("cutme")
+            // Clamp wall
+            cuboid([clt, Clamp_depth, Clamp_wall_height+wall],
+                   chamfer=chamf,
+                   edges=edges("ALL", except=BOTTOM+RIGHT),
+                   anchor=LEFT+BOTTOM) {
+
+            // Make the clamp wall grippy
+            up(wall/2) attach(RIGHT, $overlap=0)
+                grip_mask([Clamp_wall_height, Clamp_depth, Grip_size],
+                          spin=90, $tags="cutme");
+
+            // This part holds the bottom of the PCB
+            position(LEFT+BOTTOM)
+                cuboid([(ps.x - nut_wall_t - Middle_gap)/2 + wall, Clamp_depth, wall],
+                       chamfer=chamf,
+                       anchor=LEFT+BOTTOM) {
+
+                // This part attaches onto the middle wall between the clamp
+                position(RIGHT+TOP)
+                    cuboid([nut_wall_t, Clamp_depth, Nut_width+wall],
+                           chamfer=chamf,
+                           anchor=TOP+RIGHT)
+                    tags("cutme") {
+
+                    right(eps) position(RIGHT)
+                        down(wall/2)
+                        screwhole_mask(h=nut_wall_t+2*eps, anchor=RIGHT);
+                    // For a nut + bolt to clamp the PCB
+                    left(wall)
+                        attach_screw_head_cutout();
+
+                    // Screws for centering the clamps within the mount
+                    back(hole_spacing)
+                        left(wall)
+                        attach_screw_head_cutout();
+                }
+            }
+        }
+
+        children();
+    }
+}
+
 // TODO: 7 nuts for a single PCB seems a bit nuts, maybe consider snaps or
 //       something 3d printed
 // TODO: Or consider using screws in the z direction to mount to the power
 //       module casing, and use an adjustable spacer for the Z-spacing of the
 //       USB port
-module make_clamp_side() {
-    // Clamp wall
-    diff("cutme")
-        left(ps.x / 2)
-        down(wall)
-        cuboid([clt, Clamp_depth, Clamp_wall_height+wall],
-               chamfer=chamf,
-               edges=edges("ALL", except=BOTTOM+RIGHT),
-               anchor=RIGHT+BOTTOM) {
-
-        // Make the clamp wall grippy
-        up(wall/2) attach(RIGHT, $overlap=0)
-            grip_mask([Clamp_wall_height, Clamp_depth, Grip_size],
-                      spin=90, $tags="cutme");
-
-        // This part holds the bottom of the PCB
-        position(LEFT+BOTTOM)
-            cuboid([(ps.x - nut_wall_t - Middle_gap)/2 + wall, Clamp_depth, wall],
-                   chamfer=chamf,
-                   anchor=LEFT+BOTTOM) {
-
-            // This part attaches onto the middle wall between the clamp
-            position(RIGHT+TOP)
-                cuboid([nut_wall_t, Clamp_depth, Nut_width+wall],
-                       chamfer=chamf,
-                       anchor=TOP+RIGHT)
-                tags("cutme") {
-
-                position(RIGHT)
-                    down(wall/2)
-                    screwhole_mask(h=nut_wall_t, anchor=RIGHT, thin_outset=1.5);
-                // For a nut + bolt to clamp the PCB
-                left(wall)
-                    attach_screw_head_cutout();
-
-                // Screws for centering the clamps within the mount
-                back(hole_spacing)
-                    left(wall)
-                    attach_screw_head_cutout();
-            }
-        }
-    }
-}
-
 // TODO: middle part of the mount is prone to snapping...
 module make_mount() {
     cut_screwholes()
@@ -229,44 +245,59 @@ echo(str("This adds at least ", Nut_width+wall, "mm in height"));
 
 echo(str("Minimum screw length: ", nut_wall_t + Middle_gap + 2*wall + Nut_thickness/2, "mm"));
 
+
+// TODO: floating bars? just ignore it?
 module clamp_mask(inverse=false) {
     $eps = 0.001;
+
+    // Thickness of wall to stop the dovetail from sliding further
     back_stop = wall;
-    sz = [(ps.x - nut_wall_t - Middle_gap)/2 + wall,
-          Clamp_depth - back_stop,
+
+    sz = [(ps.x - nut_wall_t - Middle_gap)/2 + wall - back_stop,
+          Clamp_depth,
           wall + Clamp_wall_height
         ];
-    left((ps.x + clt) / 2 - (sz.x-wall)/2)
-        back(Clamp_depth/2+$eps - back_stop)
-        down(wall/2) {
-        partition_mask(l=sz.x+2*$eps + 2*$slop,
-                       h=sz.y+2*$eps + 2*$slop,
-                       w=sz.z + 2*$slop,
+
+    right(back_stop) up(wall/2) {
+        zrot(90) partition_mask(l=sz.y+2*$eps + 2*$slop,
+                       h=sz.x + 2*$slop,
+                       w=sz.z,
                        cutpath="dovetail",
                        cutsize=wall/4,
                        orient=FRONT,
                        inverse=inverse
             );
-        down((inverse ? 1 : -1) * (sz.z/2 +$slop))
-            cuboid([sz.x, back_stop, sz.z], anchor=FRONT);
+            down((inverse ? 1 : -1) * (sz.z/2 +$slop) + wall/8)
+            cuboid([back_stop, sz.y, sz.z], anchor=RIGHT);
     }
 }
 
-module clamp_section(top=true) {
+module clamp_section(top=true, orient=TOP, anchor=CENTER) {
     // 0.05 slop on both sides makes 0.1
+
+    module clamp() {
+        make_clamp_side(orient=orient, anchor=anchor) {
+            children();
+        }
+    }
+
     intersection() {
-        make_clamp_side();
-        clamp_mask($slop=0.05, inverse=!top);
+        clamp();
+
+        show("intersect") clamp() {
+            position(LEFT) clamp_mask($slop=0.025, inverse=!top, $tags="intersect");
+        }
     }
 }
 
+// TODO: thin outset seems to be too thin to work
 // thin_outset creates a thin outset cylinder at the edges. The idea is that
 // there will be a small plane there for slicing software to add thickness to
 // compensate for z-compression, and avoid excess resin making the hole too small
 module screwhole_mask(h=Power_module_size.x,
                       thin_outset=0,
                       anchor=CENTER, spin=0, orient=TOP) {
-    eps=$fs/2;
+    eps=0.01;
     d = Screw_hole_diameter;
     sz = [h, 2*hole_spacing + d, d];
 
@@ -297,24 +328,27 @@ module cut_screwholes() {
 
 // TODO: rotate pieces on their side and add a base to the part directly on the
 //       platform
-//cut_screwholes()
-    union() {
-        if (Part_to_show == "All") {
-            zrot_copies(n=2)
-                make_clamp_side();
-            make_mount();
-            // No longer necessary
-            // back(PCB_size.y/2 + 5) pcb_back_holder();
-        } else if (Part_to_show == "Clamp") {
-                clamp_section(top=true);
-            clamp_section(top=false);
-        } else if (Part_to_show == "Clamp - top") {
-            clamp_section(top=true);
-        } else if (Part_to_show == "Clamp - bottom") {
-            clamp_section(top=false);
-        } else if (Part_to_show == "Mount") {
-            make_mount();
-        } else if (Part_to_show == "Back holder") {
-            pcb_back_holder();
-        }
+union() {
+    if (Part_to_show == "All") {
+        zrot_copies(n=2)
+            left((nut_wall_t + Middle_gap) / 2)
+            down(wall)
+            make_clamp_side(anchor=RIGHT);
+        make_mount();
+        // No longer necessary
+        // back(PCB_size.y/2 + 5) pcb_back_holder();
+    } else if (Part_to_show == "Clamp") {
+        clamp_section(top=true);
+        clamp_section(top=false);
+    } else if (Part_to_show == "Clamp - top") {
+        addBase(0.3, 1.5)
+        clamp_section(top=true, orient=LEFT, anchor=LEFT);
+    } else if (Part_to_show == "Clamp - bottom") {
+        addBase(0.3, 1.5)
+            down(0.001) clamp_section(top=false, orient=RIGHT, anchor=RIGHT);
+    } else if (Part_to_show == "Mount") {
+        make_mount();
+    } else if (Part_to_show == "Back holder") {
+        pcb_back_holder();
     }
+}
