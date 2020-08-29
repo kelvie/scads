@@ -16,7 +16,7 @@ Clamp_wall_thickness = 2;
 Back_plate_height = 8;
 Back_plate_width = 10;
 
-Grip_size = 0.15; // [0.025:0.025:0.4]
+Grip_size = 0.25; // [0.025:0.025:0.4]
 
 // Square nut side, or flat to flat for hex
 Nut_width = 5.5;
@@ -24,7 +24,6 @@ Nut_thickness = 2.4;
 
 // Total middle gap size; operating width of the clamp
 Middle_gap = 3;
-
 
 Screw_hole_diameter = 3.2;
 
@@ -153,7 +152,7 @@ module make_clamp_side(anchor=CENTER, spin=0, orient=TOP) {
 
                     right(eps) position(RIGHT)
                         down(wall/2)
-                        screwhole_mask(h=nut_wall_t+2*eps, anchor=RIGHT);
+                        screwhole_mask(h=nut_wall_t+2*eps, thin_outset=1.25, anchor=RIGHT);
                     // For a nut + bolt to clamp the PCB
                     left(wall)
                         attach_screw_head_cutout();
@@ -170,15 +169,61 @@ module make_clamp_side(anchor=CENTER, spin=0, orient=TOP) {
     }
 }
 
+module side_mounts(inner_width) {
+    eps = $fs/2;
+    cuboid([Power_module_size.x, wall, Nut_width+wall],
+           chamfer=chamf,
+           anchor=FRONT+BOTTOM) {
+
+        // Create rails to mount onto the side of the power module
+        dy = (ps.y - Clamp_depth)/2 - 2*slop;
+        position(FRONT)
+            back(dy)
+            cuboid(size=$parent_size,
+                   chamfer=chamf,
+                   anchor=BACK);
+
+        mirror_copy(LEFT)
+            position(RIGHT+FRONT)
+            cuboid([wall, dy, Nut_width+wall],
+                   chamfer=chamf,
+                   edges=edges("ALL", except=LEFT),
+                   anchor=RIGHT+FRONT
+                ) {
+            // Show where the nut would go
+            % position(LEFT) cuboid([nt, nw, nw], anchor=RIGHT);
+
+            // Add guides for the nut
+            mirror_copy(TOP)
+                position(TOP+LEFT)
+                cuboid([nt/2, dy - wall, ($parent_size.z - nw/2) / 2 - 2*slop],
+                       anchor=TOP+RIGHT
+                    );
+
+            tags("cutme") hull() {
+                right(eps) back(wall + nw/2) position(RIGHT+FRONT)
+                    cyl(d=Screw_hole_diameter,
+                        h=wall+2*eps,
+                        anchor=TOP,
+                        orient=RIGHT);
+                right(eps) fwd(wall + nw/2) position(RIGHT+BACK)
+                    cyl(d=Screw_hole_diameter,
+                        h=wall+2*eps,
+                        anchor=TOP,
+                        orient=RIGHT);
+            }
+        }
+    }
+}
+
 // TODO: 7 nuts for a single PCB seems a bit nuts, maybe consider snaps or
 //       something 3d printed
 // TODO: Or consider using screws in the z direction to mount to the power
 //       module casing, and use an adjustable spacer for the Z-spacing of the
 //       USB port
-// TODO: make shorter to allow USB port hanging down the front
-// TODO: make front screw rail just a screw holder, back can be a rail for
-//       adjustment
 module make_mount() {
+
+
     cut_screwholes()
         diff("cutme")
         cuboid([nut_wall_t, ps.y, Nut_width+wall],
@@ -197,51 +242,12 @@ module make_mount() {
         mirror_copy(BACK)
             fwd(hole_spacing) attach_nut_cutout($tags="cutme");
 
-        mirror_copy(BACK) position(FRONT+BOTTOM)
-            cuboid([Power_module_size.x, wall, Nut_width+wall],
-                   chamfer=chamf,
-                   anchor=FRONT+BOTTOM) {
-
-            // Create rails to mount onto the side of the power module
-            dy = (ps.y - Clamp_depth)/2 - 2*slop;
-            position(FRONT)
-                back(dy)
-                cuboid(size=$parent_size,
-                       chamfer=chamf,
-                       anchor=BACK);
-            mirror_copy(LEFT)
-                position(RIGHT+FRONT)
-                cuboid([wall, dy, Nut_width+wall],
-                       chamfer=chamf,
-                       edges=edges("ALL", except=LEFT),
-                       anchor=RIGHT+FRONT
-                    ) {
-                // Show where the nut would go
-                % position(LEFT) cuboid([nt, nw, nw], anchor=RIGHT);
-
-                // Add guides for the nut
-                mirror_copy(TOP)
-                    position(TOP+LEFT)
-                    cuboid([nt/2, dy - wall, ($parent_size.z - nw) / 2 - 2*slop],
-                           anchor=TOP+RIGHT
-                        );
-
-                tags("cutme") hull() {
-                    right(slop) back(wall) position(RIGHT+FRONT)
-                        cyl(d=Screw_hole_diameter,
-                            h=wall+2*slop,
-                            anchor=FORWARD+TOP,
-                            orient=RIGHT);
-                    right(slop) fwd(wall) position(RIGHT+BACK)
-                        cyl(d=Screw_hole_diameter,
-                            h=wall+2*slop,
-                            anchor=BACK+TOP,
-                            orient=RIGHT);
-                }
-            }
-        }
+         mirror_copy(BACK)
+            position(FRONT+BOTTOM)
+                side_mounts();
     }
 }
+
 echo(str("This adds at least ", Nut_width+wall, "mm in height"));
 
 echo(str("Minimum screw length: ", nut_wall_t + Middle_gap + 2*wall + Nut_thickness/2, "mm"));
@@ -292,14 +298,13 @@ module clamp_section(top=true, orient=TOP, anchor=CENTER) {
     }
 }
 
-// TODO: thin outset seems to be too thin to work
 // thin_outset creates a thin outset cylinder at the edges. The idea is that
 // there will be a small plane there for slicing software to add thickness to
 // compensate for z-compression, and avoid excess resin making the hole too small
 module screwhole_mask(h=Power_module_size.x,
                       thin_outset=0,
                       anchor=CENTER, spin=0, orient=TOP) {
-    eps=0.01;
+    eps=0.05;
     d = Screw_hole_diameter;
     sz = [h, 2*hole_spacing + d, d];
 
@@ -344,8 +349,10 @@ union() {
         addBase(0.3, 1.5)
         clamp_section(top=true, orient=LEFT, anchor=LEFT);
     } else if (Part_to_show == "Clamp - bottom") {
-        // TODO: this base causes a lot of deformity due to non-adherence
-        addBase(0.3, 1.5)
+        // Combined with thin_offset to make sure the circles are protected, but
+        // the rest of it gets enough support.
+        // TODO: make this into a general function (addBase needs to be renamed anyway)
+        addBase(0.3, 0.25)
             down(0.001) clamp_section(top=false, orient=RIGHT, anchor=RIGHT);
     } else if (Part_to_show == "Mount") {
         make_mount();
