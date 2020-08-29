@@ -71,6 +71,22 @@ function get_box_dimensions() =
         pds == "CTP2" ? 18 : // tight fit, don't think we're going this route
         0);
 
+bd = get_box_dimensions();
+wt = Wall_thickness;
+
+module edge_dovetail(type, length) {
+    dovetail(type,
+             length=length,
+             height=wt/2,
+             width=wt/2,
+             chamfer=wt/16,
+             spin=180,
+             anchor=BOTTOM,
+             back_width = 0.9 * wt/2,
+             $slop=0.1,
+             $tags=$tags
+        );
+}
 
 // TODO: think of how to mount PCBs... maybe a standoff like
 //       https://www.thingiverse.com/thing:47369. Or just have it clamp down on
@@ -95,22 +111,6 @@ function get_box_dimensions() =
 // TODO: final printability check
 // TODO: customize front plate
 module make_part() {
-    bd = get_box_dimensions();
-    wt = Wall_thickness;
-
-    module edge_dovetail(type, length) {
-        dovetail(type,
-                 length=length,
-                 height=wt/2,
-                 width=wt/2,
-                 chamfer=wt/16,
-                 spin=180,
-                 anchor=BOTTOM,
-                 back_width = 0.9 * wt/2,
-                 $slop=0.1,
-                 $tags=$tags
-            );
-    }
 
     // Whether or not to cover all the connectors... I don't think this is
     // helpful as it hides the colours.
