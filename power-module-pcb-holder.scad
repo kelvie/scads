@@ -16,7 +16,7 @@ Clamp_wall_thickness = 2;
 Back_plate_height = 8;
 Back_plate_width = 10;
 
-Grip_size = 0.25; // [0.025:0.025:0.4]
+Grip_size = 0.4; // [0:0.1:1]
 
 // Square nut side, or flat to flat for hex
 Nut_width = 5.5;
