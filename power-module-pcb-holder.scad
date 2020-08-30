@@ -28,7 +28,7 @@ Middle_gap = 3;
 Screw_hole_diameter = 3.2;
 
 // Extra tolerance for push-in nuts, etc
-Slop = 0.1;
+Slop = 0.05;
 
 // Only when showing all parts
 Show_power_module_dimensions = false;
@@ -152,7 +152,7 @@ module make_clamp_side(anchor=CENTER, spin=0, orient=TOP) {
 
                     right(eps) position(RIGHT)
                         down(wall/2)
-                        screwhole_mask(h=nut_wall_t+2*eps, thin_outset=1.25, anchor=RIGHT);
+                        screwhole_mask(h=nut_wall_t+2*eps, anchor=RIGHT);
                     // For a nut + bolt to clamp the PCB
                     left(wall)
                         attach_screw_head_cutout();
@@ -222,8 +222,6 @@ module side_mounts(inner_width) {
 //       module casing, and use an adjustable spacer for the Z-spacing of the
 //       USB port
 module make_mount() {
-
-
     cut_screwholes()
         diff("cutme")
         cuboid([nut_wall_t, ps.y, Nut_width+wall],
@@ -343,8 +341,7 @@ union() {
         // No longer necessary
         // back(PCB_size.y/2 + 5) pcb_back_holder();
     } else if (Part_to_show == "Clamp") {
-        clamp_section(top=true);
-        clamp_section(top=false);
+        make_clamp_side(orient=FRONT, anchor=FRONT);
     } else if (Part_to_show == "Clamp - top") {
         addBase(0.3, 1.5)
         clamp_section(top=true, orient=LEFT, anchor=LEFT);
