@@ -72,4 +72,4 @@ diff("diff-me")
     }
 
 
-$file_suffix = str("slop-", slop);
+$export_suffix = str("slop-", slop);
