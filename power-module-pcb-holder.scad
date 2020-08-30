@@ -133,9 +133,10 @@ module make_clamp_side(anchor=CENTER, spin=0, orient=TOP) {
                    anchor=LEFT+BOTTOM) {
 
             // Make the clamp wall grippy
-            up(wall/2) attach(RIGHT, $overlap=0)
-                grip_mask([Clamp_wall_height, Clamp_depth, Grip_size],
-                          spin=90, $tags="cutme");
+            if (Grip_size > 0)
+                up(wall/2) attach(RIGHT, $overlap=0)
+                    grip_mask([Clamp_wall_height, Clamp_depth, Grip_size],
+                              spin=90, $tags="cutme");
 
             // This part holds the bottom of the PCB
             position(LEFT+BOTTOM)
