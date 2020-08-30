@@ -63,16 +63,6 @@ module pcb_back_holder() {
     };
 }
 
-if ($preview && Part_to_show == "All") {
-    if (Show_power_module_dimensions) %cuboid(Power_module_size);
-
-    // PCB
-    if (Show_PCB)
-        color("green", 0.2)
-            fwd(wall)
-            cuboid(size=ps, anchor=BOTTOM);
-}
-
 // Creates a grip mask
 module grip_mask(size, anchor=CENTER, spin=0, orient=TOP) {
     segments = floor(size.x / (size.z * sqrt(2)));
@@ -357,4 +347,15 @@ union() {
     } else if (Part_to_show == "Back holder") {
         pcb_back_holder();
     }
+}
+
+if ($preview && Part_to_show == "All") {
+    if (Show_power_module_dimensions) %cuboid(Power_module_size);
+
+    // PCB
+    if (Show_PCB)
+        color("green", 0.5)
+            up(Clamp_wall_height/2)
+            fwd(wall)
+            cuboid(size=ps, anchor=BOTTOM);
 }
