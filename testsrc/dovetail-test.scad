@@ -3,7 +3,7 @@ include <../lib/BOSL2/joiners.scad>
 include <../lib/addBase.scad>
 
 
-slop=0.15; // [0:0.05:0.3]
+slop=0.2; // [0:0.05:0.3]
 wall=2;
 chamfer=2/4;
 
@@ -71,3 +71,5 @@ diff("diff-me")
         tags("diff-me") attach(TOP) edge_dovetail("female", 20);
     }
 
+
+$file_suffix = str("slop-", slop);
