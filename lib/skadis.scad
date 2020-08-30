@@ -61,7 +61,7 @@ module hookPeg(pegTolerance=defaultPegTolerance,
         intersection() {
             fwd(t - yOff)
                 xrot(-pegAngle / 2)
-                cuboid((t+2) * [10, 10, 10], anchor=anchor);
+                cuboid((t+2) * [2, 2, 2], anchor=anchor);
             children(0);
         }
     }
