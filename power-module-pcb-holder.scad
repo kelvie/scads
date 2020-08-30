@@ -34,7 +34,7 @@ Slop = 0.075;
 Show_power_module_dimensions = false;
 
 // Only when showing all parts
-Show_PCB = false;
+Show_PCB = true;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -104,6 +104,8 @@ module mirror_copy_yflip(v) {
     mirror(v) mirror(FORWARD) children(0);
 }
 
+// TODO: clamp flexes too much, I need another screw in a different z-position
+// TODO: clamp wiggles too much as well
 module make_clamp_side(anchor=CENTER, spin=0, orient=TOP) {
     sz = [(ps.x - nut_wall_t - Middle_gap)/2 + wall, // x
           Clamp_depth,                               // y

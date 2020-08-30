@@ -89,6 +89,7 @@ module edge_dovetail(type, length) {
 }
 
 // TODO: Add slop to the inner box dimensions, so the pcb holder can fit
+// TODO: countersunk screws on the outside
 // TODO: removeable inner plate to swap in and out... this way I can swap this
 //       between the buck convertor and this
 // TODO: stack 2-up (need to think about adjustability, or have them easy to
