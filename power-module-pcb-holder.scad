@@ -28,7 +28,7 @@ Middle_gap = 3;
 Screw_hole_diameter = 3.2;
 
 // Extra tolerance for push-in nuts, etc
-Slop = 0.05;
+Slop = 0.075;
 
 // Only when showing all parts
 Show_power_module_dimensions = false;
