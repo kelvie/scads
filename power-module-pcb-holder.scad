@@ -196,7 +196,7 @@ module side_mounts(inner_width) {
             // Add guides for the nut
             mirror_copy(TOP)
                 position(TOP+LEFT)
-                cuboid([nt/2, dy - wall, ($parent_size.z - nw/2) / 2 - 2*slop],
+                cuboid([nt/4, dy - wall, ($parent_size.z - nw) / 2 - 2*slop],
                        anchor=TOP+RIGHT
                     );
 
