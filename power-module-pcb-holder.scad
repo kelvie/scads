@@ -359,3 +359,5 @@ if ($preview && Part_to_show == "All") {
             fwd(wall)
             cuboid(size=ps, anchor=BOTTOM);
 }
+
+$export_suffix = Part_to_show;
