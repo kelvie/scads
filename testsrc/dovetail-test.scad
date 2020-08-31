@@ -3,9 +3,10 @@ include <../lib/BOSL2/joiners.scad>
 include <../lib/addBase.scad>
 
 
-slop=0.2; // [0:0.05:0.3]
+slop=0.1; // [0:0.05:0.3]
 wall=2;
 chamfer=2/4;
+back_width_multiplier=1;
 
 wt = wall;
 
@@ -20,7 +21,7 @@ module edge_dovetail(type, length) {
              chamfer=wt/16,
              spin=180,
              anchor=BOTTOM,
-             back_width = 0.9 * wt/2,
+             back_width = back_width_multiplier * wt/2,
              $slop=slop,
              $tags=$tags
         );
@@ -72,4 +73,4 @@ diff("diff-me")
     }
 
 
-$export_suffix = str("slop-", slop);
+$export_suffix = str("slop-", slop, "-bwm-", back_width_multiplier);
