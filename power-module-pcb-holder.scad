@@ -81,7 +81,6 @@ module grip_mask(size, anchor=CENTER, spin=0, orient=TOP) {
 slop = Slop;
 nt = Nut_thickness;
 nw = Nut_width;
-clt = Clamp_wall_thickness;
 
 module clamp_part(anchor=CENTER, spin=0, orient=TOP) {
     eps= $fs/10;
