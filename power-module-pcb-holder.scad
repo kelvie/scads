@@ -277,14 +277,10 @@ union() {
         make_mount();
 
         zrot_copies(n=2)
-            left(rail_width/2) {
+            left(Power_module_size.x/2 - nw/2 - wall/2 - (nw - Screw_hole_diameter)/2) {
             down(side_mount_sz.z - mount_height) clamp_part(anchor=BOTTOM);
 
-            if ($preview)
-                down(side_mount_sz.z)
-                    color("gray", 0.7)
-                    metric_bolt(headtype="countersunk", size=3, l=6, orient=BOTTOM,
-                                phillips="#1", pitch=0, anchor=TOP);
+
         }
 
     } else if (Part_to_show == "Clamp") {
@@ -296,7 +292,13 @@ union() {
 }
 
 if ($preview && Part_to_show == "All") {
-    if (Show_power_module_dimensions) %cuboid(Power_module_size);
+
+    mirror_copy(LEFT)
+    down(side_mount_sz.z)
+        left(Power_module_size.x / 2 - nw/2 - wall/2)
+        color("gray", 0.7)
+        metric_bolt(headtype="countersunk", size=3, l=8, orient=BOTTOM,
+                    phillips="#1", pitch=0, anchor=TOP);
 
     // PCB
     if (Show_PCB)
@@ -304,6 +306,9 @@ if ($preview && Part_to_show == "All") {
             up(Clamp_wall_height/2)
             fwd(wall)
             cuboid(size=ps);
+    if (Show_power_module_dimensions) %cuboid(Power_module_size);
+
+
 }
 
 echo(str("This adds ", side_mount_sz.z, "mm to the height."));
