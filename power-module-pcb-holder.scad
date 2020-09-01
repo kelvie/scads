@@ -37,8 +37,8 @@ Screw_head_height = 1.65;
 // Only affects the bottom screw rail
 Screw_head_type = "Countersunk"; // [Countersunk, Pan head]
 
-// Extra tolerance for push-in nuts, etc
-Slop = 0.075;
+// Extra tolerance for push-in nuts, etc.
+Slop = 0.1;
 
 
 /* [Visibility] */
@@ -130,7 +130,7 @@ module clamp_part(anchor=CENTER, spin=0, orient=TOP) {
 }
 
 side_mount_sz = [Power_module_size.x,
-                 (ps.y - Clamp_depth)/2 - 2*slop,
+                 (ps.y - Clamp_depth)/2 - 1.5*slop,
                  nw + wall];
 
 // Side mounts for the whole piece to mount onto the power module
