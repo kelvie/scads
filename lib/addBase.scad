@@ -18,7 +18,10 @@ module addBase(height, inset=-1, chamfer=false, enable=true, zoff=0) {
     layers = chamfer ? height / $fs : 1;
     $eps = height / layers / 100;
 
+    // TODO: add custom supports at arbitrary points
     module add_base_with_projection() {
+
+        // TODO: do a hull instead with a thin top and bottom layer
         for (i = [0:layers-1])
             translate([0, 0, i*height/layers])
                 linear_extrude(height/layers + $eps)
@@ -41,7 +44,6 @@ module addBase(height, inset=-1, chamfer=false, enable=true, zoff=0) {
             }
     }
 
-    // TODO: do a hull instead with a thin top and bottom layer
     add_base_with_projection() {
         children(0);
 
