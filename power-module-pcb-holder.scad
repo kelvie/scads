@@ -280,8 +280,7 @@ union() {
         }
 
     } else if (Part_to_show == "Clamp") {
-        addBase(0.2, 1.5)
-            down($fs/10)
+        addBase(0.3, 1.5, zoff=0.1)
             clamp_part(anchor=BOTTOM);
     } else if (Part_to_show == "Mount") {
         make_mount();
