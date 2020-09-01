@@ -38,7 +38,10 @@ Screw_head_height = 1.65;
 Screw_head_type = "Countersunk"; // [Countersunk, Pan head]
 
 // Extra tolerance for push-in nuts, etc.
-Slop = 0.1;
+Slop = 0.075;
+
+// Tolerance for a loose slide fit (like for rails)
+Loose_slop = 0.15;
 
 
 /* [Visibility] */
@@ -100,15 +103,20 @@ module clamp_part(anchor=CENTER, spin=0, orient=TOP) {
                 left(eps)
                 cuboid(nut_sz,
                        anchor=LEFT) {
+                // Taper up the square nut to ease printing
                 position(TOP)
+                    down(eps)
                     prismoid(size1=[nut_sz.x, nut_sz.y],
                     size2=[nut_sz.x, 0],
-                    h=taper_height);
+                    h=taper_height+eps);
             }
 
-            // Taper up the square nut to ease printing
-
-            cyl(h=$parent_size.z + eps, d=Screw_hole_diameter);
+            // Cutout for screw hole
+            position(LEFT+BOTTOM)
+                right(nw/2)
+                    down(eps)
+                    cyl(h=$parent_size.z + Clamp_wall_height/2 + eps, d=Screw_hole_diameter,
+                         anchor=BOTTOM, chamfer2=Screw_hole_diameter/8);
         }
         position(LEFT+BOTTOM)
             cuboid([Clamp_wall_thickness, Clamp_depth, Clamp_wall_height+$parent_size.z],
@@ -129,7 +137,7 @@ module clamp_part(anchor=CENTER, spin=0, orient=TOP) {
 }
 
 side_mount_sz = [Power_module_size.x,
-                 (ps.y - Clamp_depth)/2 - 1.5*slop,
+                 (ps.y - Clamp_depth)/2 - Loose_slop,
                  nw + wall];
 
 // Side mounts for the whole piece to mount onto the power module
