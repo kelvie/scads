@@ -1,14 +1,20 @@
-default: c-mount-rear-lens-cap-inlined.scad
 
 SCADS := $(wildcard *.scad)
 PNGS := $(patsubst %.scad, png/%.png, $(SCADS))
+INLINED := $(patsubst %.scad, build/%-inlined.scad, $(SCADS))
+
+default: $(INLINED)
+
+build/%-inlined.scad: %.scad
+	mkdir -p build
+	openscad -o $@ $^
 
 %.deps: %.scad
 	openscad -d $@ $< -o out.echo
 	-rm out.echo
 
 clean:
-	rm -f *.deps *-inlined.scad
+	rm -rf *.deps *-inlined.scad *.json build png
 
 # obvs doesn't work for stl files, or nested includes, or files that have the
 # word 'out.echo' in it
