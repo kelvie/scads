@@ -1,14 +1,13 @@
 include <../lib/BOSL2/std.scad>
 include <../lib/BOSL2/joiners.scad>
 include <../lib/addBase.scad>
+include <../lib/text.scad>
 
 
 slop=0.2; // [0:0.05:0.3]
-wall=2;
-chamfer=2/4;
-back_width_multiplier=1;
-
-wt = wall;
+wt=2;
+chamfer=wt/3;
+back_width_multiplier=0.9;
 
 $fs= 0.025;
 $fa = $preview ? 10 : 5;
@@ -21,56 +20,39 @@ module edge_dovetail(type, length) {
              chamfer=wt/16,
              spin=180,
              anchor=BOTTOM,
-             back_width = back_width_multiplier * wt/2,
+             back_width=back_width_multiplier*wt/2,
              $slop=slop,
              $tags=$tags
         );
 }
 
-module make_dovetail(type, length, taper=1) {
-    // TODO: this doesn't look lke it'll fit
-    module opposite() {
-//            right(length/2)
-        yrot(180) dovetail(type == "male" ? "female" : "male",
-                           length=length,
-                           height=wall/2,
-//                               width=wall + 2*length*tan(taper),
-                           width=wall,
-                           spin=90,
-                           chamfer=0,
-                           anchor=BOTTOM,
-                           taper=taper, $slop=0);
-    }
-    dovetail(type,
-             length=length,
-             height=wall/2,
-             width=wall,
-             spin=90,
-             chamfer=0,
-             anchor=BOTTOM,
-             taper=taper
-        );
-
-    tags("mask") opposite();
-    %opposite();
-}
 
 module base_cube() {
-    cuboid(size=[wt, 20, wt],anchor=BOTTOM,
-           chamfer=chamfer,
-           edges=BOTTOM
-        )
-        children();
+    addBase(0.3, 1.5, zoff=0.1)
+        difference() {
+        cuboid(size=[wt*4, 20, wt], chamfer=chamfer, edges=BOTTOM, anchor=BOTTOM)
+            children();
+        zrot(90) up(wt) addText(str("sl ", slop, " bm ", back_width_multiplier));
+    }
 }
+
 base_cube() {
-        attach(TOP) edge_dovetail("male", 20);
-    }
+    mirror_copy(LEFT)
+        attach(TOP)
+        left(($parent_size.x - wt)/2)
+        edge_dovetail("male", 20);
+}
 
-
+left(15)
 diff("diff-me")
-    left(10) base_cube() {
-        tags("diff-me") attach(TOP) edge_dovetail("female", 20);
-    }
+base_cube() {
+    tags("diff-me")
+        mirror_copy(LEFT)
+        attach(TOP)
+        left(($parent_size.x - wt)/2)
+        edge_dovetail("female", 20);
+}
+
 
 
 $export_suffix = str("slop-", slop, "-bwm-", back_width_multiplier);
