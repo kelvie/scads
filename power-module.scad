@@ -82,8 +82,10 @@ module edge_dovetail(type, length) {
         );
 }
 
-// TODO: Add slop to the inner box dimensions, so the pcb holder can fit
-// TODO: countersunk screws on the outside
+// TODO: dovetails on the top are way too difficult to put in
+// TODO: countersunk screws rails on the outside
+// TODO: wire holes from the anderson PP connectors aren't printable, make them
+//       go up to the top
 // TODO: removeable inner plate to swap in and out... this way I can swap this
 //       between the buck convertor and this
 // TODO: stack 2-up (need to think about adjustability, or have them easy to
@@ -94,6 +96,7 @@ module edge_dovetail(type, length) {
 // TODO: adjust usb port dimensions
 // TODO: nut holder for the front part
 // TODO: text on side connectors to know which one's which
+// TODO: Add slop to the inner box dimensions, so the pcb holder can fit
 // TODO: final printability check
 // TODO: customize front plate
 module make_part() {
@@ -209,7 +212,10 @@ module make_part() {
                    anchor=BOTTOM, chamfer=chamf,
                    edges=edges("ALL", except=[BACK, BOTTOM])) {
             attach(BOTTOM) {
-                mirror_copy(LEFT) left(bd.x/2 + wt/2) back(wt/2) edge_dovetail("female", bd.y, $tags="diffme");
+                mirror_copy(LEFT)
+                left($parent_size.x/2 - wt/2)
+                    back(wt/2)
+                    edge_dovetail("female", bd.y, $tags="diffme");
             }
         };
 
