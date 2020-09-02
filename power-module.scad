@@ -15,7 +15,7 @@ include <lib/usb-c.scad>
 
 /* [View options] */
 // Which piece to render.
-Piece = 0; // [0: All, 1: Front, 2: Main, 3: Top, 4: Left connector, 5: Right connector, 6: Main with connectors]
+Piece = "All"; // [All, Front, Main, Top, Left connector, Right connector, Main with connectors]
 
 // Separate all the parts when viewing All pieces
 Explode_parts = true;
@@ -31,23 +31,18 @@ Box_dimensions = [50, 70, 40];
 
 Wall_thickness = 2;
 
-PCB_width = 18;
-PCB_depth = 50;
-PCB_thickness = 1.57;
-
 /* [Front Connector options] */
-Opening_type = 0; // [0:USB A+C combo, 1: Anderson PP]
+Opening_type = "USB-C"; // [USB-C, Anderson PP]
 
 /* [USB-C options] */
-
-// Downward in Z direction
-USB_C_port_offset = 4;
+// From the bottom inside wall
+Bottom_USB_C_port_offset = 9;
+USB_C_hole_tolerance = 0.5;
 
 
 /* [Hidden] */
 $fs = 0.025;
 $fa = $preview ? 10 : 5;
-
 
 chamf=Wall_thickness/3;
 
@@ -68,7 +63,6 @@ function get_box_dimensions() =
     common_yz + [1, 0, 0] * (
         pds == "25mm" ? 25 :
         pds == "55mm" ? 55 :
-        pds == "CTP2" ? 18 : // tight fit, don't think we're going this route
         0);
 
 bd = get_box_dimensions();
@@ -227,17 +221,20 @@ module make_part() {
                 mirror_copy(LEFT) attach(LEFT)
                     edge_dovetail("male", bd.z);
             };
-            down(USB_C_port_offset) usb_c_jack_hole(l=Box_dimensions.y);
+            down(bd.z/ 2 - Bottom_USB_C_port_offset)
+                usb_c_jack_hole(l=Box_dimensions.y,
+                                tolerance=USB_C_hole_tolerance);
         }
     }
 }
 
-tags = Piece == 1 ? "front" :
-    Piece == 2 ? "main" :
-    Piece == 3 ? "top" :
-    Piece == 4 ? "left-c" :
-    Piece == 5 ? "right-c" :
-    Piece == 6 ? "main connector" :
+// [All, Front, Main, Top, Left connector, Right connector, Main with connectors]
+tags = Piece == "Front" ? "front" :
+    Piece == "Main" ? "main" :
+    Piece == "Top" ? "top" :
+    Piece == "Left connector" ? "left-c" :
+    Piece == "Right connector" ? "right-c" :
+    Piece == "Main with connectors" ? "main connector" :
     "";
 
 module explode_out(direction) {
@@ -255,7 +252,7 @@ module explode_out(direction) {
 }
 
 // Optionally show the pieces exploded for "All"
-if (Piece == 0) {
+if (Piece == "All") {
     explode_out(FORWARD)
         color(palette[4]) show("front") make_part();
     explode_out(UP)
