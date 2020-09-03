@@ -71,7 +71,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     rightWallThickness = dovetailLeft ? wall + dovetailWidth : wall;
 
     module make_dovetail(type, length, width=2, taper=3) {
-        slop=0.05;
+        slop=0.075;
 
         module create_mask() {
             newlength = length;
@@ -96,7 +96,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                  chamfer=wall/8,
                  anchor=BOTTOM,
                  taper=taper,
-                 $slop=0.05
+                 $slop=slop
             );
 
         if (mask > 0) tags("mask") create_mask();

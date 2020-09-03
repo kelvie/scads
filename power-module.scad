@@ -31,18 +31,28 @@ Box_dimensions = [50, 70, 40];
 
 Wall_thickness = 2;
 
+// Fit of the dovetails that hold the panels together -- increase to make looser
+Dovetail_slop = 0.075; // [0:0.025:0.2]
 /* [Front Connector options] */
 Opening_type = "USB-C"; // [USB-C, Anderson PP]
+
+/* [Fastener options] */
+
+Screw_hole_diameter = 3.2;
+
+// Assumes a countersunk screw
+Screw_head_height = 1.65;
 
 /* [USB-C options] */
 // From the bottom inside wall
 Bottom_USB_C_port_offset = 9;
 USB_C_hole_tolerance = 0.5;
 
-
 /* [Hidden] */
 $fs = 0.025;
 $fa = $preview ? 10 : 5;
+
+$eps = $fs/10;
 
 chamf=Wall_thickness/3;
 
@@ -52,10 +62,8 @@ palette = ["#e6efe9","#c5f4e0","#c2eaba","#a7c4a0","#8f8389"];
 pds = Predefined_size;
 
 
-// TODO: just do 2 sizes, 25mm and 50mm, then put inserts for them
 common_yz = [0, 80, 40];
 
-// TODO: calculate based on pcb size + appropriate minimums
 // Get the box dimensions
 // `CTP2` is this module I found on aliexpress: https://www.aliexpress.com/item/4000089427329.htm
 function get_box_dimensions() =
@@ -77,28 +85,61 @@ module edge_dovetail(type, length) {
              spin=180,
              anchor=BOTTOM,
              back_width = 0.9 * wt/2,
-             $slop=0.1,
+             $slop=Dovetail_slop,
              $tags=$tags
         );
 }
 
-// TODO: dovetails on the top are way too difficult to put in
-// TODO: countersunk screws rails on the outside
+hole_d = Screw_hole_diameter;
+screw_head_h = Screw_head_height;
+screw_rail_w = hole_d + 2*screw_head_h;
+
+module screw_rail(l, h, anchor=CENTER, orient=TOP, spin=0) {
+    big_d = screw_rail_w;
+    size = [l + big_d, big_d, h];
+
+    module _cutout() {
+        hull()
+            mirror_copy(LEFT)
+            left(l/2)
+            cyl(d=hole_d, h=h);
+
+        hull()
+            mirror_copy(LEFT)
+            left(l/2)
+            up(h/2)
+            cyl(d2=big_d,
+                d1=hole_d,
+                h=screw_head_h,
+                anchor=TOP);
+    }
+
+    attachable(size=size, anchor=anchor, orient=orient, spin=spin) {
+        _cutout();
+        children();
+    }
+}
+
+// TODO: this is ugly af
+module screw_rail_grill(w, l, h) {
+    xcopies(l=w, spacing=1.5*screw_rail_w)
+        screw_rail(l=l , h=h, anchor=TOP+LEFT, spin=90);
+}
+
+// TODO: wire guides coming out of the PP connectors
 // TODO: wire holes from the anderson PP connectors aren't printable, make them
 //       go up to the top
 // TODO: removeable inner plate to swap in and out... this way I can swap this
-//       between the buck convertor and this
-// TODO: stack 2-up (need to think about adjustability, or have them easy to
+//       between the buck convertor and this (needs bottom holes?)
+// TODO: stack 2-up? (need to think about adjustability, or have them easy to
 //       slide out)
-// TODO: cut vents on the back and sides (perhaps move connectors up near the
-//       top)
 // TODO: slot for bottom of front plate to prevent movement
-// TODO: adjust usb port dimensions
-// TODO: nut holder for the front part
+// TODO: nut holder for the front plate to hold top plate
 // TODO: text on side connectors to know which one's which
 // TODO: Add slop to the inner box dimensions, so the pcb holder can fit
 // TODO: final printability check
 // TODO: customize front plate
+// TODO: split parts into modules rather than use tags...
 module make_part() {
 
     // Whether or not to cover all the connectors... I don't think this is
@@ -119,6 +160,7 @@ module make_part() {
                        anchor=TOP, chamfer=chamf,
                        edges=edges("ALL", except=[TOP]));
 
+            // TODO refactor common parts for left + right
             // Left wall
             position(LEFT)
                 down(wt/2)
@@ -128,6 +170,15 @@ module make_part() {
                        chamfer=chamf,
                        edges=edges("ALL", except=[RIGHT, TOP])) {
 
+
+                // Cut out screw rails
+                left($eps)
+                    down($parent_size.z/2 - wt)
+                    attach(LEFT)
+                    screw_rail_grill(
+                        w=$parent_size.y - 2*screw_rail_w,
+                        l=$parent_size.z/4 - wt,
+                        h=2*wt, $tags="mask");
 
                 // Dovetails for top
                 attach(TOP) edge_dovetail("male", bd.y);
@@ -164,6 +215,16 @@ module make_part() {
                        anchor=LEFT,
                        chamfer=chamf,
                        edges=edges("ALL", except=[LEFT, TOP])) {
+
+                // screw rails
+                right($eps)
+                    down($parent_size.z/2 - wt)
+                    attach(RIGHT)
+                    screw_rail_grill(
+                        w=$parent_size.y - 2*screw_rail_w,
+                        l=$parent_size.z/4 - wt,
+                        h=2*wt, $tags="mask");
+
 
                 // Dovetails for top
                 attach(TOP) edge_dovetail("male", bd.y);

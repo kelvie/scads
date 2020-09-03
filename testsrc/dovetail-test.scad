@@ -4,7 +4,7 @@ include <../lib/addBase.scad>
 include <../lib/text.scad>
 
 
-slop=0.2; // [0:0.05:0.3]
+slop=0.075; // [0:0.025:0.3]
 wt=2;
 chamfer=wt/3;
 back_width_multiplier=0.9; // [0.8:0.0025:1.0]
