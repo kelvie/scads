@@ -206,7 +206,7 @@ module make_part() {
                                     mask=2*wt);
 
                         hull() {
-                            move_copies([2*wt*UP])
+                            move_copies([CENTER, 2*wt*UP])
                             pp15_casing_wirehider_mask(
                                 anchor=TOP+RIGHT,
                                 spin=180-connector_spin,
@@ -265,7 +265,7 @@ module make_part() {
                                     spin=connector_spin,
                                     mask=3);
                         hull() {
-                            move_copies([2*wt*UP])
+                            move_copies([CENTER, 2*wt*UP])
                                 pp15_casing_wirehider_mask(
                                     anchor=TOP+RIGHT,
                                     spin=connector_spin,
