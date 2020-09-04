@@ -145,6 +145,7 @@ module screw_rail_grill(w, l, h) {
 
 // need TODOs
 // TODO: refactor to be able to rotate pieces + use addbase
+// TODO: webbings to hold up nut holder, and other places?
 // TODO: internal wire guides on the left and right walls to organize wires
 //       better
 // TODO: final printability check
