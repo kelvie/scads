@@ -351,3 +351,5 @@ if (Piece == "All") {
 
 } else
     show(tags) make_part();
+
+$export_suffix = Piece;
