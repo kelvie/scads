@@ -126,14 +126,15 @@ module screw_rail_grill(w, l, h) {
         screw_rail(l=l , h=h, anchor=TOP+LEFT, spin=90);
 }
 
-// TODO: wire guides coming out of the PP connectors
+// TODO: internal wire guides on the left and right walls to organize wires
+//       better
 // TODO: removeable inner plate to swap in and out... this way I can swap this
 //       between the buck convertor and this (needs bottom holes?)
 // TODO: stack 2-up? (need to think about adjustability, or have them easy to
 //       slide out)
 // TODO: slot for bottom of front plate to prevent movement
 // TODO: nut holder for the front plate to hold top plate
-// TODO: text on side connectors to know which one's which
+// TODO: text on side connectors to know which one's which, and what voltages
 // TODO: Add slop to the inner box dimensions, so the pcb holder can fit
 // TODO: final printability check
 // TODO: customize front plate
