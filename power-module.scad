@@ -11,6 +11,7 @@ include <lib/BOSL2/joiners.scad>
 
 include <lib/anderson-connectors.scad>
 include <lib/usb-c.scad>
+include <lib/fasteners.scad>
 
 
 /* [View options] */
@@ -47,6 +48,9 @@ Screw_hole_diameter = 3.2;
 // Assumes a countersunk screw
 Screw_head_height = 1.65;
 
+Nut_thickness = 2.4;
+Nut_width = 5.5;
+
 /* [USB-C options] */
 // From the bottom inside wall
 Bottom_USB_C_port_offset = 9;
@@ -69,7 +73,6 @@ pds = Predefined_size;
 common_yz = [0, 80, 40];
 
 // Get the box dimensions
-// `CTP2` is this module I found on aliexpress: https://www.aliexpress.com/item/4000089427329.htm
 function get_box_dimensions() =
     pds == "Custom" ? Box_dimensions :
     common_yz + [1, 0, 0] * (
@@ -77,7 +80,7 @@ function get_box_dimensions() =
         pds == "55mm" ? 55 :
         0);
 
-bd = get_box_dimensions();
+bd = get_box_dimensions() + Slop * [2, 0, 0];
 wt = Wall_thickness;
 
 module edge_dovetail(type, length) {
@@ -96,10 +99,10 @@ module edge_dovetail(type, length) {
 
 hole_d = Screw_hole_diameter;
 screw_head_h = Screw_head_height;
-screw_rail_w = hole_d + 2*screw_head_h;
+screw_head_w = hole_d + 2*screw_head_h;
 
 module screw_rail(l, h, anchor=CENTER, orient=TOP, spin=0) {
-    big_d = screw_rail_w;
+    big_d = screw_head_w;
     size = [l + big_d, big_d, h];
 
     module _cutout() {
@@ -126,9 +129,10 @@ module screw_rail(l, h, anchor=CENTER, orient=TOP, spin=0) {
 
 // TODO: this is ugly af
 module screw_rail_grill(w, l, h) {
-    xcopies(l=w, spacing=1.5*screw_rail_w)
+    xcopies(l=w, spacing=1.5*screw_head_w)
         screw_rail(l=l , h=h, anchor=TOP+LEFT, spin=90);
 }
+
 
 // future TODOs
 // TODO: removeable inner plate to swap in and out... this way I can swap this
@@ -136,13 +140,11 @@ module screw_rail_grill(w, l, h) {
 // TODO: stack 2-up? (need to think about adjustability, or have them easy to
 //       slide out)
 // TODO: text on side connectors to know which one's which, and what voltages
-// TODO: Add slop to the inner box dimensions, so the pcb holder can fit
 // TODO: customize front plate
 // TODO: split parts into modules rather than use tags...
 
 // need TODOs
 // TODO: refactor to be able to rotate pieces + use addbase
-// TODO: nut holder for the front plate to hold top plate
 // TODO: internal wire guides on the left and right walls to organize wires
 //       better
 // TODO: final printability check
@@ -194,7 +196,7 @@ module make_part() {
                     down($parent_size.z/2 - wt)
                     attach(LEFT)
                     screw_rail_grill(
-                        w=$parent_size.y - 2*screw_rail_w,
+                        w=$parent_size.y - 2*screw_head_w,
                         l=$parent_size.z/4 - wt,
                         h=2*wt, $tags="mask");
 
@@ -250,7 +252,7 @@ module make_part() {
                     down($parent_size.z/2 - wt)
                     attach(RIGHT)
                     screw_rail_grill(
-                        w=$parent_size.y - 2*screw_rail_w,
+                        w=$parent_size.y - 2*screw_head_w,
                         l=$parent_size.z/4 - wt,
                         h=2*wt, $tags="mask");
 
@@ -316,19 +318,33 @@ module make_part() {
                     back(wt/2)
                     edge_dovetail("female", bd.y, $tags="diffme");
             }
-        };
+            back(wt + Nut_width/2 - Slop/2)
+                up($eps)
+                position(TOP+FRONT)
+                screw_rail(l=0, h=2*wt, anchor=TOP, $tags="diffme");
+        }
 
         tags("front") position(FRONT)
             difference() {
             cuboid([bd.x, 0, bd.z] + wt*[0, 1, 0],
                    anchor=BACK,
                    edges=edges("ALL", except=BACK,BOTTOM)) {
+
+                // Dovetails on both sides
                 mirror_copy(LEFT) attach(LEFT)
                     edge_dovetail("male", bd.z);
+
+                // To slot into the bottom plate
                 position(BOTTOM+BACK)
                     cuboid([$parent_size.x / 2, wt/2, wt/2],
                            anchor=TOP+BACK, chamfer=chamf/2,
                         edges=edges("ALL", except=TOP));
+
+                position(TOP+FRONT)
+                    m3_sqnut_holder(wall=wt,
+                                    chamfer=chamf,
+                                    orient=BACK,
+                                    anchor=FRONT+BOTTOM);
             }
             down(bd.z/ 2 - Bottom_USB_C_port_offset)
                 usb_c_jack_hole(l=Box_dimensions.y,
