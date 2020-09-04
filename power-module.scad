@@ -127,8 +127,6 @@ module screw_rail_grill(w, l, h) {
 }
 
 // TODO: wire guides coming out of the PP connectors
-// TODO: wire holes from the anderson PP connectors aren't printable, make them
-//       go up to the top
 // TODO: removeable inner plate to swap in and out... this way I can swap this
 //       between the buck convertor and this (needs bottom holes?)
 // TODO: stack 2-up? (need to think about adjustability, or have them easy to
@@ -196,14 +194,25 @@ module make_part() {
                         pp15_casing(jack=false, anchor=TOP+RIGHT,
                                     spin=180 - connector_spin,
                                     orient=RIGHT);
+
                     // cutout into wall
                     tags("mask")
-                        left(0.01)
+                        left(0.01) {
                         pp15_casing(jack=false,
                                     anchor=TOP+RIGHT,
                                     spin=180-connector_spin,
                                     orient=RIGHT,
-                                    mask=3);
+                                    mask=2*wt);
+
+                        hull() {
+                            move_copies([2*wt*UP])
+                            pp15_casing_wirehider_mask(
+                                anchor=TOP+RIGHT,
+                                spin=180-connector_spin,
+                                orient=RIGHT,
+                                mask=2*wt);
+                        }
+                    }
                 }
             }
 
@@ -248,12 +257,21 @@ module make_part() {
 
                     // cutout into wall
                     tags("mask")
-                        right(0.01)
+                        right(0.01) {
                         pp15_casing(jack=connector_jack,
                                     anchor=TOP+RIGHT,
                                     orient=LEFT,
                                     spin=connector_spin,
                                     mask=3);
+                        hull() {
+                            move_copies([2*wt*UP])
+                                pp15_casing_wirehider_mask(
+                                    anchor=TOP+RIGHT,
+                                    spin=connector_spin,
+                                    orient=LEFT,
+                                    mask=2*wt);
+                        }
+                    }
 
                 }
             }

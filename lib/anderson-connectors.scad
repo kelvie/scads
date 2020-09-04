@@ -1,7 +1,6 @@
 include <BOSL2/std.scad>
 include <BOSL2/joiners.scad>
 
-// TODO: make sure taper angle is enough for the thing to fit (or just cut out a square)
 // TODO: add text argument
 // TODO: some way to cut out an entry path for the other connector rather than
 //       having it stick out (graduated thickness?)
@@ -37,7 +36,7 @@ include <BOSL2/joiners.scad>
 //          for cutting openings to mount this onto
 module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false, wall=2,
                    wireHider=true,
-                   anchor=CENTER, spin=0, orient=UP, mask=0) {
+                   anchor=CENTER, spin=0, orient=UP, mask=0, wirehider_mask=0) {
     // These are from the official drawings for the 1237 series
     width = 7.9; // x and y
     widthWithDovetail = 8.4; // x
@@ -69,6 +68,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     // Left+right walls
     leftWallThickness = wall;
     rightWallThickness = dovetailLeft ? wall + dovetailWidth : wall;
+    has_mask = mask > 0 || wirehider_mask > 0;
 
     module make_dovetail(type, length, width=2, taper=3) {
         slop=0.075;
@@ -211,7 +211,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
         }
 
 
-        if (mask == 0 && wireHider) {
+        if (!has_mask && wireHider) {
             diag = wireHiderWidth * sqrt(2);
             diag_nowall = diag - wall * sqrt(2);
             diag_chamfer = chamfer/sqrt(2);
@@ -233,12 +233,12 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
             }
         }
 
-        if (mask != 0) {
+        if (wirehider_mask != 0) {
             offset = wall;
-            tags("mask")
+            tags("wire-hider-mask")
                 fwd(outsideSz.y + offset)
-                up(outsideSz.z+mask)
-                    cuboid(size=[insideSz.x, insideSz.z, mask + 0.01],
+                up(outsideSz.z+wirehider_mask)
+                    cuboid(size=[insideSz.x, insideSz.z, wirehider_mask + 0.01],
                            anchor=BACK+TOP);
         }
 
@@ -248,10 +248,15 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
         union() {
             down(fullOutsideSz.z/2)
                 back(outsideSz.y - wall - matedFullLength/2)
-                if (mask == 0) {
-                    hide("mask") make();
+                if (mask == 0 && wirehider_mask == 0) {
+                    hide("mask wire-hider-mask") make();
                 } else {
-                    show("mask") make($tags="notmask");
+                    show(str(
+                             (mask > 0 ? "mask" : ""),
+                             " ",
+                             (wirehider_mask > 0 ? "wire-hider-mask" : "")
+                             ))
+                        make($tags="notmask");
                 }
 
             // For debugging
@@ -259,4 +264,13 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
         }
         children();
     }
+}
+
+module pp15_casing_wirehider_mask(mask, tolerance=0.2,
+                                  wall=2,
+                                  anchor=CENTER, spin=0, orient=UP) {
+    pp15_casing(
+        tolerance=tolerance,
+        wall=wall,
+        anchor=anchor, spin=spin, orient=orient, wirehider_mask=mask);
 }
