@@ -31,10 +31,14 @@ Box_dimensions = [50, 70, 40];
 
 Wall_thickness = 2;
 
+// General slop for fits
+Slop = 0.1;
+
 // Fit of the dovetails that hold the panels together -- increase to make looser
 Dovetail_slop = 0.075; // [0:0.025:0.2]
 /* [Front Connector options] */
 Opening_type = "USB-C"; // [USB-C, Anderson PP]
+
 
 /* [Fastener options] */
 
@@ -137,7 +141,7 @@ module screw_rail_grill(w, l, h) {
 // TODO: split parts into modules rather than use tags...
 
 // need TODOs
-// TODO: slot for bottom of front plate to prevent movement
+// TODO: refactor to be able to rotate pieces + use addbase
 // TODO: nut holder for the front plate to hold top plate
 // TODO: internal wire guides on the left and right walls to organize wires
 //       better
@@ -158,9 +162,21 @@ module make_part() {
         // recolor(palette[1])
             tags("main") {
             position(BOTTOM)
+                diff("mask", "main")
                 cuboid([bd.x, bd.y, 0] + wt*[2,2,1],
                        anchor=TOP, chamfer=chamf,
-                       edges=edges("ALL", except=[TOP]));
+                       edges=edges("ALL", except=[TOP])) {
+                // cutout for the slot for the front plate
+                tags("mask")
+                back(wt/2 + Slop/2)
+                    up($eps)
+                    position(FRONT+TOP)
+                    cuboid([$parent_size.x / 2, wt/2 + Slop, wt/2 + Slop],
+                           anchor=TOP+FRONT,
+                           chamfer=chamf/2,
+                           edges=edges("ALL", except=TOP));
+
+            }
 
             // TODO refactor common parts for left + right
             // Left wall
@@ -309,7 +325,11 @@ module make_part() {
                    edges=edges("ALL", except=BACK,BOTTOM)) {
                 mirror_copy(LEFT) attach(LEFT)
                     edge_dovetail("male", bd.z);
-            };
+                position(BOTTOM+BACK)
+                    cuboid([$parent_size.x / 2, wt/2, wt/2],
+                           anchor=TOP+BACK, chamfer=chamf/2,
+                        edges=edges("ALL", except=TOP));
+            }
             down(bd.z/ 2 - Bottom_USB_C_port_offset)
                 usb_c_jack_hole(l=Box_dimensions.y,
                                 tolerance=USB_C_hole_tolerance);
