@@ -12,12 +12,13 @@ include <lib/BOSL2/joiners.scad>
 include <lib/anderson-connectors.scad>
 include <lib/usb-c.scad>
 include <lib/fasteners.scad>
-include <lib/wire_hook.scad>
+include <lib/wire-hook.scad>
+include <lib/add-base.scad>
 
 
 /* [View options] */
 // Which piece to render.
-Piece = "All"; // [All, Front, Main, Top, Left connector, Right connector, Main with connectors]
+Piece = "All"; // [All, Main with connectors, Main, Front, Top, Side connector]
 
 // Separate all the parts when viewing All pieces
 Explode_parts = true;
@@ -26,7 +27,7 @@ Explode_offset = 15; // [0:1:60]
 /* [Measurements] */
 // Inner dimensions of the enclosure
 
-Predefined_size = "25mm"; // [Custom, CTP2: USB-C step down module, 25mm: 25mm wide, 55mm: 55mm wide]
+Predefined_size = "25mm"; // [Custom, 25mm: 25mm wide, 55mm: 55mm wide]
 
 // Only applicable when predefined size is Custom. Keep Y and Z the same if you want them to connect nicely...
 Box_dimensions = [50, 70, 40];
@@ -139,6 +140,54 @@ module screw_rail_grill(w, l, h) {
 }
 
 
+module make_top(anchor=BOTTOM, orient=TOP) {
+    diff("diffme")
+        cuboid([bd.x, bd.y, 0] + wt*[2,1,1],
+               anchor=anchor, chamfer=chamf, orient=orient,
+               edges=edges("ALL", except=[BACK, BOTTOM])) {
+        attach(BOTTOM) {
+            mirror_copy(LEFT)
+                left($parent_size.x/2 - wt/2)
+                back(wt/2)
+                edge_dovetail("female", bd.y, $tags="diffme");
+        }
+        back(wt + Nut_width/2 - Slop/2)
+            up($eps)
+            position(TOP+FRONT)
+            screw_rail(l=0, h=2*wt, anchor=TOP, $tags="diffme");
+    }
+}
+
+module make_front(anchor=BACK, orient=TOP) {
+    diff("diffme")
+        cuboid([bd.x, 0, bd.z] + wt*[0, 1, 0],
+               anchor=anchor, orient=orient,
+               edges=edges("ALL", except=BACK,BOTTOM)) {
+
+        // Dovetails on both sides
+        mirror_copy(LEFT) attach(LEFT)
+            edge_dovetail("male", bd.z);
+
+        // To slot into the bottom plate
+        position(BOTTOM+BACK)
+            cuboid([$parent_size.x / 2, wt/2, wt/2],
+                   anchor=TOP+BACK, chamfer=chamf/2,
+                   edges=edges("ALL", except=TOP));
+
+        position(TOP+FRONT)
+            m3_sqnut_holder(wall=wt,
+                            chamfer=chamf,
+                            orient=BACK,
+                            anchor=FRONT+BOTTOM);
+
+        tags("diffme")
+            down(bd.z/ 2 - Bottom_USB_C_port_offset)
+            usb_c_jack_hole(l=Box_dimensions.y,
+                            tolerance=USB_C_hole_tolerance);
+    }
+
+}
+
 // future TODOs
 // TODO: removeable inner plate to swap in and out... this way I can swap this
 //       between the buck convertor and this (needs bottom holes?)
@@ -148,6 +197,7 @@ module screw_rail_grill(w, l, h) {
 // TODO: customize front plate
 // TODO: split parts into modules rather than use tags...
 // TODO: webbings to hold up nut holder, and other places?
+// TODO: front anderson powerpole holder
 
 // need TODOs
 // TODO: refactor to be able to rotate pieces + use addbase
@@ -169,9 +219,9 @@ module make_part() {
                 children();
     }
 
+    // Build around a hidden inner cube
     hide("hidden")
         cuboid(size=bd,
-               anchor=CENTER,
                $overlap=0, $tags="hidden") {
 
         // Can't colour this because it overrides all children's colouring...
@@ -311,7 +361,7 @@ module make_part() {
                     }
                 }
 
-                up($parent_size.z/2)
+                up($parent_size.z/2 - Slop)
                     attach(LEFT)
                     make_wire_hook($parent_size.y / 4);
             }
@@ -321,7 +371,7 @@ module make_part() {
                        anchor=FRONT,
                        chamfer=chamf,
                        edges=edges("ALL", except=[FRONT])) {
-                up($parent_size.z/2)
+                up($parent_size.z/2 - wt - Slop)
                     attach(FRONT)
                     make_wire_hook($parent_size.x / 2, 2);
             }
@@ -330,59 +380,20 @@ module make_part() {
 
         tags("top") position(TOP)
             fwd(wt/2)
-            diff("diffme")
-            cuboid([bd.x, bd.y, 0] + wt*[2,1,1],
-                   anchor=BOTTOM, chamfer=chamf,
-                   edges=edges("ALL", except=[BACK, BOTTOM])) {
-            attach(BOTTOM) {
-                mirror_copy(LEFT)
-                left($parent_size.x/2 - wt/2)
-                    back(wt/2)
-                    edge_dovetail("female", bd.y, $tags="diffme");
-            }
-            back(wt + Nut_width/2 - Slop/2)
-                up($eps)
-                position(TOP+FRONT)
-                screw_rail(l=0, h=2*wt, anchor=TOP, $tags="diffme");
-        }
+            make_top();
 
         tags("front") position(FRONT)
-            difference() {
-            cuboid([bd.x, 0, bd.z] + wt*[0, 1, 0],
-                   anchor=BACK,
-                   edges=edges("ALL", except=BACK,BOTTOM)) {
-
-                // Dovetails on both sides
-                mirror_copy(LEFT) attach(LEFT)
-                    edge_dovetail("male", bd.z);
-
-                // To slot into the bottom plate
-                position(BOTTOM+BACK)
-                    cuboid([$parent_size.x / 2, wt/2, wt/2],
-                           anchor=TOP+BACK, chamfer=chamf/2,
-                        edges=edges("ALL", except=TOP));
-
-                position(TOP+FRONT)
-                    m3_sqnut_holder(wall=wt,
-                                    chamfer=chamf,
-                                    orient=BACK,
-                                    anchor=FRONT+BOTTOM);
-            }
-            down(bd.z/ 2 - Bottom_USB_C_port_offset)
-                usb_c_jack_hole(l=Box_dimensions.y,
-                                tolerance=USB_C_hole_tolerance);
-        }
+            make_front();
     }
 }
 
-// [All, Front, Main, Top, Left connector, Right connector, Main with connectors]
-tags = Piece == "Front" ? "front" :
-    Piece == "Main" ? "main" :
-    Piece == "Top" ? "top" :
-    Piece == "Left connector" ? "left-c" :
-    Piece == "Right connector" ? "right-c" :
-    Piece == "Main with connectors" ? "main connector" :
-    "";
+module main_part(anchor=CENTER, orient=TOP, spin=0) {
+    size = bd + wt*[2,2,2];
+    attachable(size=size, anchor=anchor, orient=orient, spin=spin) {
+        show("main") make_part();
+        children();
+    }
+}
 
 module explode_out(direction) {
     explode_offset = Explode_offset;
@@ -410,7 +421,20 @@ if (Piece == "All") {
         show("right-c") make_part();
     color(palette[1]) show("main") make_part();
 
-} else
-    show(tags) make_part();
+ } else if (Piece == "Main with connectors") {
+    show("main connector") make_part();
+ } else {
+    add_base(0.3, 1, 0.1)
+    if (Piece == "Main") {
+        main_part(anchor=BOTTOM);
+    } else if (Piece == "Side connector") {
+        pp15_casing(jack=false, anchor=BOTTOM);
+    } else if (Piece == "Top") {
+        make_top(anchor=TOP, orient=BOTTOM);
+    } else if (Piece == "Front") {
+        make_front(anchor=TOP, orient=BOTTOM);
+    }
+ }
+
 
 $export_suffix = Piece;
