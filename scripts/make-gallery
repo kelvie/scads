@@ -10,7 +10,8 @@ fi
 
 echo '# Gallery' > $outFile
 
-for file in *.scad; do
+# Doesn't support spaces in filenames but whatever
+for file in $(ls -t *.scad); do
     git ls-files --error-unmatch "$file" >/dev/null 2>&1 || continue
     baseName="${file%%.scad}"
     pngfile="png/${baseName}.png"
