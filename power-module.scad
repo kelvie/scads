@@ -183,12 +183,18 @@ module make_front(anchor=BACK, orient=TOP) {
                             orient=BACK,
                             anchor=FRONT+BOTTOM);
 
-        tags("diffme")
+        tags("diffme") {
+
+            // USB-C hole
             down(bd.z/ 2 - Bottom_USB_C_port_offset)
             usb_c_jack_hole(l=Box_dimensions.y,
                             tolerance=USB_C_hole_tolerance);
-    }
 
+            // TODO: parametrize and adjust
+            down(bd.z/2 - Bottom_USB_C_port_offset - 6.4)
+                cuboid([13.2, Box_dimensions.y, 6.4] + USB_C_hole_tolerance * [1, 0, 1], rounding=0.1);
+        }
+    }
 }
 
 // future TODOs
