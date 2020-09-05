@@ -12,6 +12,7 @@ include <lib/BOSL2/joiners.scad>
 include <lib/anderson-connectors.scad>
 include <lib/usb-c.scad>
 include <lib/fasteners.scad>
+include <lib/wire_hook.scad>
 
 
 /* [View options] */
@@ -50,6 +51,10 @@ Screw_head_height = 1.65;
 
 Nut_thickness = 2.4;
 Nut_width = 5.5;
+
+/* [Wire hook options] */
+Use_wire_hooks = true;
+Wire_thickness = 2.3;
 
 /* [USB-C options] */
 // From the bottom inside wall
@@ -142,12 +147,10 @@ module screw_rail_grill(w, l, h) {
 // TODO: text on side connectors to know which one's which, and what voltages
 // TODO: customize front plate
 // TODO: split parts into modules rather than use tags...
+// TODO: webbings to hold up nut holder, and other places?
 
 // need TODOs
 // TODO: refactor to be able to rotate pieces + use addbase
-// TODO: webbings to hold up nut holder, and other places?
-// TODO: internal wire guides on the left and right walls to organize wires
-//       better
 // TODO: final printability check
 module make_part() {
 
@@ -155,6 +158,16 @@ module make_part() {
     // helpful as it hides the colours.
     connector_jack = false;
     connector_spin = 0;
+
+    module make_wire_hook(width, num_wires=4) {
+        if (Use_wire_hooks)
+            wire_hook(thickness=1,
+                      wire_diameter=Wire_thickness,
+                      width=width,
+                      num_wires=num_wires,
+                      anchor=BACK+BOTTOM)
+                children();
+    }
 
     hide("hidden")
         cuboid(size=bd,
@@ -237,6 +250,7 @@ module make_part() {
                         }
                     }
                 }
+
             }
 
             // Right wall
@@ -295,15 +309,22 @@ module make_part() {
                                     mask=2*wt);
                         }
                     }
-
                 }
+
+                up($parent_size.z/2)
+                    attach(LEFT)
+                    make_wire_hook($parent_size.y / 4);
             }
 
             position(BACK)
                 cuboid([bd.x, 0, bd.z] + wt*[2,1,2],
                        anchor=FRONT,
                        chamfer=chamf,
-                       edges=edges("ALL", except=[FRONT]));
+                       edges=edges("ALL", except=[FRONT])) {
+                up($parent_size.z/2)
+                    attach(FRONT)
+                    make_wire_hook($parent_size.x / 2, 2);
+            }
 
         }
 
