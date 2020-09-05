@@ -207,10 +207,6 @@ module make_front(anchor=BACK, orient=TOP) {
 // TODO: split parts into modules rather than use tags...
 // TODO: webbings to hold up nut holder, and other places?
 // TODO: front anderson powerpole holder
-
-// need TODOs
-// TODO: refactor to be able to rotate pieces + use addbase
-// TODO: final printability check
 module make_part() {
 
     // Whether or not to cover all the connectors... I don't think this is
