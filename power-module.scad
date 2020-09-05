@@ -24,6 +24,10 @@ Piece = "All"; // [All, Main with connectors, Main, Front, Top, Side connector]
 Explode_parts = true;
 Explode_offset = 15; // [0:1:60]
 
+/* [Print Options] */
+// Adds a extra base on the bottom to prevent elephant's foot
+Add_base = true;
+
 /* [Measurements] */
 // Inner dimensions of the enclosure
 
@@ -42,7 +46,6 @@ Dovetail_slop = 0.075; // [0:0.025:0.2]
 /* [Front Connector options] */
 Opening_type = "USB-C"; // [USB-C, Anderson PP]
 
-
 /* [Fastener options] */
 
 Screw_hole_diameter = 3.2;
@@ -60,7 +63,7 @@ Wire_thickness = 2.3;
 /* [USB-C options] */
 // From the bottom inside wall
 Bottom_USB_C_port_offset = 9;
-USB_C_hole_tolerance = 0.5;
+USB_C_hole_tolerance = 1;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -423,18 +426,19 @@ if (Piece == "All") {
 
  } else if (Piece == "Main with connectors") {
     show("main connector") make_part();
- } else {
-    add_base(0.3, 1, 0.1)
-    if (Piece == "Main") {
-        main_part(anchor=BOTTOM);
-    } else if (Piece == "Side connector") {
-        pp15_casing(jack=false, anchor=BOTTOM);
-    } else if (Piece == "Top") {
-        make_top(anchor=TOP, orient=BOTTOM);
-    } else if (Piece == "Front") {
+ } else if (Piece == "Front") {
+    // Front is really thin so needs less inset
+    add_base(0.3, 0.75, 0.1, enable=Add_base)
         make_front(anchor=TOP, orient=BOTTOM);
-    }
+ } else {
+    add_base(0.3, 1, 0.1, enable=Add_base)
+        if (Piece == "Main") {
+            main_part(anchor=BOTTOM);
+        } else if (Piece == "Side connector") {
+            pp15_casing(jack=false, anchor=BOTTOM);
+        } else if (Piece == "Top") {
+            make_top(anchor=TOP, orient=BOTTOM);
+        }
  }
-
 
 $export_suffix = Piece;

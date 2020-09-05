@@ -35,8 +35,8 @@ module add_base(h, inset=-1, zcut=0, chamfer=false, enable=true) {
                 translate([0, 0, -zcut]) {
                     difference() {
                         children(0);
-                        translate([0, 0, -$eps])
-                            linear_extrude(zcut + $eps)
+                        translate([0, 0, -h])
+                            linear_extrude(zcut + h)
                             offset(delta=4*zcut)
                             children(1);
                     }
@@ -44,16 +44,20 @@ module add_base(h, inset=-1, zcut=0, chamfer=false, enable=true) {
             }
     }
 
-    add_base_with_projection() {
+    if (enable)
+        add_base_with_projection() {
+            children(0);
+
+            if ($children > 1)
+                children(1);
+            else
+                projection(cut=true)
+                    down($fs/10) // for some reason projection fails sometimes if it's not *exactly* on the x-axis
+                    children(0);
+        }
+    else
         children(0);
 
-        if ($children > 1)
-            children(1);
-        else
-            projection(cut=true)
-                down($fs/10) // for some reason projection fails sometimes if it's not *exactly* on the x-axis
-                children(0);
-    }
 }
 
 
