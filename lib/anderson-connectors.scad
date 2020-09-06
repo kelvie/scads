@@ -71,7 +71,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
     has_mask = mask > 0 || wirehider_mask > 0;
 
     module make_dovetail(type, length, width=2, taper=3) {
-        slop=0.075;
+        slop=0.05;
 
         module create_mask() {
             newlength = length;
@@ -84,7 +84,7 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                                    chamfer=wall/8,
                                    anchor=BOTTOM,
                                    taper=taper, $slop=slop) {
-                position(FRONT) cuboid($parent_size + 4*slop * [1,0,0], anchor=BACK);
+                up(tolerance) position(FRONT) cuboid($parent_size + 2*tolerance * [1,0,1], anchor=BACK);
             }
         }
 

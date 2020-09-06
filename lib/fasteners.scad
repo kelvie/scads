@@ -35,7 +35,7 @@ module m3_sqnut_holder(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
                    edges=edges);
             up(wall/2 + eps)
                 m3_sqnut_cutout(hole_height=wall+eps,
-                                chamfer=chamfer);
+                                chamfer=chamfer, slop=slop);
         }
         children();
     }

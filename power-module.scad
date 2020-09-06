@@ -15,7 +15,6 @@ include <lib/fasteners.scad>
 include <lib/wire-hook.scad>
 include <lib/add-base.scad>
 
-
 /* [View options] */
 // Which piece to render.
 Piece = "All"; // [All, Main with connectors, Main, Front, Top, Side connector]
@@ -28,6 +27,7 @@ Explode_offset = 15; // [0:1:60]
 // Adds a extra base on the bottom to prevent elephant's foot
 Add_base = true;
 
+
 /* [Measurements] */
 // Inner dimensions of the enclosure
 
@@ -38,16 +38,24 @@ Box_dimensions = [50, 70, 40];
 
 Wall_thickness = 2;
 
+// Multiplier of the grill width to space out by
+Grill_spacing = 1.25;
+
 // General slop for fits
 Slop = 0.1;
 
+// Inner width slop for fitting in PCB holders
+Inner_width_slop = 0.4;
+
 // Fit of the dovetails that hold the panels together -- increase to make looser
 Dovetail_slop = 0.075; // [0:0.025:0.2]
+
+
 /* [Front Connector options] */
-Opening_type = "USB-C"; // [USB-C, Anderson PP]
+Opening_type = "USB-C+A"; // [USB-C+A, Anderson PP]
+
 
 /* [Fastener options] */
-
 Screw_size = 3;
 Screw_hole_diameter = 3.2;
 
@@ -57,14 +65,19 @@ Screw_head_height = 1.65;
 Nut_thickness = 2.4;
 Nut_width = 5.5;
 
+
 /* [Wire hook options] */
 Use_wire_hooks = true;
 Wire_thickness = 2.3;
 
-/* [USB-C options] */
+
+/* [USB-C+A options] */
 // From the bottom inside wall
-Bottom_USB_C_port_offset = 9;
+Bottom_USB_C_port_offset = 9.5;
 USB_C_hole_tolerance = 1;
+
+// Also from the bottom inside wall
+Bottom_USB_A_port_offset = 16.5;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -90,7 +103,7 @@ function get_box_dimensions() =
         pds == "55mm" ? 55 :
         0);
 
-bd = get_box_dimensions() + Slop * [2, 0, 0];
+bd = get_box_dimensions() + Inner_width_slop * [1,0,0];
 wt = Wall_thickness;
 
 module edge_dovetail(type, length) {
@@ -138,7 +151,7 @@ module screw_rail(l, h, anchor=CENTER, orient=TOP, spin=0) {
 
 // TODO: this is ugly af
 module screw_rail_grill(w, l, h) {
-    xcopies(l=w, spacing=1.5*screw_head_w)
+    xcopies(l=w, spacing=Grill_spacing*screw_head_w)
         screw_rail(l=l , h=h, anchor=TOP+LEFT, spin=90);
 }
 
@@ -190,9 +203,9 @@ module make_front(anchor=BACK, orient=TOP) {
             usb_c_jack_hole(l=Box_dimensions.y,
                             tolerance=USB_C_hole_tolerance);
 
-            // TODO: parametrize and adjust
-            down(bd.z/2 - Bottom_USB_C_port_offset - 6.4)
-                cuboid([13.2, Box_dimensions.y, 6.4] + USB_C_hole_tolerance * [1, 0, 1], rounding=0.1);
+            // TODO: make a library for USB-A port
+            down(bd.z/2 - Bottom_USB_A_port_offset)
+                cuboid([13.2, Box_dimensions.y, 6] + USB_C_hole_tolerance * [1, 0, 1], rounding=0.25);
         }
     }
 }
@@ -233,6 +246,10 @@ module make_part() {
         // Can't colour this because it overrides all children's colouring...
         // recolor(palette[1])
             tags("main") {
+
+                // Debug -- need a screw rail 12mm near the front to fit the USB
+                // module
+                // %position(FRONT) cuboid([100, 12, 100], anchor=FRONT);
             position(BOTTOM)
                 diff("mask", "main")
                 cuboid([bd.x, bd.y, 0] + wt*[2,2,1],
