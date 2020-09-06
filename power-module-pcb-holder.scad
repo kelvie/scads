@@ -31,6 +31,7 @@ Middle_pillar_size = 3;
 Nut_width = 5.5;
 Nut_thickness = 2.4;
 
+Screw_size = 3;
 Screw_hole_diameter = 3.2;
 Screw_head_height = 1.65;
 
@@ -227,8 +228,8 @@ module x_rail() {
                 mirror_copy(LEFT)
                 left(dx)
                 down($parent_size.z + 2*eps)
-                cyl(d1=Screw_hole_diameter+2*Screw_head_height,
-                    d2=Screw_hole_diameter,
+                cyl(d1=Screw_size+2*Screw_head_height,
+                    d2=Screw_size,
                     h=Screw_head_height + eps,
                     anchor=BOTTOM);
         }
@@ -309,8 +310,6 @@ if ($preview && Part_to_show == "All") {
             fwd(wall)
             cuboid(size=ps);
     if (Show_power_module_dimensions) %cuboid(Power_module_size);
-
-
 }
 
 echo(str("This adds ", side_mount_sz.z, "mm to the height."));

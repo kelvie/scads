@@ -48,6 +48,7 @@ Opening_type = "USB-C"; // [USB-C, Anderson PP]
 
 /* [Fastener options] */
 
+Screw_size = 3;
 Screw_hole_diameter = 3.2;
 
 // Assumes a countersunk screw
@@ -108,11 +109,10 @@ module edge_dovetail(type, length) {
 
 hole_d = Screw_hole_diameter;
 screw_head_h = Screw_head_height;
-screw_head_w = hole_d + 2*screw_head_h;
+screw_head_w = Screw_size + 2*screw_head_h;
 
 module screw_rail(l, h, anchor=CENTER, orient=TOP, spin=0) {
-    big_d = screw_head_w;
-    size = [l + big_d, big_d, h];
+    size = [l + screw_head_w, screw_head_w, h];
 
     module _cutout() {
         hull()
@@ -124,8 +124,8 @@ module screw_rail(l, h, anchor=CENTER, orient=TOP, spin=0) {
             mirror_copy(LEFT)
             left(l/2)
             up(h/2)
-            cyl(d2=big_d,
-                d1=hole_d,
+            cyl(d2=screw_head_w,
+                d1=Screw_size,
                 h=screw_head_h,
                 anchor=TOP);
     }
