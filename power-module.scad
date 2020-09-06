@@ -73,11 +73,11 @@ Wire_thickness = 2.3;
 
 /* [USB-C+A options] */
 // From the bottom inside wall
-Bottom_USB_C_port_offset = 9.5;
-USB_C_hole_tolerance = 1;
+Bottom_USB_C_port_offset = 9;
+USB_C_hole_tolerance = 0.75;
 
 // Also from the bottom inside wall
-Bottom_USB_A_port_offset = 16.5;
+Bottom_USB_A_port_offset = 16;
 
 /* [Hidden] */
 $fs = 0.025;
