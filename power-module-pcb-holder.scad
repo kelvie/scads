@@ -67,17 +67,22 @@ chamf = wall / 4;
 nut_wall_t = Nut_thickness + 2;
 
 // Creates a grip mask
-// TODO: make one that grips in the y direction instead
 module grip_mask(size, anchor=CENTER, spin=0, orient=TOP) {
-    segments = floor(size.x / (size.z * sqrt(2)));
+    sz = [size.x, size.y, size.z*sqrt(2)];
 
-    new_sz = [size.x, size.y, size.z*sqrt(2)];
+    xsegments = floor(sz.x / sz.z);
+    ysegments = floor(sz.y / sz.z);
+
     // debug
     // %cuboid(new_sz, anchor=anchor, spin=spin, orient=orient);
 
-    attachable(size=new_sz, anchor=anchor, spin=spin, orient=orient) {
-        xcopies(spacing=size.z*sqrt(2), n=segments)
-            yrot(45) cuboid([size.z, size.y, size.z]);
+    attachable(size=sz, anchor=anchor, spin=spin, orient=orient) {
+        union() {
+            xcopies(spacing=sz.z, n=xsegments)
+                yrot(45) cuboid([size.z, size.y, size.z]);
+            ycopies(spacing=sz.z, n=ysegments)
+                xrot(45) cuboid([size.x, size.z, size.z]);
+        }
         children();
     }
 }
