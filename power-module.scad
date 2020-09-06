@@ -451,7 +451,7 @@ if (Piece == "All") {
     add_base(0.3, 0.75, 0.1, enable=Add_base)
         make_front(anchor=TOP, orient=BOTTOM);
  } else {
-    add_base(0.3, 1, 0.1, enable=Add_base)
+    add_base(0.3, 1.5, 0.1, enable=Add_base)
         if (Piece == "Main") {
             main_part(anchor=BOTTOM);
         } else if (Piece == "Side connector") {
