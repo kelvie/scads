@@ -84,7 +84,8 @@ module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false,
                                    chamfer=wall/8,
                                    anchor=BOTTOM,
                                    taper=taper, $slop=slop) {
-                up(tolerance) position(FRONT) cuboid($parent_size + 2*tolerance * [1,0,1], anchor=BACK);
+                // Needs more tolerance, still hard to put in and out; needs to be wider
+                position(FRONT) cuboid($parent_size + 2*tolerance * [2,1,0], anchor=BACK);
             }
         }
 
