@@ -48,7 +48,7 @@ Slop = 0.1;
 Inner_width_slop = 0.4;
 
 // Fit of the dovetails that hold the panels together -- increase to make looser
-Dovetail_slop = 0.075; // [0:0.025:0.2]
+Dovetail_slop = 0.1; // [0:0.025:0.2]
 
 
 /* [Front Connector options] */
@@ -450,14 +450,16 @@ if (Piece == "All") {
     // Front is really thin so needs less inset
     add_base(0.3, 0.75, 0.1, enable=Add_base)
         make_front(anchor=TOP, orient=BOTTOM);
+ } else if (Piece == "Top") {
+    // Top piece can't be printed directly on the platform or it warps during
+    // curing
+    make_top(anchor=TOP, orient=BOTTOM);
  } else {
     add_base(0.3, 1.5, 0.1, enable=Add_base)
         if (Piece == "Main") {
             main_part(anchor=BOTTOM);
         } else if (Piece == "Side connector") {
             pp15_casing(jack=false, anchor=BOTTOM);
-        } else if (Piece == "Top") {
-            make_top(anchor=TOP, orient=BOTTOM);
         }
  }
 
