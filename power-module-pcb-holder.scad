@@ -2,7 +2,7 @@ include <lib/BOSL2/hull.scad>
 include <lib/BOSL2/std.scad>
 include <lib/BOSL2/metric_screws.scad>
 
-include <lib/addBase.scad>
+include <lib/add-base.scad>
 
 /* [Overall dimensions] */
 PCB_size = [18.22, 49.2, 1.57];
@@ -54,6 +54,10 @@ Show_power_module_dimensions = false;
 
 // Only when showing all parts
 Show_PCB = true;
+
+/* [Printability] */
+// Add a raised base for printing directly on the build platform
+Add_base = true;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -287,15 +291,15 @@ union() {
         zrot_copies(n=2)
             left(Power_module_size.x/2 - nw/2 - wall/2 - (nw - Screw_hole_diameter)/2) {
             down(side_mount_sz.z - mount_height) clamp_part(anchor=BOTTOM);
-
-
         }
 
     } else if (Part_to_show == "Clamp") {
-        addBase(0.3, 1, zoff=0.1)
+        add_base(0.3, 1, 0.1, enable=Add_base)
             clamp_part(anchor=BOTTOM);
     } else if (Part_to_show == "Mount") {
-        make_mount();
+        add_base(0.3, 1, 0.1, enable=Add_base)
+            up(side_mount_sz.z)
+            make_mount();
     }
 }
 
