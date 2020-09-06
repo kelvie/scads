@@ -34,7 +34,7 @@ include <BOSL2/joiners.scad>
 //
 //   `mask` when nonzero creates a cutout mask of the specified height, suitable
 //          for cutting openings to mount this onto
-module pp15_casing(middlePin=true, tolerance=0.2, dovetailLeft=true, jack=false, wall=2,
+module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false, wall=2,
                    wireHider=true,
                    anchor=CENTER, spin=0, orient=UP, mask=0, wirehider_mask=0) {
     // These are from the official drawings for the 1237 series
