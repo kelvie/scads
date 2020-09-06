@@ -14,7 +14,7 @@ Wall_thickness = 2;
 /* [Clamp dimensions] */
 Clamp_wall_height = 8;
 Clamp_wall_thickness = 2;
-Clamp_depth = 20;
+Clamp_depth = 15;
 
 /* [Base mount dimensions] */
 Back_plate_height = 8;
@@ -42,7 +42,7 @@ Screw_head_type = "Countersunk"; // [Countersunk, Pan head]
 Slop = 0.075;
 
 // Tolerance for a loose slide fit (like for rails)
-Loose_slop = 0.15;
+Loose_slop = 0.125;
 
 
 /* [Visibility] */
@@ -322,4 +322,5 @@ if ($preview && Part_to_show == "All") {
 }
 
 echo(str("This adds ", side_mount_sz.z, "mm to the height."));
+echo(str("Rail size is ", side_mount_sz.y - 2*wall - nw, "mm"));
 $export_suffix = Part_to_show;

@@ -176,7 +176,7 @@ module make_top(anchor=BOTTOM, orient=TOP) {
 
 module make_front(anchor=BACK, orient=TOP) {
     diff("diffme")
-        cuboid([bd.x, 0, bd.z] + wt*[0, 1, 0] - Slop*[0,0,1],
+        cuboid([bd.x, 0, bd.z] + wt*[0, 1, 0] - Slop*[0.5,0,1],
                anchor=anchor, orient=orient,
                edges=edges("ALL", except=BACK,BOTTOM)) {
 
