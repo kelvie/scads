@@ -70,7 +70,7 @@ Nut_width = 5.5;
 Use_wire_hooks = true;
 
 // Number of wires to hold for the back wire hook
-Back_wire_hook_wires = 2;
+Back_wire_hook_wires = 4;
 Right_wire_hook_wires = 0;
 Left_wire_hook_wires = 0;
 
