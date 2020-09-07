@@ -396,7 +396,7 @@ module make_part() {
                        edges=edges("ALL", except=[FRONT])) {
                 up($parent_size.z/2 - wt - Slop)
                     attach(FRONT)
-                    make_wire_hook($parent_size.x / 2, 2);
+                    make_wire_hook($parent_size.x / 3, 2);
             }
 
         }
