@@ -96,6 +96,8 @@ slop = Slop;
 nt = Nut_thickness;
 nw = Nut_width;
 
+// TODO: clamp doesn't work great for keeping boards in the z direction.
+// TODO: consider somehow allowing two boards at once
 module clamp_part(anchor=CENTER, spin=0, orient=TOP) {
     eps= $fs/10;
 
