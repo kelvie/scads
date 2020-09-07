@@ -68,8 +68,13 @@ Nut_width = 5.5;
 
 /* [Wire hook options] */
 Use_wire_hooks = true;
-Wire_thickness = 2.3;
 
+// Number of wires to hold for the back wire hook
+Back_wire_hook_wires = 2;
+Right_wire_hook_wires = 0;
+Left_wire_hook_wires = 0;
+
+Wire_thickness = 2.3;
 
 /* [USB-C+A options] */
 // From the bottom inside wall
@@ -204,8 +209,10 @@ module make_front(anchor=BACK, orient=TOP) {
                             tolerance=USB_C_hole_tolerance);
 
             // TODO: make a library for USB-A port
+            usb_port_size = [13.2, 6];
             down(bd.z/2 - Bottom_USB_A_port_offset)
-                cuboid([13.2, Box_dimensions.y, 6] + USB_C_hole_tolerance * [1, 0, 1], rounding=0.25);
+                cuboid([usb_port_size.x, Box_dimensions.y, usb_port_size.y] + USB_C_hole_tolerance * [1, 0, 1] ,
+                       rounding=0.25);
         }
     }
 }
@@ -219,7 +226,6 @@ module make_front(anchor=BACK, orient=TOP) {
 // TODO: text on side connectors to know which one's which, and what voltages
 // TODO: customize front plate
 // TODO: split parts into modules rather than use tags...
-// TODO: webbings to hold up nut holder, and other places?
 // TODO: front anderson powerpole holder
 module make_part() {
 
@@ -229,7 +235,7 @@ module make_part() {
     connector_spin = 0;
 
     module make_wire_hook(width, num_wires=4) {
-        if (Use_wire_hooks)
+        if (Use_wire_hooks && num_wires > 0)
             wire_hook(thickness=1,
                       wire_diameter=Wire_thickness,
                       width=width,
@@ -324,6 +330,11 @@ module make_part() {
                     }
                 }
 
+                // Wire hook
+                up($parent_size.z/2 - Slop)
+                    attach(RIGHT)
+                    make_wire_hook($parent_size.y / 4, Left_wire_hook_wires);
+
             }
 
             // Right wall
@@ -386,7 +397,7 @@ module make_part() {
 
                 up($parent_size.z/2 - Slop)
                     attach(LEFT)
-                    make_wire_hook($parent_size.y / 4);
+                    make_wire_hook($parent_size.y / 4, Right_wire_hook_wires);
             }
 
             position(BACK)
@@ -396,7 +407,7 @@ module make_part() {
                        edges=edges("ALL", except=[FRONT])) {
                 up($parent_size.z/2 - wt - Slop)
                     attach(FRONT)
-                    make_wire_hook($parent_size.x / 3, 2);
+                    make_wire_hook($parent_size.x / 3, Back_wire_hook_wires);
             }
 
         }
