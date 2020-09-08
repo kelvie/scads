@@ -264,8 +264,8 @@ module make_mount() {
         // Middle pillar, if desired
         if (Middle_pillar_size > 0)
             position(BOTTOM)
-            cuboid([Middle_pillar_size, ps.y, side_mount_sz.z], anchor=BOTTOM,
-                chamfer=chamf, $tags="keepme");
+                cuboid([Middle_pillar_size, ps.y - 2*wall, side_mount_sz.z], anchor=BOTTOM,
+                       chamfer=chamf, $tags="keepme");
 
         fwd(wall/2)
             position(BACK+BOTTOM)
@@ -281,8 +281,11 @@ module make_mount() {
                 }
 
         back(wall/2)
-            position(FRONT+BOTTOM)
+            position(FRONT+BOTTOM)  {
             side_mounts(anchor=BACK+BOTTOM);
+            fwd(side_mount_sz.y+eps)
+                cuboid([0.25, 0.25, side_mount_sz.z], anchor=FRONT+BOTTOM, $tags="cutme");
+        }
     }
 }
 
