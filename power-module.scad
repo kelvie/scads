@@ -229,6 +229,12 @@ module make_front(anchor=BACK, orient=TOP) {
 // TODO: customize front plate
 // TODO: split parts into modules rather than use tags...
 // TODO: front anderson powerpole holder
+
+// nearterm TODOs:
+// - Make top more printable -- have top part detach from bottom part?
+// - Deal with warpability of long parts on platform, make bottom plate
+//   thicker or use a pattern on the bottom (good for grip anyway), and we'll
+//   also need holes anyway
 module make_part() {
 
     // Whether or not to cover all the connectors... I don't think this is
