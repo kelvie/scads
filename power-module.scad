@@ -21,7 +21,7 @@ Piece = "All"; // [All, Main with connectors, Main, Front, Top, Side connector]
 
 // Separate all the parts when viewing All pieces
 Explode_parts = true;
-Explode_offset = 15; // [0:1:60]
+Explode_offset = 45; // [0:1:100]
 
 /* [Print Options] */
 // Adds a extra base on the bottom to prevent elephant's foot
@@ -48,7 +48,7 @@ Slop = 0.1;
 Inner_width_slop = 0.4;
 
 // Fit of the dovetails that hold the panels together -- increase to make looser
-Dovetail_slop = 0.1; // [0:0.025:0.2]
+Dovetail_slop = 0.15; // [0:0.025:0.2]
 
 
 /* [Front Connector options] */
@@ -180,14 +180,16 @@ module make_top(anchor=BOTTOM, orient=TOP) {
 }
 
 module make_front(anchor=BACK, orient=TOP) {
+
+    cube_size = [bd.x, 0, bd.z] + wt*[0, 1, 0] - Slop*[0.5,0,1];
     diff("diffme")
-        cuboid([bd.x, 0, bd.z] + wt*[0, 1, 0] - Slop*[0.5,0,1],
+        cuboid(cube_size,
                anchor=anchor, orient=orient,
                edges=edges("ALL", except=BACK,BOTTOM)) {
 
         // Dovetails on both sides
         mirror_copy(LEFT) attach(LEFT)
-            edge_dovetail("male", bd.z);
+            edge_dovetail("male", cube_size.z);
 
         // To slot into the bottom plate
         position(BOTTOM+BACK)
@@ -445,15 +447,19 @@ module explode_out(direction) {
 
 // Optionally show the pieces exploded for "All"
 if (Piece == "All") {
-    explode_out(FORWARD)
-        color(palette[4]) show("front") make_part();
-    explode_out(UP)
-        color(palette[3]) show("top") make_part();
     explode_out(LEFT)
         show("left-c") make_part();
     explode_out(RIGHT)
         show("right-c") make_part();
     color(palette[1]) show("main") make_part();
+
+    explode_out(FORWARD)
+        color(palette[3], alpha=0.8) show("top") make_part();
+
+    explode_out(UP)
+         color(palette[4], alpha=0.5) show("front") make_part();
+
+
 
  } else if (Piece == "Main with connectors") {
     show("main connector") make_part();
