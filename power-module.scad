@@ -155,9 +155,9 @@ module screw_rail(l, h, anchor=CENTER, orient=TOP, spin=0) {
 }
 
 // TODO: this is ugly af
-module screw_rail_grill(w, l, h) {
+module screw_rail_grill(w, l, h, anchor=TOP+LEFT) {
     xcopies(l=w, spacing=Grill_spacing*screw_head_w)
-        screw_rail(l=l , h=h, anchor=TOP+LEFT, spin=90);
+        screw_rail(l=l , h=h, anchor=anchor, spin=90);
 }
 
 
@@ -213,7 +213,9 @@ module make_front(anchor=BACK, orient=TOP) {
             // TODO: make a library for USB-A port
             usb_port_size = [13.2, 6];
             down(bd.z/2 - Bottom_USB_A_port_offset)
-                cuboid([usb_port_size.x, Box_dimensions.y, usb_port_size.y] + USB_C_hole_tolerance * [1, 0, 1] ,
+                cuboid([usb_port_size.x,
+                        Box_dimensions.y,
+                        usb_port_size.y] + USB_C_hole_tolerance * [1, 0, 1] ,
                        rounding=0.25);
         }
     }
@@ -293,13 +295,18 @@ module make_part() {
 
 
                 // Cut out screw rails
-                left($eps)
-                    down($parent_size.z/2 - wt)
-                    attach(LEFT)
-                    screw_rail_grill(
-                        w=$parent_size.y - 2*screw_head_w,
-                        l=$parent_size.z/4 - wt,
-                        h=2*wt, $tags="mask");
+                left($eps) attach(LEFT) {
+                    fwd($parent_size.z/2 - wt)
+                        screw_rail_grill(w=$parent_size.y - 2*screw_head_w,
+                                         l=$parent_size.z/4 - wt,
+                                         h=2*wt, $tags="mask");
+
+                    back($parent_size.z/2 - wt)
+                        right($parent_size.y/4 - wt/2)
+                        screw_rail_grill(w=($parent_size.y - 2*screw_head_w)/2,
+                                         l=$parent_size.z/4 - wt,
+                                         h=2*wt, $tags="mask", anchor=TOP+RIGHT);
+                }
 
                 // Dovetails for top
                 attach(TOP) edge_dovetail("male", bd.y);
@@ -355,14 +362,19 @@ module make_part() {
                        edges=edges("ALL", except=[LEFT, TOP])) {
 
                 // screw rails
-                right($eps)
-                    down($parent_size.z/2 - wt)
-                    attach(RIGHT)
-                    screw_rail_grill(
-                        w=$parent_size.y - 2*screw_head_w,
-                        l=$parent_size.z/4 - wt,
-                        h=2*wt, $tags="mask");
+                // Cut out screw rails
+                right($eps) attach(RIGHT) {
+                    fwd($parent_size.z/2 - wt)
+                        screw_rail_grill(w=$parent_size.y - 2*screw_head_w,
+                                         l=$parent_size.z/4 - wt,
+                                         h=2*wt, $tags="mask");
 
+                    back($parent_size.z/2 - wt)
+                        right($parent_size.y/4 - wt/2)
+                        screw_rail_grill(w=($parent_size.y - 2*screw_head_w)/2,
+                                         l=$parent_size.z/4 - wt,
+                                         h=2*wt, $tags="mask", anchor=TOP+RIGHT);
+                }
 
                 // Dovetails for top
                 attach(TOP) edge_dovetail("male", bd.y);
