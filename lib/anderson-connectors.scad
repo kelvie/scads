@@ -129,7 +129,8 @@ module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false,
                 chamfer=chamfer,
                 edges=edges("ALL", except=edge_nochamf)
                 ) {
-            attach(TOP){
+
+            left((leftWallThickness - wall)/2) attach(TOP) {
                 fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
                 back((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
             }
@@ -143,6 +144,7 @@ module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false,
                 chamfer=chamfer,
                 edges=edges("ALL", except=edge_nochamf)
                 ) {
+        right((rightWallThickness - wall)/2)
             attach(TOP) {
                 fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
                 back((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
@@ -267,7 +269,7 @@ module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false,
     }
 }
 
-module pp15_casing_wirehider_mask(mask, tolerance=0.2,
+module pp15_casing_wirehider_mask(mask, tolerance=0.1,
                                   wall=2,
                                   anchor=CENTER, spin=0, orient=UP) {
     pp15_casing(
