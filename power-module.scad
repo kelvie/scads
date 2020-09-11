@@ -17,7 +17,7 @@ include <lib/add-base.scad>
 
 /* [View options] */
 // Which piece to render.
-Piece = "All"; // [All, Main with connectors, Main, Front, Top, Side connector]
+Piece = "All"; // [All, Top with connectors, Bottom, Front, Top, Left connector, Right connector]
 
 // Separate all the parts when viewing All pieces
 Explode_parts = true;
@@ -48,7 +48,7 @@ Slop = 0.1;
 Inner_width_slop = 0.4;
 
 // Fit of the dovetails that hold the panels together -- increase to make looser
-Dovetail_slop = 0.15; // [0:0.025:0.2]
+Dovetail_slop = 0.1; // [0:0.025:0.2]
 
 
 /* [Front Connector options] */
@@ -65,7 +65,7 @@ Screw_head_height = 1.65;
 Nut_thickness = 2.4;
 Nut_width = 5.5;
 
-Rail_angle = 75; // [0:15:90]
+Rail_angle = 45; // [0:15:90]
 
 /* [Wire hook options] */
 Use_wire_hooks = true;
@@ -99,7 +99,7 @@ palette = ["#e6efe9","#c5f4e0","#c2eaba","#a7c4a0","#8f8389"];
 pds = Predefined_size;
 
 
-common_yz = [0, 80, 40];
+common_yz = [0, 80, 45];
 
 // Get the box dimensions
 function get_box_dimensions() =
@@ -112,36 +112,17 @@ function get_box_dimensions() =
 bd = get_box_dimensions() + Inner_width_slop * [1,0,0];
 wt = Wall_thickness;
 
-module edge_dovetail(type, length) {
+module edge_dovetail(type, length, spin=0) {
     dovetail(type,
              length=length,
              height=wt/2,
              width=wt/2,
              chamfer=wt/16,
-             spin=180,
+             spin=spin,
              anchor=BOTTOM,
              back_width = 0.9 * wt/2,
              $slop=Dovetail_slop,
-             $tags=$tags
-        );
-}
-
-module make_top(anchor=BOTTOM, orient=TOP) {
-    diff("diffme")
-        cuboid([bd.x, bd.y, 0] + wt*[2,1,1],
-               anchor=anchor, chamfer=chamf, orient=orient,
-               edges=edges("ALL", except=[BACK, BOTTOM])) {
-        attach(BOTTOM) {
-            mirror_copy(LEFT)
-                left($parent_size.x/2 - wt/2)
-                back(wt/2)
-                edge_dovetail("female", bd.y, $tags="diffme");
-        }
-        back(wt + Nut_width/2 - Slop/2)
-            up($eps)
-            position(TOP+FRONT)
-            m3_screw_rail(l=0, h=2*wt, anchor=TOP, $tags="diffme");
-    }
+             $tags=type == "female" ? "mask" : $tags);
 }
 
 module make_front(anchor=BACK, orient=TOP) {
@@ -189,7 +170,6 @@ module make_front(anchor=BACK, orient=TOP) {
 // future TODOs
 // TODO: removeable inner plate to swap in and out... this way I can swap this
 //       between the buck convertor and this
-// TODO: Bottom rail?
 // TODO: stack 2-up? (need to think about adjustability, or have them easy to
 //       slide out)
 // TODO: text on side connectors to know which one's which, and what voltages
@@ -202,7 +182,8 @@ module make_front(anchor=BACK, orient=TOP) {
 // - Deal with warpability of long parts on platform, make bottom plate
 //   thicker or use a pattern on the bottom (good for grip anyway), and we'll
 //   also need holes anyway
-module make_part() {
+/*
+module make_parttt() {
 
     // Whether or not to cover all the connectors... I don't think this is
     // helpful as it hides the colours.
@@ -289,7 +270,6 @@ module make_part() {
                 up(wt/2)
                 fwd(bd.y/2 + wt/2)
                     attach(RIGHT)
-                    tags("mask")
                     edge_dovetail("female", bd.z);
 
                 position(LEFT+TOP) {
@@ -358,7 +338,6 @@ module make_part() {
                 up(wt/2)
                     fwd(bd.y/2 + wt/2)
                     attach(LEFT)
-                    tags("mask")
                     edge_dovetail("female", bd.z);
 
 
@@ -415,11 +394,227 @@ module make_part() {
             make_front();
     }
 }
+*/
 
-module main_part(anchor=CENTER, orient=TOP, spin=0) {
-    size = bd + wt*[2,2,2];
+// Size of dovetails that fit the bottom to the top piece
+back_dovetail_ratio = 1/4;
+front_dovetail_ratio = 1/8;
+
+module make_top(anchor=BOTTOM, orient=TOP, spin=0) {
+    inner_size = [bd.x, bd.y, bd.z/2];
+    size = inner_size + wt*[2,2,1];
+
+    module _right_wall() {
+        position(RIGHT+TOP)
+            diff("mask")
+            cuboid([wt, size.y, size.z],
+                   anchor=RIGHT+TOP,
+                   chamfer=chamf,
+                   edges=edges("ALL", except=[TOP, LEFT])) {
+
+            back_dovetail_ratio = 1/3;
+
+            dovetail_base_l = inner_size.y;
+
+            // Dovetails on bottom (back)
+            back(dovetail_base_l * (1 - back_dovetail_ratio)/2)
+                attach(TOP)
+                edge_dovetail("female", back_dovetail_ratio * dovetail_base_l, spin=180);
+
+            // Dovetails on bottom (front)
+            fwd(dovetail_base_l * (1 - front_dovetail_ratio)/2)
+                attach(TOP)
+                edge_dovetail("male", front_dovetail_ratio*dovetail_base_l);
+
+
+            // Dovetails for front
+            up(wt/2 - inner_size.z/4)
+                fwd(bd.y/2 + wt/2)
+                attach(LEFT)
+                edge_dovetail("male", inner_size.z/2);
+
+            // Cut out notch to fit the bottom part in the back
+            position(BACK+TOP)
+                back($eps)
+                up($eps)
+                cuboid([size.x, wt+$eps, wt+$eps], anchor=BACK+TOP, $tags="mask");
+
+            // Add a notch to fit the top part in the front
+            position(FRONT+TOP)
+                cuboid([wt, wt, wt],
+                       chamfer=chamf,
+                       edges=edges(RIGHT, except=[TOP, BOTTOM, BACK]),
+                       anchor=FRONT+BOTTOM);
+            children();
+        }
+    }
+
+    module _part() {
+        // Debug
+        // % cuboid(size);
+        hide("hidden")
+            cuboid(size, $tags="hidden")
+            tags("nothidden") {
+            position(BOTTOM)
+                diff("mask")
+                cuboid([size.x, size.y, 0] + wt*[0, 0,1],
+                       anchor=BOTTOM, chamfer=chamf,
+                       edges=edges("ALL", except=[TOP])) {
+                // Grill for screws
+                attach(BOTTOM, $overlap=-$eps)
+                    m3_screw_rail_grill(l=$parent_size.y - 2*wt,
+                                        w=$parent_size.x - 2*wt,
+                                        h=wt*2,
+                                        angle=Rail_angle,
+                                        $tags="mask");
+            }
+
+            // left/right walls
+            _right_wall() {
+                attach(RIGHT, $overlap=-$eps)
+                    left(($parent_size.y/2 - wt) / 2)
+                    m3_screw_rail_grill(l=$parent_size.z - 2*wt,
+                                        w=$parent_size.y/2 - 2*wt,
+                                        h=wt*2, angle=Rail_angle,
+                                        $tags="mask");
+                mirror(FRONT) position(RIGHT+TOP) {
+                    // TODO: positioning is wrong, doesn't reach the top
+                    // cutout into wall
+                    tags("mask")
+                        right($eps) {
+                        pp15_casing(jack=false,
+                                    anchor=TOP+RIGHT,
+                                    orient=LEFT,
+                                    mask=3);
+
+
+                        hull()
+                            move_copies([CENTER, 2*wt*UP])
+                            pp15_casing_wirehider_mask(anchor=TOP+RIGHT,
+                                                       orient=LEFT,
+                                                       mask=2*wt);
+                    }
+                }
+            }
+
+            mirror(LEFT)
+                _right_wall() {
+                attach(RIGHT, $overlap=-$eps)
+                    right(($parent_size.y/2 - wt) / 2)
+                    m3_screw_rail_grill(l=$parent_size.z - 2*wt,
+                                        w=$parent_size.y/2 - 2*wt,
+                                        h=wt*2, angle=Rail_angle,
+                                        $tags="mask");
+                position(RIGHT+TOP) {
+                    // cutout into wall
+                    tags("mask")
+                        right($eps) {
+                        pp15_casing(jack=false,
+                                    anchor=TOP+RIGHT,
+                                    orient=LEFT,
+                                    mask=3);
+
+                        hull()
+                            move_copies([CENTER, 2*wt*UP])
+                            pp15_casing_wirehider_mask(anchor=TOP+RIGHT,
+                                                       orient=LEFT,
+                                                       mask=2*wt);
+                    }
+                }
+            }
+
+
+            // Back wall
+            position(BACK+BOTTOM)
+                cuboid([size.x, 0, size.z] + wt * [0, 1, -1],
+                       anchor=BACK+BOTTOM,
+                       chamfer=chamf,
+                       edges=edges("ALL", except=[TOP, FRONT]));
+        }
+    }
+
     attachable(size=size, anchor=anchor, orient=orient, spin=spin) {
-        show("main") make_part();
+        _part();
+        children();
+    }
+}
+
+// TODO:
+//   - what to do about front?
+module make_bottom(anchor=CENTER, orient=TOP, spin=0) {
+    inner_size = [bd.x, bd.y, bd.z/2];
+    size = inner_size + wt*[2,2,1];
+
+    module _part() {
+        // Debug
+        // % cuboid(size);
+        hide("hidden")
+            cuboid(size, $tags="hidden")
+            tags("nothidden") {
+            position(BOTTOM)
+                diff("mask")
+                cuboid([size.x, size.y, 0] + wt*[0, 0,1],
+                       anchor=BOTTOM, chamfer=chamf,
+                       edges=edges("ALL", except=[TOP])) {
+                    // Grill for screws
+                    attach(BOTTOM, $overlap=-$eps)
+                        m3_screw_rail_grill(l=$parent_size.y - 2*wt,
+                                            w=$parent_size.x - 2*wt,
+                                            h=wt*2,
+                                            angle=Rail_angle,
+                                            $tags="mask");
+            }
+
+            // left/right walls
+            mirror_copy(LEFT)
+            position(RIGHT+TOP)
+                diff("mask")
+                cuboid([wt, size.y, size.z],
+                       anchor=RIGHT+TOP,
+                       chamfer=chamf,
+                       edges=edges("ALL", except=[TOP, LEFT])) {
+                attach(RIGHT, $overlap=-$eps)
+                    m3_screw_rail_grill(l=$parent_size.z - 2*wt,
+                                        w=$parent_size.y - 2*wt,
+                                        h=wt*2, angle=Rail_angle,
+                                        $tags="mask");
+
+                dovetail_base_l = inner_size.y;
+
+                // Dovetail on top (back)
+                back(dovetail_base_l * (1 - back_dovetail_ratio)/2)
+                    attach(TOP)
+                    edge_dovetail("male", back_dovetail_ratio * dovetail_base_l, spin=180);
+
+                fwd(dovetail_base_l * (1 - front_dovetail_ratio)/2)
+                attach(TOP)
+                    edge_dovetail("female", front_dovetail_ratio*dovetail_base_l);
+
+                // Dovetails for front
+                up(wt/2 - inner_size.z/4)
+                    fwd(bd.y/2 + wt/2)
+                    attach(LEFT)
+                        edge_dovetail("male", inner_size.z/2);
+
+                // Cut out a notch on the top+front to fit the top part
+                position(FRONT+TOP)
+                    up($eps)
+                    fwd($eps)
+                    cuboid((wt+$eps) * [1, 1, 1],
+                           anchor=FRONT+TOP, $tags="mask");
+
+            }
+            // Back wall
+            position(BACK+BOTTOM)
+                cuboid([size.x, 0, size.z] + wt * [0, 1, 1],
+                       anchor=BACK+BOTTOM,
+                       chamfer=chamf,
+                       edges=BOTTOM);
+        }
+    }
+
+    attachable(size=size, anchor=anchor, orient=orient, spin=spin) {
+        _part();
         children();
     }
 }
@@ -440,22 +635,23 @@ module explode_out(direction) {
 
 // Optionally show the pieces exploded for "All"
 if (Piece == "All") {
-    explode_out(LEFT)
-        show("left-c") make_part();
-    explode_out(RIGHT)
-        show("right-c") make_part();
-    color(palette[1]) show("main") make_part();
+    // explode_out(LEFT)
+    //     show("left-c") make_part();
+    // explode_out(RIGHT)
+    //     show("right-c") make_part();
+
+
+    color(palette[1]) make_bottom(anchor=TOP);
 
     explode_out(FORWARD)
-        color(palette[3], alpha=0.8) show("top") make_part();
+        color(palette[3], alpha=0.99) make_top(anchor=TOP, orient=BOTTOM);
 
     explode_out(UP)
-         color(palette[4], alpha=0.5) show("front") make_part();
+        fwd(bd.y/2)
+         color(palette[4], alpha=0.99) make_front(anchor=BACK);
 
-
-
- } else if (Piece == "Main with connectors") {
-    show("main connector") make_part();
+ } else if (Piece == "Top with connectors") {
+    // show("main connector") make_part();
  } else if (Piece == "Front") {
     // Front is really thin so needs less inset
     add_base(0.3, 0.75, 0.1, enable=Add_base)
@@ -463,12 +659,12 @@ if (Piece == "All") {
  } else if (Piece == "Top") {
     // Top piece can't be printed directly on the platform or it warps during
     // curing
-    make_top(anchor=TOP, orient=BOTTOM);
+    make_top(anchor=BOTTOM, orient=TOP);
+ } else if (Piece == "Bottom") {
+    make_bottom(anchor=BOTTOM);
  } else {
     add_base(0.3, 1.5, 0.1, enable=Add_base)
-        if (Piece == "Main") {
-            main_part(anchor=BOTTOM);
-        } else if (Piece == "Side connector") {
+        if (Piece == "Right connector" || Piece == "Left connector") {
             pp15_casing(jack=false, anchor=BOTTOM);
         }
  }
