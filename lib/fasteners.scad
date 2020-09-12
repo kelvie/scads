@@ -89,8 +89,8 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45) {
                 back(yoff + ydiff/2 )
                     right(xdiff/2)
                     m3_screw_rail(l=l, h=h, anchor=anchor, spin=angle);
+        }
     }
-}
 }
 
 /* [Hidden] */
@@ -106,10 +106,14 @@ module m3_sqnut_cutout(hole_height, hole_diameter=Screw_hole_diameter, slop=Slop
         cyl(d=hd, h=nt+slop+2*hh, orient=FRONT);
 }
 
+function m3_sqnut_holder_size(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
+                         edges=edges("ALL"), slop=Slop) =
+    [nw, nt, nw] + wall * [2,2,1] + slop*[1,1,1];
+
 module m3_sqnut_holder(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
                        edges=edges("ALL"), slop=Slop) {
     eps = $fs/10;
-    sz = [nw, nt, nw] + wall * [2,2,1] + slop*[1,1,1];
+    sz = m3_sqnut_holder_size(wall, orient, spin, anchor, chamfer, edges, slop);
 
     attachable(size=sz, orient=orient, spin=spin, anchor=anchor) {
         difference() {
