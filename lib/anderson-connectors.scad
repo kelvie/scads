@@ -1,6 +1,45 @@
 include <BOSL2/std.scad>
 include <BOSL2/joiners.scad>
 
+// To show a sample
+Show_sample = false;
+
+Part_to_show = "Cover"; // [Cover, Base, Mask]
+
+/* [Hidden] */
+$fa = $preview ? 5 : 10;
+$fs = 0.025;
+
+default_wall = 2;
+default_tolerance = 0.1;
+// These are from the official drawings for the 1237 series
+width = 7.9; // x and y
+widthWithDovetail = 8.4; // x
+rollPinRadius = 1.3;
+tipToRollPinCentre = 9.9; // y
+fullLength = 24.6; // y
+wireHoleWidth = 5; // x
+dovetailHeight = 12.3; // y
+matedFullLength = 41.2; // y
+dovetailWidth = widthWithDovetail - width;
+
+dovetail_insert_hole_tolerance = 2*default_tolerance * [2,1,0];
+
+function _get_inside_size(jack=false) =
+    let (housingLength = jack ? fullLength : matedFullLength - fullLength)
+    [2*widthWithDovetail, housingLength, widthWithDovetail];
+
+function _get_outside_size(isz, wall=default_wall, tolerance=default_tolerance) =
+    isz + wall * [2, 1, 2] + tolerance * [1, 0, 1];
+
+function pp15_get_center_yoffset(jack=false, wall=default_wall,
+                                tolerance=default_tolerance) =
+    let (
+         osz = _get_outside_size(_get_inside_size(jack), wall, tolerance)
+         )
+    (osz.y - wall - matedFullLength/2);
+// TODO: dovetails wrong direction for current iteration
+// TODO: need a base plate of some sort to keep the connectiors in place
 // TODO: add text argument
 // TODO: some way to cut out an entry path for the other connector rather than
 //       having it stick out (graduated thickness?)
@@ -34,24 +73,15 @@ include <BOSL2/joiners.scad>
 //
 //   `mask` when nonzero creates a cutout mask of the specified height, suitable
 //          for cutting openings to mount this onto
-module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false, wall=2,
-                   wireHider=true,
-                   anchor=CENTER, spin=0, orient=UP, mask=0, wirehider_mask=0) {
-    // These are from the official drawings for the 1237 series
-    width = 7.9; // x and y
-    widthWithDovetail = 8.4; // x
-    rollPinRadius = 1.3;
-    tipToRollPinCentre = 9.9; // y
-    fullLength = 24.6; // y
-    wireHoleWidth = 5; // x
-    dovetailHeight = 12.3; // y
-    matedFullLength = 41.2; // y
+module pp15_casing(middlePin=true, tolerance=default_tolerance,
+                   dovetailLeft=true, jack=false, wall=default_wall,
+                   wireHider=true, mask=0, wirehider_mask=0,
+                   anchor=CENTER, spin=0, orient=UP) {
 
-    dovetailWidth = widthWithDovetail - width;
     housingLength = jack ? fullLength : matedFullLength - fullLength;
 
-    insideSz = [2*widthWithDovetail, housingLength, widthWithDovetail];
-    outsideSz = insideSz + wall * [2, 1, 2] + tolerance * [1, 0, 1];
+    insideSz = _get_inside_size(jack);
+    outsideSz = _get_outside_size(insideSz, wall, tolerance);
 
     wireHiderWidth = wireHider ? outsideSz.z : 0;
 
@@ -69,6 +99,8 @@ module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false,
     leftWallThickness = wall;
     rightWallThickness = dovetailLeft ? wall + dovetailWidth : wall;
     has_mask = mask > 0 || wirehider_mask > 0;
+    rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
+    rollPinHeight = widthWithDovetail + tolerance + wall;
 
     module make_dovetail(type, length, width=2, taper=3) {
         slop=0.05;
@@ -85,7 +117,9 @@ module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false,
                                    anchor=BOTTOM,
                                    taper=taper, $slop=slop) {
                 // Needs more tolerance, still hard to put in and out; needs to be wider
-                position(FRONT) cuboid($parent_size + 2*tolerance * [2,1,0], anchor=BACK);
+                position(FRONT)
+                    cuboid($parent_size + dovetail_insert_hole_tolerance,
+                           anchor=BACK);
             }
         }
 
@@ -183,9 +217,6 @@ module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false,
                     cyl(r=rollPinRadius + tolerance / 2, h=outsideSz.z+2*$eps, anchor=BOTTOM);
         }
 
-        rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
-        rollPinHeight = widthWithDovetail + tolerance + wall;
-
         // Side roll pins
         fwd(rollPinYOffset) {
             mirror_copy(LEFT) left(width)
@@ -249,8 +280,8 @@ module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false,
 
     attachable(anchor=anchor, spin=spin, orient=orient, size=fullOutsideSz) {
         union() {
-            down(fullOutsideSz.z/2)
-                back(outsideSz.y - wall - matedFullLength/2)
+            down(outsideSz.z/2)
+            back(pp15_get_center_yoffset(jack, wall, tolerance))
                 if (mask == 0 && wirehider_mask == 0) {
                     hide("mask wire-hider-mask") make();
                 } else {
@@ -270,10 +301,49 @@ module pp15_casing(middlePin=true, tolerance=0.1, dovetailLeft=true, jack=false,
 }
 
 module pp15_casing_wirehider_mask(mask, tolerance=0.1,
-                                  wall=2,
+                                  wall=default_wall,
                                   anchor=CENTER, spin=0, orient=UP) {
     pp15_casing(
         tolerance=tolerance,
         wall=wall,
         anchor=anchor, spin=spin, orient=orient, wirehider_mask=mask);
 }
+
+module pp15_base_plate(wall=2, tolerance=default_tolerance,
+                       anchor=CENTER, spin=0, orient=UP) {
+    chamf = undef;
+    isz = _get_inside_size();
+    osz = _get_outside_size(isz);
+    yoff = pp15_get_center_yoffset();
+
+    size = [isz.x - 2*(wall + dovetail_insert_hole_tolerance.x),
+            osz.y,
+            wall];
+    bbox_size=[osz.x, 2*(osz.y + abs(yoff)), wall];
+
+    module _part() {
+        prismoid(size2=[size.x, size.y], size1=[size.x - 2*size.z, size.y],
+                 h=size.z, anchor=CENTER);
+    }
+
+    attachable(size=bbox_size, anchor=anchor, spin=spin, orient=orient) {
+        union() {
+            back(yoff - osz.y/2) _part();
+            // debug
+            // % cuboid(bbox_size);
+        }
+        children();
+    }
+}
+
+if (Show_sample) {
+    part = Part_to_show;
+    if (part == "Base") {
+        pp15_base_plate();
+    } else if (part == "Cover") {
+        pp15_base_plate(anchor=BOTTOM, orient=BOTTOM);
+        pp15_casing(anchor=TOP);
+    } else if (part == "Mask") {
+    }
+
+ }
