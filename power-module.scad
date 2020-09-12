@@ -273,7 +273,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
 
             // Slot to go into a rail on the walls of the other part
             position(TOP)
-                up($eps)
+                down($eps)
                 cuboid([wt/3 - Slop, 2* abs(pp15_get_center_yoffset()), wt/2],
                        chamfer=chamf/3, edges=TOP,
                        anchor=BOTTOM
@@ -537,4 +537,4 @@ if (Piece == "All") {
         }
  }
 
-$export_suffix = Piece;
+$export_suffix = str(Opening_type, "-", Piece);
