@@ -21,7 +21,7 @@ Back_plate_height = 8;
 Back_plate_width = 10;
 
 // Size of the lugs on the grips
-Grip_size = 0.6; // [0:0.1:2]
+Grip_size = 1; // [0:0.1:2]
 
 Middle_pillar_size = 3;
 
@@ -96,8 +96,8 @@ slop = Slop;
 nt = Nut_thickness;
 nw = Nut_width;
 
+// TODO: Make the clamp + back heights the same
 // TODO: clamp doesn't work great for keeping boards in the z direction.
-// TODO: consider somehow allowing two boards at once
 module clamp_part(anchor=CENTER, spin=0, orient=TOP) {
     eps= $fs/10;
 
@@ -134,18 +134,15 @@ module clamp_part(anchor=CENTER, spin=0, orient=TOP) {
         position(LEFT+BOTTOM)
             cuboid([Clamp_wall_thickness, Clamp_depth, Clamp_wall_height+$parent_size.z],
                    chamfer=chamf,
-                   anchor=LEFT+BOTTOM
-                ) {
+                   anchor=LEFT+BOTTOM) {
             // Make the clamp wall grippy
             if (Grip_size > 0)
                 down(chamf)
-                position(RIGHT+TOP)
+                    position(RIGHT+TOP)
                     grip_mask([Clamp_wall_height-chamf, Clamp_depth, Grip_size],
                               orient=RIGHT, anchor=LEFT,
-                               $tags="cutme");
-            }
-
-
+                              $tags="cutme");
+        }
     }
 }
 
@@ -257,28 +254,47 @@ module make_mount() {
                chamfer=chamf,
                anchor=BOTTOM, $tags="bottom") {
 
-        // TODO: dual rail?
-        //mirror_copy(BACK) fwd($parent_size.y / 4)
         x_rail();
 
         // Middle pillar, if desired
         if (Middle_pillar_size > 0)
             position(BOTTOM)
-                cuboid([Middle_pillar_size, ps.y - 2*wall, side_mount_sz.z], anchor=BOTTOM,
-                       chamfer=chamf, $tags="keepme");
+                cuboid([Middle_pillar_size, ps.y - 2*(wall - chamf), side_mount_sz.z], anchor=BOTTOM,
+                       chamfer=chamf, edges=edges("ALL", except=[FRONT,BACK]),
+                       $tags="keepme");
 
         fwd(wall/2)
             position(BACK+BOTTOM)
-            side_mounts(anchor=FRONT+BOTTOM) {
+            side_mounts(anchor=FRONT+BOTTOM) diff("mask") {
             // Hold the back of the PCB in place
             position(BACK+TOP)
-                down(chamf)
-                cuboid([Back_plate_width, wall, Back_plate_height + chamf + slop],
+                down(chamf) {
+                prismoid(size1=[Back_plate_width, 2*wall],
+                         size2=[Back_plate_width, wall],
+                         shift=[0, -wall/2],
+                         h=Back_plate_height,
+                         chamfer=chamf,
+                         anchor=BOTTOM);
+
+                // To create the top chamfer
+                cuboid([Back_plate_width, wall, Back_plate_height+chamf],
                        anchor=BOTTOM+BACK,
-                       chamfer=chamf,
-                       edges=edges("ALL", except=BOTTOM)
-                    );
+                       chamfer=chamf) {
+
+                    // Make the back wall grippy
+                    if (Grip_size > 0)
+                        down(chamf)
+                            position(FRONT+TOP)
+                            grip_mask([Back_plate_width, Back_plate_height - chamf, Grip_size],
+                            orient=FRONT, anchor=BACK,
+                                      $tags="mask");
                 }
+            }
+
+
+            position(BACK)
+                cuboid([side_mount_sz.x, 2*wall, side_mount_sz.z], chamfer=chamf);
+        }
 
         back(wall/2)
             position(FRONT+BOTTOM)  {
