@@ -4,14 +4,14 @@ include <BOSL2/joiners.scad>
 // To show a sample
 Show_sample = false;
 
-Part_to_show = "Cover"; // [Cover, Base, Mask]
+Part_to_show = "Cover"; // [Cover, Base, Mask, All]
 
 /* [Hidden] */
 $fa = $preview ? 5 : 10;
 $fs = 0.025;
 
 default_wall = 2;
-default_tolerance = 0.1;
+default_tolerance = 0.2;
 // These are from the official drawings for the 1237 series
 width = 7.9; // x and y
 widthWithDovetail = 8.4; // x
@@ -114,7 +114,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                                    spin=90,
                                    chamfer=wall/8,
                                    anchor=BOTTOM,
-                                   taper=taper, $slop=slop) {
+                                   taper=taper, $slop=slop, extra=0) {
                 // Needs more tolerance, still hard to put in and out; needs to be wider
                 position(FRONT)
                     cuboid($parent_size + dovetail_insert_hole_tolerance,
@@ -125,13 +125,12 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         dovetail(type,
                  length=length,
                  height=wall,
-                 width=width,
+                 width=2,
                  spin=90,
                  chamfer=wall/8,
                  anchor=BOTTOM,
                  taper=taper,
-                 $slop=slop
-            );
+                 $slop=slop, extra=0);
 
         if (mask > 0) tags("mask") create_mask();
 
@@ -179,8 +178,10 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                 ) {
         right((rightWallThickness - wall)/2)
             attach(TOP) {
-                fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
-                back((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
+            fwd((outsideSz.y - wall)/2)
+                make_dovetail("male", wall);
+            back((outsideSz.y - wall - chamfer)/2)
+                make_dovetail("male", wall);
             }
         }
 
@@ -339,10 +340,14 @@ if (Show_sample) {
     part = Part_to_show;
     if (part == "Base") {
         pp15_base_plate();
-    } else if (part == "Cover") {
-        pp15_base_plate(anchor=BOTTOM, orient=BOTTOM);
+    } else if (part == "All") {
+        pp15_base_plate(anchor=TOP);
         pp15_casing(anchor=TOP);
+        % pp15_casing(anchor=TOP, mask=3);
     } else if (part == "Mask") {
+        pp15_casing(anchor=TOP, mask=3);
+    } else if (part == "Cover") {
+        pp15_casing(anchor=TOP);
     }
 
  }

@@ -249,6 +249,11 @@ module front_wall(size, inner_size, height,
 // TODO: customize front plate
 // TODO: front anderson powerpole holder
 
+// nearterm TODO:
+// - PCB holder too fragile at the bakc
+// - PCB holder not clamping enough in z direction
+
+
 // Size of dovetails that fit the bottom to the top piece
 back_dovetail_ratio = 1/8;
 front_dovetail_ratio = 1/8;
@@ -274,7 +279,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             // Slot to go into a rail on the walls of the other part
             position(TOP)
                 down($eps)
-                cuboid([wt/3 - Slop, 2* abs(pp15_get_center_yoffset()), wt/2],
+                cuboid([wt/3 - Slop, 2* abs(pp15_get_center_yoffset()), wt/2 - Slop],
                        chamfer=chamf/3, edges=TOP,
                        anchor=BOTTOM
                        );
@@ -433,7 +438,7 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
                 // Regular rail for top part's slot to go into
                 position(TOP)
                     up($eps)
-                    cuboid([wt/3, dovetail_base_l/2, wt/2 + Slop],
+                    cuboid([wt/3 + Slop, dovetail_base_l/2, wt/2 + Slop],
                     chamfer=-chamf/3, edges=TOP,
                     anchor=TOP,
                     $tags="mask");
