@@ -249,11 +249,6 @@ module front_wall(size, inner_size, height,
 // TODO: customize front plate
 // TODO: front anderson powerpole holder
 
-// nearterm TODO:
-// - PCB holder too fragile at the bakc
-// - PCB holder not clamping enough in z direction
-
-
 // Size of dovetails that fit the bottom to the top piece
 back_dovetail_ratio = 1/8;
 front_dovetail_ratio = 1/8;
