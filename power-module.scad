@@ -248,6 +248,7 @@ module front_wall(size, inner_size, height,
 // TODO: text on side connectors to know which one's which, and what voltages
 // TODO: customize front plate
 // TODO: front anderson powerpole holder
+// TODO: build in PCB holder (maybe something like a sandwich press for the top)
 
 // Size of dovetails that fit the bottom to the top piece
 back_dovetail_ratio = 1/8;
