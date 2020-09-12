@@ -315,7 +315,7 @@ union() {
         }
 
     } else if (Part_to_show == "Clamp") {
-        add_base(0.3, 1, 0.1, enable=Add_base)
+        add_base(0.3, 0.75, 0.1, enable=Add_base)
             clamp_part(anchor=BOTTOM);
     } else if (Part_to_show == "Mount") {
         add_base(0.3, 1, 0.1, enable=Add_base)
