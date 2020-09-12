@@ -216,8 +216,30 @@ module right_wall(size, inner_size) {
     }
 }
 
-module front_wall(size, inner_size) {
+module front_wall(size, inner_size, height,
+                  anchor=CENTER, orient=TOP, spin=0) {
+    if (Opening_type == "USB-C+A") {
+        size = [inner_size.x, wt, height];
+        attachable(size=size, orient=orient, anchor=anchor, spin=spin) {
+            diff("diffme")
+                cuboid(size) tags("diffme") {
 
+                // USB-C hole
+                down($parent_size.z/ 2 - Bottom_USB_C_port_offset)
+                    usb_c_jack_hole(l=Box_dimensions.y,
+                                    tolerance=USB_C_hole_tolerance);
+
+                // TODO: make a library for USB-A port
+                usb_port_size = [13.2, 6];
+                down($parent_size.z/2 - Bottom_USB_A_port_offset)
+                    cuboid([usb_port_size.x,
+                            Box_dimensions.y,
+                            usb_port_size.y] + USB_C_hole_tolerance * [1, 0, 1] ,
+                           rounding=0.25);
+            }
+            children();
+        }
+    }
 }
 
 // future TODOs
@@ -358,6 +380,11 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                                                     chamfer=chamf/2);
                 }
             }
+
+            // Optional front plate
+            position(FRONT+BOTTOM)
+                up(wt)
+                front_wall(size, inner_size, height=size.z, anchor=FRONT+BOTTOM);
         }
     }
 
@@ -434,6 +461,9 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
                     m3_screw_rail(l=0, h=2*wt, orient=BACK, $tags="mask");
             }
 
+            // Optional front plate
+            position(FRONT)
+                front_wall(size, inner_size, height=size.z-2*wt, anchor=FRONT);
         }
     }
 
@@ -472,9 +502,12 @@ if (Piece == "All") {
     explode_out(UP)
         color(palette[3], alpha=0.99) make_top(anchor=TOP, orient=BOTTOM);
 
-    explode_out(FORWARD)
-        fwd(bd.y/2)
-         color(palette[4], alpha=0.99) make_front(anchor=BACK);
+    if (Opening_type == "USB-C+A") {
+    } else {
+         explode_out(FORWARD)
+             fwd(bd.y/2)
+             color(palette[4], alpha=0.99) make_front(anchor=BACK);
+    }
 
  } else if (Piece == "Bottom with connectors") {
     color(palette[1], alpha=1) make_bottom(anchor=TOP);
