@@ -179,17 +179,45 @@ module bottom_wall(size) {
                                 angle=Rail_angle,
                                 $tags="mask");
 
-        // Slot for front plate
-        position(FRONT+TOP)
-            up($eps)
-            back(wt/2)
-            cuboid([$parent_size.x / 2, wt/2, wt/2] + Slop * [2, 1, 1],
-                   anchor=TOP+FRONT,
-                   chamfer=-chamf/2, edges=TOP,
-                   $tags="mask");
+        if (Opening_type == "USB-C+A") {
+        } else {
+            // Slot for front plate
+            position(FRONT+TOP)
+                up($eps)
+                back(wt/2)
+                cuboid([$parent_size.x / 2, wt/2, wt/2] + Slop * [2, 1, 1],
+                       anchor=TOP+FRONT,
+                       chamfer=-chamf/2, edges=TOP,
+                       $tags="mask");
+        }
 
         children();
     }
+}
+
+
+module right_wall(size, inner_size) {
+    diff("mask")
+        cuboid([wt, size.y, size.z],
+               anchor=RIGHT+TOP,
+               chamfer=chamf,
+               edges=edges("ALL", except=[TOP, LEFT])) {
+
+        if (Opening_type == "USB-C+A") {
+        } else {
+            // Dovetails for front
+            up(wt/2 - inner_size.z/4)
+                fwd(bd.y/2 + wt/2)
+                attach(LEFT)
+                edge_dovetail("male", inner_size.z/2);
+        }
+
+        children();
+    }
+}
+
+module front_wall(size, inner_size) {
+
 }
 
 // future TODOs
@@ -208,13 +236,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
     size = inner_size + wt*[2,2,1];
 
     module _right_wall() {
-        position(RIGHT+TOP)
-            diff("mask")
-            cuboid([wt, size.y, size.z],
-                   anchor=RIGHT+TOP,
-                   chamfer=chamf,
-                   edges=edges("ALL", except=[TOP, LEFT])) {
-
+        right_wall(size, inner_size) {
             dovetail_base_l = inner_size.y;
 
             // Dovetails on top (back)
@@ -226,13 +248,6 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             fwd(dovetail_base_l * (1 - front_dovetail_ratio)/2)
                 attach(TOP)
                 edge_dovetail("male", front_dovetail_ratio*dovetail_base_l);
-
-
-            // Dovetails for front
-            up(wt/2 - inner_size.z/4)
-                fwd(bd.y/2 + wt/2)
-                attach(LEFT)
-                edge_dovetail("male", inner_size.z/2);
 
             // Slot to go into a rail on the walls of the other part
             position(TOP)
@@ -254,6 +269,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                        chamfer=chamf,
                        edges=edges(RIGHT, except=[TOP, BOTTOM, BACK]),
                        anchor=FRONT+BOTTOM);
+
             children();
         }
     }
@@ -270,7 +286,8 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
 
             // left/right walls
             mirror(LEFT)
-            _right_wall() {
+                position(RIGHT+TOP)
+                _right_wall() {
                 attach(RIGHT, $overlap=-$eps)
                     left(($parent_size.y/2 - wt) / 2)
                     m3_screw_rail_grill(l=$parent_size.z - 2*wt,
@@ -294,6 +311,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                 }
             }
 
+            position(RIGHT+TOP)
             _right_wall() {
                 attach(RIGHT, $overlap=-$eps)
                     right(($parent_size.y/2 - wt) / 2)
@@ -367,12 +385,8 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
 
             // left/right walls
             mirror_copy(LEFT)
-            position(RIGHT+TOP)
-                diff("mask")
-                cuboid([wt, size.y, size.z],
-                       anchor=RIGHT+TOP,
-                       chamfer=chamf,
-                       edges=edges("ALL", except=[TOP, LEFT])) {
+                position(RIGHT+TOP)
+                right_wall(size, inner_size) {
                 attach(RIGHT, $overlap=-$eps)
                     m3_screw_rail_grill(l=$parent_size.z - 2*wt,
                                         w=$parent_size.y - 2*wt,
@@ -399,20 +413,14 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
                     anchor=TOP,
                     $tags="mask");
 
-                // Dovetails for front
-                up(wt/2 - inner_size.z/4)
-                    fwd(bd.y/2 + wt/2)
-                    attach(LEFT)
-                        edge_dovetail("male", inner_size.z/2);
-
                 // Cut out a notch on the top+front to fit the top part
                 position(FRONT+TOP)
                     up($eps)
                     fwd($eps)
                     cuboid((wt+$eps) * [1, 1, 1],
                            anchor=FRONT+TOP, $tags="mask");
-
             }
+
             // Back wall
             diff("mask")
                 position(BACK+BOTTOM)
