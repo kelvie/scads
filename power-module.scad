@@ -394,8 +394,6 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
     }
 }
 
-// TODO:
-// - what to do about front?
 module make_top(anchor=CENTER, orient=TOP, spin=0) {
     inner_size = [bd.x, bd.y, bd.z/2];
     size = inner_size + wt*[2,2,1];

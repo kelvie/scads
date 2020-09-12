@@ -38,8 +38,7 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
          osz = _get_outside_size(_get_inside_size(jack), wall, tolerance)
          )
     (osz.y - wall - matedFullLength/2);
-// TODO: dovetails wrong direction for current iteration
-// TODO: need a base plate of some sort to keep the connectiors in place
+
 // TODO: add text argument
 // TODO: some way to cut out an entry path for the other connector rather than
 //       having it stick out (graduated thickness?)
