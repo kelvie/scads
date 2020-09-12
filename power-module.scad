@@ -166,6 +166,32 @@ module make_front(anchor=BACK, orient=TOP) {
     }
 }
 
+module bottom_wall(size) {
+    diff("mask")
+        cuboid([size.x, size.y, 0] + wt*[0, 0,1],
+               anchor=BOTTOM, chamfer=chamf,
+               edges=edges("ALL", except=[TOP])) {
+        // Grill for screws
+        attach(BOTTOM, $overlap=-$eps)
+            m3_screw_rail_grill(l=$parent_size.y - 2*wt,
+                                w=$parent_size.x - 2*wt,
+                                h=wt*2,
+                                angle=Rail_angle,
+                                $tags="mask");
+
+        // Slot for front plate
+        position(FRONT+TOP)
+            up($eps)
+            back(wt/2)
+            cuboid([$parent_size.x / 2, wt/2, wt/2] + Slop * [2, 1, 1],
+                   anchor=TOP+FRONT,
+                   chamfer=-chamf/2, edges=TOP,
+                   $tags="mask");
+
+        children();
+    }
+}
+
 // future TODOs
 // TODO: removeable inner plate to swap in and out... this way I can swap this
 //       between the buck convertor and this
@@ -239,27 +265,8 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             cuboid(size, $tags="hidden")
             tags("nothidden") {
             position(BOTTOM)
-                diff("mask")
-                cuboid([size.x, size.y, 0] + wt*[0, 0,1],
-                       anchor=BOTTOM, chamfer=chamf,
-                       edges=edges("ALL", except=[TOP])) {
-                // Grill for screws
-                attach(BOTTOM, $overlap=-$eps)
-                    m3_screw_rail_grill(l=$parent_size.y - 2*wt,
-                                        w=$parent_size.x - 2*wt,
-                                        h=wt*2,
-                                        angle=Rail_angle,
-                                        $tags="mask");
+                bottom_wall(size);
 
-                // Slot for front plate
-                position(FRONT+TOP)
-                    up($eps)
-                    back(wt/2)
-                    cuboid([$parent_size.x / 2, wt/2, wt/2] + Slop * [2, 1, 1],
-                           anchor=TOP+FRONT,
-                           chamfer=-chamf/2, edges=TOP,
-                           $tags="mask");
-            }
 
             // left/right walls
             mirror(LEFT)
@@ -355,27 +362,8 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
             cuboid(size, $tags="hidden")
             tags("nothidden") {
             position(BOTTOM)
-                diff("mask")
-                cuboid([size.x, size.y, 0] + wt*[0, 0, 1],
-                       anchor=BOTTOM, chamfer=chamf,
-                       edges=edges("ALL", except=[TOP])) {
+                bottom_wall(size);
 
-                    // Grill for screws
-                    attach(BOTTOM, $overlap=-$eps)
-                        m3_screw_rail_grill(l=$parent_size.y - 2*wt,
-                                            w=$parent_size.x - 2*wt,
-                                            h=wt*2,
-                                            angle=Rail_angle,
-                                            $tags="mask");
-                    // Slot for front plate
-                    position(FRONT+TOP)
-                        up($eps)
-                        back(wt/2)
-                        cuboid([$parent_size.x / 2, wt/2, wt/2] + Slop * [2, 1, 1],
-                               anchor=TOP+FRONT,
-                               chamfer=-chamf/2, edges=TOP,
-                               $tags="mask");
-            }
 
             // left/right walls
             mirror_copy(LEFT)
