@@ -22,7 +22,7 @@ Piece = "All"; // [All, Bottom with connectors, Bottom, Front, Top, Left connect
 
 // Separate all the parts when viewing All pieces
 Explode_parts = true;
-Explode_offset = 45; // [0:1:100]
+Explode_offset = 20; // [0:1:100]
 
 /* [Print Options] */
 // Adds a extra base on the bottom to prevent elephant's foot
