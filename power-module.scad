@@ -39,7 +39,11 @@ Box_dimensions = [50, 70, 40];
 Wall_thickness = 2;
 
 // Multiplier of the grill width to space out by
-Grill_spacing = 1.25;
+Side_grill_spacing = 1.1;
+Bottom_grill_spacing = 1.5;
+
+// Grill rail angle
+Rail_angle = 60; // [0:15:90]
 
 // General slop for fits
 Slop = 0.1;
@@ -65,7 +69,6 @@ Screw_head_height = 1.65;
 Nut_thickness = 2.4;
 Nut_width = 5.5;
 
-Rail_angle = 45; // [0:15:90]
 
 /* [Wire hook options] */
 Use_wire_hooks = true;
@@ -167,17 +170,33 @@ module make_front(anchor=BACK, orient=TOP) {
 }
 
 module bottom_wall(size) {
+    module _grill(w, angle) {
+        l = $parent_size.y/2 - wt;
+        back(l/2)
+            m3_screw_rail_grill(l=l, w=w, h=wt*2,
+                                angle=angle,
+                                spacing_mult=Bottom_grill_spacing);
+    }
+
     diff("mask")
         cuboid([size.x, size.y, 0] + wt*[0, 0,1],
                anchor=BOTTOM, chamfer=chamf,
                edges=edges("ALL", except=[TOP])) {
+
+        // Split up the long rail when it's past 30mm
+        grill_w = $parent_size.x;
+        grill_w_n = ceil(grill_w / 30);
         // Grill for screws
         attach(BOTTOM, $overlap=-$eps)
-            m3_screw_rail_grill(l=$parent_size.y - 2*wt,
-                                w=$parent_size.x - 2*wt,
-                                h=wt*2,
-                                angle=Rail_angle,
-                                $tags="mask");
+            tags("mask") {
+            _grill(angle=90, w=grill_w - 2*wt);
+
+            // Split up the long rails
+            mirror(BACK)
+                for (i = [0:grill_w_n-1])
+                    left((i - (grill_w_n - 1)/2)*(grill_w - 2*wt)/grill_w_n)
+                        _grill(angle=0, w=grill_w/grill_w_n - 2*wt);
+        }
 
         if (Opening_type == "USB-C+A") {
         } else {
@@ -195,6 +214,14 @@ module bottom_wall(size) {
     }
 }
 
+
+module side_wall_grill(d) {
+        m3_screw_rail_grill(l=$parent_size.z - 2*wt,
+                            w=d,
+                            h=wt*2,
+                            angle=Rail_angle,
+                            spacing_mult=Side_grill_spacing);
+}
 
 module right_wall(size, inner_size) {
     diff("mask")
@@ -313,10 +340,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                 _right_wall() {
                 attach(RIGHT, $overlap=-$eps)
                     left(($parent_size.y/2 - wt) / 2)
-                    m3_screw_rail_grill(l=$parent_size.z - 2*wt,
-                                        w=$parent_size.y/2 - 2*wt,
-                                        h=wt*2, angle=Rail_angle,
-                                        $tags="mask");
+                    side_wall_grill(d=$parent_size.y/2 - 2*wt, $tags="mask");
 
                 mirror(FRONT) position(TOP+RIGHT) {
                     pp15_base_plate(anchor=TOP+RIGHT, orient=LEFT);
@@ -338,10 +362,8 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             _right_wall() {
                 attach(RIGHT, $overlap=-$eps)
                     right(($parent_size.y/2 - wt) / 2)
-                    m3_screw_rail_grill(l=$parent_size.z - 2*wt,
-                                        w=$parent_size.y/2 - 2*wt,
-                                        h=wt*2, angle=Rail_angle,
-                                        $tags="mask");
+                    side_wall_grill(d=$parent_size.y/2 - 2*wt, $tags="mask");
+
                 position(TOP+RIGHT) {
                     pp15_base_plate(anchor=TOP+RIGHT, orient=LEFT);
                     // cutout into wall
@@ -414,10 +436,8 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
                 position(RIGHT+TOP)
                 right_wall(size, inner_size) {
                 attach(RIGHT, $overlap=-$eps)
-                    m3_screw_rail_grill(l=$parent_size.z - 2*wt,
-                                        w=$parent_size.y - 2*wt,
-                                        h=wt*2, angle=Rail_angle,
-                                        $tags="mask");
+                    side_wall_grill(d=$parent_size.y - 2*wt,
+                                    $tags="mask");
 
                 dovetail_base_l = inner_size.y;
 
@@ -462,7 +482,7 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
 
             // Optional front plate
             position(FRONT)
-                front_wall(size, inner_size, height=size.z-2*wt, anchor=FRONT);
+                front_wall(size, inner_size, height=size.z-2*wt, anchor=FRONT, orient=BOTTOM);
         }
     }
 
