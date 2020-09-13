@@ -69,8 +69,7 @@ Screw_head_height = 1.65;
 Nut_thickness = 2.4;
 Nut_width = 5.5;
 
-
-/* [Wire hook options] */
+/* [Wire hook options (currently unused)] */
 Use_wire_hooks = true;
 
 // Number of wires to hold for the back wire hook
