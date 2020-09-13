@@ -389,13 +389,16 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                        anchor=BACK+BOTTOM,
                        chamfer=chamf,
                        edges=edges("ALL", except=[TOP, FRONT])) {
+                // when printed with the opening straithgt up, square nuts seem
+                // to require less slop
+                sqnut_slop = 0.75 * Slop;
                 position(TOP+FRONT)
                     m3_sqnut_holder(wall=wt/2,
                                     chamfer=chamf/2,
                                     edges=edges("ALL", except=[BACK, BOTTOM]),
                                     orient=TOP,
-                                    anchor=BACK+BOTTOM) {
-                    sh_sz = m3_sqnut_holder_size(wall=wt/2);
+                                    anchor=BACK+BOTTOM, slop=sqnut_slop) {
+                    sh_sz = m3_sqnut_holder_size(wall=wt/2, slop=sqnut_slop);
                     up($eps)
                     position(BOTTOM)
                         mirror(BACK) bottom_support([sh_sz.x, sh_sz.y],
