@@ -43,7 +43,7 @@ Side_grill_spacing = 1.1;
 Bottom_grill_spacing = 1.5;
 
 // Grill rail angle
-Rail_angle = 60; // [0:15:90]
+Rail_angle = 75; // [0:15:90]
 
 // General slop for fits
 Slop = 0.1;
@@ -332,14 +332,15 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             position(BOTTOM)
                 bottom_wall(size);
 
+            grill_length = $parent_size.y/2 - 2*wt + abs(pp15_get_center_yoffset());
 
-            // left/right walls
+            // left wall
             mirror(LEFT)
                 position(RIGHT+TOP)
                 _right_wall() {
                 attach(RIGHT, $overlap=-$eps)
-                    left(($parent_size.y/2 - wt) / 2)
-                    side_wall_grill(d=$parent_size.y/2 - 2*wt, $tags="mask");
+                    left(grill_length / 2 - abs(pp15_get_center_yoffset()) + wt)
+                    side_wall_grill(d=grill_length, $tags="mask");
 
                 mirror(FRONT) position(TOP+RIGHT) {
                     pp15_base_plate(anchor=TOP+RIGHT, orient=LEFT);
@@ -357,11 +358,12 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                 }
             }
 
+            // right wall
             position(RIGHT+TOP)
             _right_wall() {
                 attach(RIGHT, $overlap=-$eps)
-                    right(($parent_size.y/2 - wt) / 2)
-                    side_wall_grill(d=$parent_size.y/2 - 2*wt, $tags="mask");
+                    right(grill_length / 2 - abs(pp15_get_center_yoffset()) + wt)
+                    side_wall_grill(d=grill_length, $tags="mask");
 
                 position(TOP+RIGHT) {
                     pp15_base_plate(anchor=TOP+RIGHT, orient=LEFT);
