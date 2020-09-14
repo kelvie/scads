@@ -276,6 +276,9 @@ module front_wall(size, inner_size, height,
 // TODO: front anderson powerpole holder
 // TODO: build in PCB holder (maybe something like a sandwich press for the top)
 
+// nearterm TODO:
+// - dovetail sides are easy to chip off
+
 // Size of dovetails that fit the bottom to the top piece
 back_dovetail_ratio = 1/8;
 front_dovetail_ratio = 1/8;
