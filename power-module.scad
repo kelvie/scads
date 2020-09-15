@@ -275,11 +275,12 @@ module front_wall(size, inner_size, height,
 // TODO: text on side connectors to know which one's which, and what voltages
 // TODO: customize front plate
 // TODO: front anderson powerpole holder
-// TODO: build in PCB holder (maybe something like a sandwich press for the top)
+// TODO: build in PCB holder (problem is that it's hard to do z adjustments),
+//       will need to have guides for the clamp which adds height...
 
 // nearterm TODO:
-// - dovetail sides are easy to chip off (needs reinforcement)
 // - round the outside edges (or rounding even) including anderson connectors
+// - dovetail sides are easy to chip off (needs reinforcement)
 // - 3-up front
 // - think about wire management (and how to stuff wires for assembly)
 
