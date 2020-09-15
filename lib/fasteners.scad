@@ -47,6 +47,8 @@ module m3_screw_rail(l, h, anchor=TOP, orient=TOP, spin=0) {
 
 function m3_screw_head_width() = screw_head_w;
 
+// TODO: add a max length of rail, and make it look nice
+
 // Creates a screw rail grill -- that is, a grill that can be used as a
 // countersunk screw rail.
 // This is useful for attaching parts that might need manual adjustment

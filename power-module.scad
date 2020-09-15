@@ -169,8 +169,8 @@ module make_front(anchor=BACK, orient=TOP) {
 }
 
 module bottom_wall(size) {
-    module _grill(w, angle) {
-        l = $parent_size.y/2 - wt;
+
+    module _grill(w, l, angle) {
         back(l/2)
             m3_screw_rail_grill(l=l, w=w, h=wt*2,
                                 angle=angle,
@@ -185,16 +185,23 @@ module bottom_wall(size) {
         // Split up the long rail when it's past 30mm
         grill_w = $parent_size.x;
         grill_w_n = ceil(grill_w / 30);
+        grill_l = $parent_size.y/2 - wt;
+
         // Grill for screws
         attach(BOTTOM, $overlap=-$eps)
             tags("mask") {
-            _grill(angle=90, w=grill_w - 2*wt);
+            _grill(angle=90, w=grill_w - 2*wt, l = grill_l/2 - wt/2);
+            back(grill_l/2)
+                _grill(angle=90, w=grill_w - 2*wt,
+                                   l = grill_l/2 - wt/2);
 
             // Split up the long rails
             mirror(BACK)
                 for (i = [0:grill_w_n-1])
                     left((i - (grill_w_n - 1)/2)*(grill_w - 2*wt)/grill_w_n)
-                        _grill(angle=0, w=grill_w/grill_w_n - 2*wt);
+                        _grill(angle=0,
+                               w=grill_w/grill_w_n - 2*wt,
+                               l=grill_l);
         }
 
         if (Opening_type == "USB-C+A") {
@@ -277,7 +284,11 @@ module front_wall(size, inner_size, height,
 // TODO: build in PCB holder (maybe something like a sandwich press for the top)
 
 // nearterm TODO:
-// - dovetail sides are easy to chip off
+// - dovetail sides are easy to chip off (needs reinforcement)
+// - fix long rails on the bottom (need to be interspersed probably)
+// - round the outside edges (or rounding even) including anderson connectors
+// - 3-up front
+// - think about wire management (and how to stuff wires for assembly)
 
 // Size of dovetails that fit the bottom to the top piece
 back_dovetail_ratio = 1/8;
