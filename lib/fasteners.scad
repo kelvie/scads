@@ -59,18 +59,26 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxl
     y_spacing = spacing * sqrt(pow(slope, 2) + 1);
     x_spacing = y_spacing / slope;
 
-    // TODO: implement offset
-    module _split_rail(l, offset) {
-        if (is_def(maxlen) && l > maxlen) {
-            n = floor(l / maxlen);
-            shortlen = l / (n-1) - spacing;
-            longlen = (l - spacing * (n-1)) / n;
+    function _rail_len(l, n) = (l - spacing * (n-1)) / n;
+    function _get_n(l, maxlen, n=1) =
+        (_rail_len(l, n) < maxlen) ? n : _get_n(l, maxlen, n+1);
+
+    assert(is_undef(maxlen) || maxlen > 2*spacing);
+
+    module _split_rail(l, offset=false) {
+        if (is_def(maxlen)) {
+            n = _get_n(l, maxlen);
+            needs_offset = offset && n > 1;
+            longlen = _rail_len(l, n);
+            shortlen = (l - n*spacing - longlen*(n-1))/2;
+            assert(shortlen > 0, "maxlen is too short");
             translate(zrot(angle, p=(l/2 + screw_head_w/2) * LEFT))
-                for (i = [0:n-1])
-                    translate(zrot(angle, p=i*(longlen+spacing) * RIGHT))
-            m3_screw_rail(l=longlen, h=h, anchor=TOP+LEFT, spin=angle);
-
-
+                for (i = [0:n-1 + (needs_offset ? 1 : 0)]) {
+                    raillen = needs_offset && (i == 0 || i == n) ? shortlen : longlen;
+                    y_adjust = (needs_offset && i > 0 ? -shortlen -spacing: 0);
+                    translate(zrot(angle, p=(i*(longlen+spacing) + y_adjust) * RIGHT))
+                        m3_screw_rail(l=raillen, h=h, anchor=TOP+LEFT, spin=angle);
+                }
         } else {
             m3_screw_rail(l=l, h=h, anchor=anchor, spin=angle);
         }
@@ -80,10 +88,10 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxl
 
     if (slope == 0) {
         ycopies(l=inner_l, spacing=spacing)
-            _split_rail(l=inner_w);
+            _split_rail(l=inner_w, offset=$idx % 2 != 0);
     } else if (!is_finite(slope)) {
         xcopies(l=inner_w, spacing=spacing)
-            _split_rail(l=inner_l);
+            _split_rail(l=inner_l, offset=$idx % 2 != 0);
     } else {
         for (i = [-max_i:max_i]) {
             yoff = i*y_spacing;
@@ -105,7 +113,7 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxl
             if (y2_ > -inner_l/2 && x2_ > -inner_w/2)
                 back(yoff + ydiff/2 )
                     right(xdiff/2)
-                    _split_rail(l=l);
+                    _split_rail(l=l, offset=i%2 != 0);
         }
     }
 }

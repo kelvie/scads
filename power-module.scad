@@ -40,7 +40,7 @@ Wall_thickness = 2;
 
 // Multiplier of the grill width to space out by
 Side_grill_spacing = 1.1;
-Bottom_grill_spacing = 1.5;
+Bottom_grill_spacing = 1.4;
 
 // Grill rail angle
 Rail_angle = 75; // [0:15:90]
@@ -175,8 +175,7 @@ module bottom_wall(size) {
             m3_screw_rail_grill(l=l, w=w, h=wt*2,
                                 angle=angle,
                                 spacing_mult=Bottom_grill_spacing,
-                                maxlen=15
-                                );
+                                maxlen=30);
     }
 
     diff("mask")
@@ -280,7 +279,6 @@ module front_wall(size, inner_size, height,
 
 // nearterm TODO:
 // - dovetail sides are easy to chip off (needs reinforcement)
-// - fix long rails on the bottom (need to be interspersed probably)
 // - round the outside edges (or rounding even) including anderson connectors
 // - 3-up front
 // - think about wire management (and how to stuff wires for assembly)
