@@ -49,7 +49,14 @@ function m3_screw_head_width() = screw_head_w;
 
 // Creates a screw rail grill -- that is, a grill that can be used as a
 // countersunk screw rail.
+//
 // This is useful for attaching parts that might need manual adjustment
+//
+// Parameters:
+//   `w` and `l` determine the area to cover
+//   `angle` is the angle of the rail
+//   `maxlen` ensures that rails won't be longer than the specified length by
+//       breaking them up
 module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxlen=undef) {
     inner_l = l - screw_head_w;
     inner_w = w - screw_head_w;
@@ -162,5 +169,5 @@ if (Show_sample) {
         m3_screw_rail_grill(w=$parent_size.x-2,
                             l=$parent_size.y-2,
                             h=4,
-                            $tags="rail", angle=Sample_angle, maxlen=15);
+                            $tags="rail", angle=Sample_angle, maxlen=30);
  }
