@@ -47,12 +47,10 @@ module m3_screw_rail(l, h, anchor=TOP, orient=TOP, spin=0) {
 
 function m3_screw_head_width() = screw_head_w;
 
-// TODO: add a max length of rail, and make it look nice
-
 // Creates a screw rail grill -- that is, a grill that can be used as a
 // countersunk screw rail.
 // This is useful for attaching parts that might need manual adjustment
-module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45) {
+module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxlen=undef) {
     inner_l = l - screw_head_w;
     inner_w = w - screw_head_w;
 
@@ -61,14 +59,31 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45) {
     y_spacing = spacing * sqrt(pow(slope, 2) + 1);
     x_spacing = y_spacing / slope;
 
+    // TODO: implement offset
+    module _split_rail(l, offset) {
+        if (is_def(maxlen) && l > maxlen) {
+            n = floor(l / maxlen);
+            shortlen = l / (n-1) - spacing;
+            longlen = (l - spacing * (n-1)) / n;
+            translate(zrot(angle, p=(l/2 + screw_head_w/2) * LEFT))
+                for (i = [0:n-1])
+                    translate(zrot(angle, p=i*(longlen+spacing) * RIGHT))
+            m3_screw_rail(l=longlen, h=h, anchor=TOP+LEFT, spin=angle);
+
+
+        } else {
+            m3_screw_rail(l=l, h=h, anchor=anchor, spin=angle);
+        }
+    }
+
     max_i = floor(max(inner_l / y_spacing, inner_w / x_spacing));
 
-    if (angle % 180 == 0) {
+    if (slope == 0) {
         ycopies(l=inner_l, spacing=spacing)
-            m3_screw_rail(l=inner_w, h=h, anchor=anchor, spin=angle);
-    } else if (angle % 180 == 90) {
+            _split_rail(l=inner_w);
+    } else if (!is_finite(slope)) {
         xcopies(l=inner_w, spacing=spacing)
-            m3_screw_rail(l=inner_l, h=h, anchor=anchor, spin=angle);
+            _split_rail(l=inner_l);
     } else {
         for (i = [-max_i:max_i]) {
             yoff = i*y_spacing;
@@ -90,7 +105,7 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45) {
             if (y2_ > -inner_l/2 && x2_ > -inner_w/2)
                 back(yoff + ydiff/2 )
                     right(xdiff/2)
-                    m3_screw_rail(l=l, h=h, anchor=anchor, spin=angle);
+                    _split_rail(l=l);
         }
     }
 }
@@ -139,5 +154,5 @@ if (Show_sample) {
         m3_screw_rail_grill(w=$parent_size.x-2,
                             l=$parent_size.y-2,
                             h=4,
-                            $tags="rail", angle=Sample_angle);
+                            $tags="rail", angle=Sample_angle, maxlen=15);
  }
