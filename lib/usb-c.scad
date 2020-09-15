@@ -7,6 +7,10 @@ usb_c_hole_h= 3.3;
 // This is a guess
 usb_c_hole_r = usb_c_hole_h / 3;
 
+// TODO:
+// - chamfer or round the opening...
+// - Make attachable
+
 // Creates a usb c hole of length l (in the y direction)
 // centered about origin. Use with difference()
 module usb_c_jack_hole(l=20, tolerance=Default_tolerance) {

@@ -156,7 +156,7 @@ module make_front(anchor=BACK, orient=TOP) {
 
             // USB-C hole
             down(bd.z/ 2 - Bottom_USB_C_port_offset)
-            usb_c_jack_hole(l=Box_dimensions.y,
+            usb_c_jack_hole(l=2*wt,
                             tolerance=USB_C_hole_tolerance);
 
             // TODO: make a library for USB-A port
@@ -255,7 +255,7 @@ module front_wall(size, inner_size, height,
 
                 // USB-C hole
                 down($parent_size.z/ 2 - Bottom_USB_C_port_offset)
-                    usb_c_jack_hole(l=Box_dimensions.y,
+                    usb_c_jack_hole(l=2*wt,
                                     tolerance=USB_C_hole_tolerance);
 
                 // TODO: make a library for USB-A port
@@ -281,7 +281,8 @@ module front_wall(size, inner_size, height,
 //       will need to have guides for the clamp which adds height...
 
 // nearterm TODO:
-// - round the outside edges (or rounding even) including anderson connectors
+// - round the anderson connectors edges
+// - round the USB openings
 // - dovetail sides are easy to chip off (needs reinforcement)
 // - 3-up front
 // - think about wire management (and how to stuff wires for assembly)
