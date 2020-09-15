@@ -94,6 +94,8 @@ $fa = $preview ? 10 : 5;
 $eps = $fs/10;
 
 chamf=Wall_thickness/3;
+rounding=Wall_thickness/2;
+
 // https://coolors.co/
 palette = ["#e6efe9","#c5f4e0","#c2eaba","#a7c4a0","#8f8389"];
 
@@ -180,7 +182,7 @@ module bottom_wall(size) {
 
     diff("mask")
         cuboid([size.x, size.y, 0] + wt*[0, 0,1],
-               anchor=BOTTOM, chamfer=chamf,
+               anchor=BOTTOM, rounding=rounding,
                edges=edges("ALL", except=[TOP])) {
 
         // Grill for screws
@@ -227,7 +229,7 @@ module right_wall(size, inner_size) {
     diff("mask")
         cuboid([wt, size.y, size.z],
                anchor=RIGHT+TOP,
-               chamfer=chamf,
+               rounding=rounding,
                edges=edges("ALL", except=[TOP, LEFT])) {
 
         if (Opening_type == "USB-C+A") {
@@ -323,7 +325,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             // Add a notch to fit the other part in the front
             position(FRONT+TOP)
                 cuboid([wt, wt, wt],
-                       chamfer=chamf,
+                       rounding=rounding,
                        edges=edges(RIGHT, except=[TOP, BOTTOM, BACK]),
                        anchor=FRONT+BOTTOM);
 
@@ -397,7 +399,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             position(BACK+BOTTOM)
                 cuboid([size.x, 0, size.z] + wt * [0, 1, -1],
                        anchor=BACK+BOTTOM,
-                       chamfer=chamf,
+                       rounding=rounding,
                        edges=edges("ALL", except=[TOP, FRONT])) {
                 // when printed with the opening straithgt up, square nuts seem
                 // to require less slop
@@ -484,7 +486,7 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
                 position(BACK+BOTTOM)
                 cuboid([size.x, 0, size.z] + wt * [0, 1, 1],
                        anchor=BACK+BOTTOM,
-                       chamfer=chamf,
+                       rounding=rounding,
                        edges=edges("ALL", except=[TOP, FRONT])) {
                 down(2*wt - 2*Slop)
                     position(TOP+BACK)
