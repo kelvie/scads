@@ -34,7 +34,7 @@ Add_base = true;
 Predefined_size = "25mm"; // [Custom, 25mm: 25mm wide, 55mm: 55mm wide]
 
 // Only applicable when predefined size is Custom. Keep Y and Z the same if you want them to connect nicely...
-Box_dimensions = [50, 70, 40];
+Custom_width = 55;
 
 Wall_thickness = 2;
 
@@ -106,8 +106,8 @@ common_yz = [0, 80, 45];
 
 // Get the box dimensions
 function get_box_dimensions() =
-    pds == "Custom" ? Box_dimensions :
     common_yz + [1, 0, 0] * (
+        pds == "Custom" ? Custom_width :
         pds == "25mm" ? 25 :
         pds == "55mm" ? 55 :
         0);
@@ -163,7 +163,7 @@ module make_front(anchor=BACK, orient=TOP) {
             usb_port_size = [13.2, 6];
             down(bd.z/2 - Bottom_USB_A_port_offset)
                 cuboid([usb_port_size.x,
-                        Box_dimensions.y,
+                        bd.y,
                         usb_port_size.y] + USB_C_hole_tolerance * [1, 0, 1] ,
                        rounding=0.25);
         }
@@ -262,7 +262,7 @@ module front_wall(size, inner_size, height,
                 usb_port_size = [13.2, 6];
                 down($parent_size.z/2 - Bottom_USB_A_port_offset)
                     cuboid([usb_port_size.x,
-                            Box_dimensions.y,
+                            bd.y,
                             usb_port_size.y] + USB_C_hole_tolerance * [1, 0, 1] ,
                            rounding=0.25);
             }
