@@ -152,7 +152,7 @@ side_mount_sz = [Power_module_size.x,
 
 // Side mounts for the whole piece to mount onto the power module
 // FUTURE: rect pipe instead?
-// TODO: make one that mounts downward and is less tall for slimmer PCBs
+// TODO: mount multiple PCBs at once? and slimmer?
 module side_mounts(inner_width, anchor=CENTER, spin=0, orient=TOP) {
     sz = side_mount_sz;
     eps = $fs/2;
