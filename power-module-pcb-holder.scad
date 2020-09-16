@@ -6,7 +6,7 @@ include <lib/add-base.scad>
 
 /* [Overall dimensions] */
 PCB_size = [18.22, 49.2, 1.57];
-Power_module_size = [25, 80, 40];
+Power_module_size = [25, 80, 45];
 
 // Minimum wall thickness -- non-load bearing walls can be half this
 Wall_thickness = 2;
