@@ -7,7 +7,7 @@ Show_sample = false;
 Part_to_show = "Cover"; // [Cover, Base, Mask, All]
 
 /* [Hidden] */
-$fa = $preview ? 5 : 10;
+$fa = $preview ? 10 : 5;
 $fs = 0.025;
 
 default_wall = 2;
