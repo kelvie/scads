@@ -56,7 +56,7 @@ Dovetail_slop = 0.1; // [0:0.025:0.2]
 
 
 /* [Front Connector options] */
-Opening_type = "USB-C+A"; // [USB-C+A, Anderson PP]
+Opening_type = "USB-C+A"; // [USB-C+A, Modular]
 
 
 /* [Fastener options] */
@@ -202,6 +202,7 @@ module bottom_wall(size) {
 
         if (Opening_type == "USB-C+A") {
         } else {
+            // TODO: make better slots that allow insertion from the front
             // Slot for front plate
             position(FRONT+TOP)
                 up($eps)
@@ -536,7 +537,7 @@ if (Piece == "All") {
     explode_out(UP)
         color(palette[3], alpha=0.99) make_top(anchor=TOP, orient=BOTTOM);
 
-    if (Opening_type == "USB-C+A") {
+    if (Opening_type == "USB-C+A" || Opening_type == "Modular") {
     } else {
          explode_out(FORWARD)
              fwd(bd.y/2)
