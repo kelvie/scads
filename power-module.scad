@@ -566,7 +566,7 @@ if (Piece == "All") {
  } else if (Piece == "Bottom") {
     make_bottom(anchor=BOTTOM);
  } else {
-    add_base(0.3, 1.25, 0.1, enable=Add_base)
+    add_base(0.3, 1, 0.1, enable=Add_base)
         if (Piece == "Right connector" || Piece == "Left connector") {
             pp15_casing(jack=false, anchor=BOTTOM);
         }

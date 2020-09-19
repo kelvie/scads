@@ -240,8 +240,9 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
         // wire hider cube
         module wh_cube() {
-            cuboid(size=[outsideSz.x, outsideSz.z, outsideSz.z],
-                   anchor=BACK+BOTTOM)
+            cuboid(size=[outsideSz.x, outsideSz.z+rounding, outsideSz.z],
+                   anchor=BACK+BOTTOM, rounding=rounding,
+                   edges=edges(BOTTOM, except=[FRONT, BACK]))
                 tags("children") children();
         }
 
@@ -249,16 +250,16 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         if (!has_mask && wireHider) {
             diag = wireHiderWidth * sqrt(2);
             diag_nowall = diag - wall * sqrt(2);
-            diag_rounding = rounding/sqrt(2);
 
             fwd(outsideSz.y)
                 difference() {
                 intersection() {
                     wh_cube();
                     show("children") wh_cube() {
-                        attach(TOP+BACK)
-                                  cuboid(size=[outsideSz.x + 0.01, diag+2*rounding, diag],
-                               rounding=diag_rounding);
+                        back(outsideSz.z - rounding/2)
+                            xrot(-45)
+                            cuboid(size=[outsideSz.x, 3*diag, diag],
+                                   rounding=rounding);
                     }
                 }
                 show("children") wh_cube() {
@@ -345,6 +346,7 @@ if (Show_sample) {
         pp15_base_plate(anchor=TOP);
         pp15_casing(anchor=TOP);
         % pp15_casing(anchor=TOP, mask=3);
+        % pp15_casing_wirehider_mask(3, anchor=TOP);
     } else if (part == "Mask") {
         pp15_casing(anchor=TOP, mask=3);
     } else if (part == "Cover") {
