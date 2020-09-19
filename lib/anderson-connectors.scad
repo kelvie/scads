@@ -1,5 +1,6 @@
 include <BOSL2/std.scad>
 include <BOSL2/joiners.scad>
+include <text.scad>
 
 // To show a sample
 Show_sample = false;
@@ -39,11 +40,7 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
          )
     (osz.y - wall - matedFullLength/2);
 
-// TODO: add text argument
-// TODO: some way to cut out an entry path for the other connector rather than
-//       having it stick out (graduated thickness?)
 // TODO: make all variables camelcase
-// TODO: chamfer the mask
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
 //
@@ -75,7 +72,7 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
 module pp15_casing(middlePin=true, tolerance=default_tolerance,
                    dovetailLeft=true, jack=false, wall=default_wall,
                    wireHider=true, mask=0, wirehider_mask=0,
-                   anchor=CENTER, spin=0, orient=UP) {
+                   anchor=CENTER, spin=0, orient=UP, text) {
 
     housingLength = jack ? fullLength : matedFullLength - fullLength;
 
@@ -163,6 +160,9 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                 edges=edges("ALL", except=edge_nochamf)
                 ) {
 
+            if (is_def(text))
+                attach(LEFT) label(text);
+
             left((leftWallThickness - wall)/2) attach(TOP) {
                 fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
                 back((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
@@ -177,6 +177,9 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                 rounding=rounding,
                 edges=edges("ALL", except=edge_nochamf)
                 ) {
+            if (is_def(text))
+                attach(RIGHT) label(text);
+
         right((rightWallThickness - wall)/2)
             attach(TOP) {
             fwd((outsideSz.y - wall)/2)

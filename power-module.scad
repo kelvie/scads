@@ -12,7 +12,6 @@ include <lib/BOSL2/joiners.scad>
 include <lib/anderson-connectors.scad>
 include <lib/usb-c.scad>
 include <lib/fasteners.scad>
-include <lib/wire-hook.scad>
 include <lib/add-base.scad>
 include <lib/supports.scad>
 
@@ -58,6 +57,9 @@ Dovetail_slop = 0.1; // [0:0.025:0.2]
 /* [Front Connector options] */
 Opening_type = "USB-C+A"; // [USB-C+A, Modular]
 
+/*  [Labels] */
+Left_connector_label = "24V";
+Right_connector_label = "24V";
 
 /* [Fastener options] */
 Screw_size = 3;
@@ -69,8 +71,6 @@ Screw_head_height = 1.65;
 Nut_thickness = 2.4;
 Nut_width = 5.5;
 
-/* [Wire hook options (currently unused)] */
-Use_wire_hooks = true;
 
 // Number of wires to hold for the back wire hook
 Back_wire_hook_wires = 4;
@@ -528,11 +528,11 @@ if (Piece == "All") {
 
     explode_out(RIGHT)
     right(bd.x/2 + wt)
-        pp15_casing(anchor=TOP+RIGHT, orient=LEFT);
+        pp15_casing(anchor=TOP+RIGHT, orient=LEFT, text=Right_connector_label);
 
     explode_out(LEFT)
     zrot(180) right(bd.x/2 + wt)
-        pp15_casing(anchor=TOP+RIGHT, orient=LEFT);
+        pp15_casing(anchor=TOP+RIGHT, orient=LEFT, text=Left_connector_label);
 
     explode_out(UP)
         color(palette[3], alpha=0.99) make_top(anchor=TOP, orient=BOTTOM);
@@ -548,10 +548,10 @@ if (Piece == "All") {
     color(palette[1], alpha=1) make_bottom(anchor=TOP);
 
     right(bd.x/2 + wt)
-        pp15_casing(anchor=TOP+RIGHT, orient=LEFT);
+        pp15_casing(anchor=TOP+RIGHT, orient=LEFT, text=Right_connector_label);
 
     zrot(180) right(bd.x/2 + wt)
-        pp15_casing(anchor=TOP+RIGHT, orient=LEFT);
+        pp15_casing(anchor=TOP+RIGHT, orient=LEFT, text=Left_connector_label);
 
 
     // show("main connector") make_part();
@@ -567,8 +567,10 @@ if (Piece == "All") {
     make_bottom(anchor=BOTTOM);
  } else {
     add_base(0.3, 1, 0.1, enable=Add_base)
-        if (Piece == "Right connector" || Piece == "Left connector") {
-            pp15_casing(jack=false, anchor=BOTTOM);
+        if (Piece == "Right connector") {
+            pp15_casing(jack=false, anchor=BOTTOM, text=Right_connector_label);
+        } else if (Piece == "Left connector") {
+            pp15_casing(jack=false, anchor=BOTTOM, text=Left_connector_label);
         }
  }
 
