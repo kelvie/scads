@@ -12,6 +12,10 @@ module part(d=3, anchor=CENTER, spin=0, orient=TOP) {
     size = [40, 20, 10];
     pitch=get_metric_iso_coarse_thread_pitch(d);
 
+    module _rod(l, orient=TOP) {
+        threaded_rod(d=d, pitch=pitch, internal=true, l=l, orient=orient, $fa=10, $tags="cutme");
+    }
+
     module _part() {
         diff("cutme")
             cuboid(size, rounding=3) {
@@ -20,25 +24,22 @@ module part(d=3, anchor=CENTER, spin=0, orient=TOP) {
                 attach(TOP) label("SL 0.1");
                 mirror_copy(BACK)
                     fwd(4) left(d-1)
-                    threaded_rod($tags="cutme",
-                                 d=d, pitch=pitch,
-                                 l=size.z + $eps, $slop=0.1);
+                    _rod(l=size.z + $eps, $slop=0.1);
 
-                right(d-1) threaded_rod($tags="cutme",
-                             d=d, pitch=pitch,
-                             l = size.y + $eps, $slop=0.1, orient=FRONT);
+                right(d-1)
+                    _rod(l=size.y+$eps, $slop=0.1, orient=FRONT);
 
             }
+
             right(10) {
                 attach(TOP) label("SL 0.2");
                 mirror_copy(BACK)
                     fwd(4) right(d-1)
-                    threaded_rod($tags="cutme",
-                                 d=d, pitch=pitch,
-                                 l=size.z + $eps, $slop=0.2);
-                left(d-1) threaded_rod($tags="cutme",
-                                        d=d, pitch=pitch,
-                                        l = size.y + $eps, $slop=0.1, orient=FRONT);
+                    _rod( l=size.z + $eps, $slop=0.2);
+
+                left(d-1)
+                    _rod(l=size.y+$eps, $slop=0.2, orient=FRONT);
+
             }
         }
     }
