@@ -328,7 +328,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             position(FRONT+TOP)
                 cuboid([wt, wt, wt],
                        rounding=rounding,
-                       edges=edges(RIGHT, except=[TOP, BOTTOM, BACK]),
+                       edges=edges(RIGHT+FRONT),
                        anchor=FRONT+BOTTOM);
 
             children();

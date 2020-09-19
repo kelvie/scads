@@ -88,6 +88,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         wireHiderWidth*[0,2,0];
 
     chamfer = wall / 3;
+    rounding = wall / 2;
     edge_nochamf = wireHider ? [TOP, FRONT] : [TOP];
 
     $eps = wall / 100;
@@ -158,7 +159,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
             cuboid(
                 size=[leftWallThickness, outsideSz.y, outsideSz.z],
                 anchor=BOTTOM+BACK+LEFT,
-                chamfer=chamfer,
+                rounding=rounding,
                 edges=edges("ALL", except=edge_nochamf)
                 ) {
 
@@ -173,7 +174,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
             cuboid(
                 size=[rightWallThickness, outsideSz.y, outsideSz.z],
                 anchor=BOTTOM+BACK+RIGHT,
-                chamfer=chamfer,
+                rounding=rounding,
                 edges=edges("ALL", except=edge_nochamf)
                 ) {
         right((rightWallThickness - wall)/2)
@@ -190,7 +191,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
             left(outsideSz.x / 2)
             cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, outsideSz.z],
                    anchor=BOTTOM+BACK+LEFT,
-                   chamfer=chamfer,
+                   rounding=rounding,
                    edges=edges("ALL", except=edge_nochamf)
                 );
 
@@ -199,7 +200,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
             difference() {
             cuboid(
                 size=[outsideSz.x, outsideSz.y, wall],
-                chamfer=chamfer,
+                rounding=rounding,
                 anchor=BOTTOM+BACK,
                 edges=edges("ALL", except=wireHider ? FRONT : [])
                 );
@@ -233,7 +234,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         fwd(outsideSz.y) mirror_copy(LEFT) left(outsideSz.x/2)
             cuboid(size=[wireHoleWallWidth+wall, wall, outsideSz.z],
                    anchor=FRONT+BOTTOM+LEFT,
-                   chamfer = chamfer,
+                   rounding=rounding,
                    edges=edges("ALL", except=edge_nochamf)
                 );
 
@@ -248,7 +249,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         if (!has_mask && wireHider) {
             diag = wireHiderWidth * sqrt(2);
             diag_nowall = diag - wall * sqrt(2);
-            diag_chamfer = chamfer/sqrt(2);
+            diag_rounding = rounding/sqrt(2);
 
             fwd(outsideSz.y)
                 difference() {
@@ -256,8 +257,8 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                     wh_cube();
                     show("children") wh_cube() {
                         attach(TOP+BACK)
-                                  cuboid(size=[outsideSz.x + 0.01, diag+2*chamfer, diag],
-                               chamfer=diag_chamfer);
+                                  cuboid(size=[outsideSz.x + 0.01, diag+2*rounding, diag],
+                               rounding=diag_rounding);
                     }
                 }
                 show("children") wh_cube() {
