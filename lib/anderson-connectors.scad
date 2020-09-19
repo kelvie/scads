@@ -90,7 +90,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
     $eps = wall / 100;
 
-    pinR = rollPinRadius - tolerance/2;
+    pin_r = rollPinRadius - tolerance/2;
 
     // Left+right walls
     leftWallThickness = wall;
@@ -224,11 +224,11 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         // Side roll pins
         fwd(rollPinYOffset) {
             mirror_copy(LEFT) left(width)
-                cyl(r=pinR, h=rollPinHeight, chamfer=chamfer, anchor=BOTTOM);
+                cyl(r=pin_r, h=rollPinHeight, chamfer=chamfer, anchor=BOTTOM);
 
             // Optional middle roll pin
             if (middlePin)
-                cyl(r=pinR, h=rollPinHeight, chamfer=chamfer, anchor=BOTTOM);
+                cyl(r=pin_r, h=rollPinHeight, chamfer=chamfer, anchor=BOTTOM);
 
         }
 
