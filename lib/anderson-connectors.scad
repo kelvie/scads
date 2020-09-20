@@ -1,11 +1,12 @@
 include <BOSL2/std.scad>
 include <BOSL2/joiners.scad>
 include <text.scad>
+use <fasteners.scad>
 
 // To show a sample
 Show_sample = false;
 
-Part_to_show = "Cover"; // [Cover, Base, Mask, All]
+Part_to_show = "Multi-holder"; // [Cover, Base, Mask, Multi-holder, All]
 
 /* [Hidden] */
 $fa = $preview ? 10 : 5;
@@ -30,7 +31,7 @@ function _get_inside_size(jack=false) =
     let (housingLength = jack ? fullLength : matedFullLength - fullLength)
     [2*widthWithDovetail, housingLength, widthWithDovetail];
 
-function _get_outside_size(isz, wall=default_wall, tolerance=default_tolerance) =
+function _get_outside_size(isz=_get_inside_size(), wall=default_wall, tolerance=default_tolerance) =
     isz + wall * [2, 1, 2] + tolerance * [1, 0, 1];
 
 function pp15_get_center_yoffset(jack=false, wall=default_wall,
@@ -41,6 +42,8 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
     (osz.y - wall - matedFullLength/2);
 
 // TODO: make all variables camelcase
+// TODO: add optional grip
+// TODO: add wire hider suitable for a cable end
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
 //
@@ -72,7 +75,9 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
 module pp15_casing(middlePin=true, tolerance=default_tolerance,
                    dovetailLeft=true, jack=false, wall=default_wall,
                    wireHider=true, mask=0, wirehider_mask=0,
-                   anchor=CENTER, spin=0, orient=UP, text) {
+                   anchor=CENTER, spin=0, orient=UP, text, rounding=default_wall/2,
+                   leg_height
+                   ) {
 
     housingLength = jack ? fullLength : matedFullLength - fullLength;
 
@@ -85,7 +90,6 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         wireHiderWidth*[0,2,0];
 
     chamfer = wall / 3;
-    rounding = wall / 2;
     edge_nochamf = wireHider ? [TOP, FRONT] : [TOP];
 
     $eps = wall / 100;
@@ -99,21 +103,21 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
     rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
     rollPinHeight = widthWithDovetail + tolerance + wall;
 
+    // Aka the legs
     module make_dovetail(type, length, width=2, taper=3) {
         slop=0.05;
-
+        leg_height = is_undef(leg_height) ? wall : leg_height;
         module create_mask() {
             newlength = length;
             right((newlength - length)/2)
                 yrot(180) dovetail(type == "male" ? "female" : "male",
                                    length=newlength,
-                                   height=wall,
+                                   height=leg_height,
                                    width=width + (newlength - length)*tan(taper),
                                    spin=90,
-                                   chamfer=wall/8,
+                                   chamfer=leg_height/8,
                                    anchor=BOTTOM,
                                    taper=taper, $slop=slop, extra=0) {
-                // Needs more tolerance, still hard to put in and out; needs to be wider
                 position(FRONT)
                     cuboid($parent_size + dovetail_insert_hole_tolerance,
                            anchor=BACK);
@@ -122,10 +126,10 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
         dovetail(type,
                  length=length,
-                 height=wall,
+                 height=leg_height,
                  width=2,
                  spin=90,
-                 chamfer=wall/8,
+                 chamfer=leg_height/8,
                  anchor=BOTTOM,
                  taper=taper,
                  $slop=slop, extra=0);
@@ -165,7 +169,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
             left((leftWallThickness - wall)/2) attach(TOP) {
                 fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
-                back((outsideSz.y - wall - chamfer)/2) make_dovetail("male", wall);
+                back((outsideSz.y - wall - 2*rounding)/2) make_dovetail("male", wall);
             }
         }
 
@@ -184,7 +188,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
             attach(TOP) {
             fwd((outsideSz.y - wall)/2)
                 make_dovetail("male", wall);
-            back((outsideSz.y - wall - chamfer)/2)
+            back((outsideSz.y - wall - 2*rounding)/2)
                 make_dovetail("male", wall);
             }
         }
@@ -341,6 +345,83 @@ module pp15_base_plate(wall=2, tolerance=default_tolerance,
     }
 }
 
+module pp15_multi_holder_casing(wall=default_wall, anchor=CENTER, spin=0, orient=TOP) {
+    casing_wall = wall;
+    pp15_casing(wireHider=false, spin=spin, orient=orient, anchor=anchor,
+                wall=casing_wall, rounding=casing_wall/2);
+}
+
+module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0, orient=TOP) {
+    casing_wall = wall;
+
+    isz = _get_inside_size(jack=false);
+    osz = _get_outside_size(isz, wall=casing_wall);
+    size = [width, osz.y+2*wall, osz.x + wall];
+    echo(size);
+    rounding=wall/4;
+
+    inner_width = width-osz.z - 2*wall;
+    // Extra rounding for chamfers
+    spacing = osz.z + wall + $slop;
+
+    module _part() {
+        % back(- pp15_get_center_yoffset() + osz.y/2)
+            xcopies(n=n, spacing=spacing) {
+            up(osz.x/2)
+                zrot(180) pp15_casing(orient=RIGHT, wireHider=false, spin=180, wall=casing_wall, rounding=casing_wall/2);
+
+        }
+
+        // Walls to hold the connectors
+        // TODO: fillets for strength...
+        // TODO: maybe make the whole thing slide in from the top using rails instead, then the walls can be thicker
+        // TODO: maybe build in front plate?
+        // TODO: move sqnut rail up
+        xcopies(n=n, spacing=spacing) {
+            difference()  {
+                left(osz.z/2)
+                    down(wall)
+                    cuboid(size=[wall, size.y, osz.x + wall],
+                           rounding=rounding,
+                           anchor=RIGHT+BOTTOM);
+
+                back(- pp15_get_center_yoffset() + osz.y/2)
+                    up(osz.x/2)
+                    zrot(180) pp15_casing(orient=RIGHT, wireHider=false, spin=180, mask=3, wall=casing_wall, rounding=casing_wall/2);
+
+            }
+            back(- pp15_get_center_yoffset() + osz.y/2)
+                left(osz.z/2)
+                up(osz.x/2)
+                zrot(180)
+                pp15_base_plate(orient=RIGHT, spin=180, anchor=TOP, wall=casing_wall);
+        }
+
+        // Bottom plate
+        cuboid([width, size.y, wall],
+               rounding=rounding,
+               anchor=TOP) {
+            // Add rails for nuts
+            // TODO: this should move up a bunch, and should merge with the connector walls if too close
+            mirror_copy(LEFT)
+                position(LEFT+BOTTOM)
+                m3_sqnut_rail(l=size.y, wall=1, rounding=rounding,
+                              chamfer=1/3, spin=90, anchor=BOTTOM+BACK, orient=TOP);
+        }
+    }
+
+    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
+        union() {
+            down(osz.x/2 -wall/2) _part();
+
+            // Debug
+            // %cuboid(size);
+        }
+        children();
+    }
+}
+
+
 if (Show_sample) {
     part = Part_to_show;
     if (part == "Base") {
@@ -353,7 +434,9 @@ if (Show_sample) {
     } else if (part == "Mask") {
         pp15_casing(anchor=TOP, mask=3);
     } else if (part == "Cover") {
-        pp15_casing(anchor=TOP);
+        pp15_casing(anchor=TOP, wireHider=false);
+    } else if (part== "Multi-holder") {
+        pp15_multi_holder(n=3, width=55, wall=2);
     }
 
  }

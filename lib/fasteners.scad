@@ -2,6 +2,7 @@ include <BOSL2/std.scad>
 
 Screw_hole_diameter = 3.2;
 
+Part_to_show = "Square nut rail"; // [Rail grill, Square nut rail]
 // Assumes a countersunk screw
 Screw_head_height = 1.65;
 
@@ -129,13 +130,27 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxl
 nw = Nut_width;
 nt = Nut_thickness;
 module m3_sqnut_cutout(hole_height, hole_diameter=Screw_hole_diameter, slop=Slop,
-                       orient=TOP, spin=0, anchor=CENTER, chamfer) {
+                       orient=TOP, spin=0, anchor=CENTER, chamfer, length) {
     hh = hole_height;
     hd = hole_diameter;
     chamfer = is_def(chamfer) ? -chamfer : undef;
-    cuboid([nw, nt, nw] + slop*[1,1,1], orient=orient, spin=spin,
-           anchor=anchor, chamfer=chamfer, edges=TOP)
-        cyl(d=hd, h=nt+slop+2*hh, orient=FRONT);
+    sz=[nw, nt, nw] + (is_def(length) ? [length,0,0] : [0,0,0]);
+
+    attachable(size=sz, orient=orient, spin=spin, anchor=anchor) {
+        if (is_undef(length)) {
+            cuboid(sz + slop*[1,1,1], chamfer=chamfer, edges=TOP);
+            cyl(d=hd, h=nt+slop+2*hh, orient=FRONT);
+        } else {
+            hull() {
+                xcopies(n=2, l=length)
+                    cuboid([nw, nt, nw] + slop*[1,1,1], chamfer=chamfer, edges=TOP);
+            }
+            hull() {
+                xcopies(n=2, l=length)
+                    cyl(d=hd, h=nt+slop+2*hh, orient=FRONT);}
+        }
+        children();
+    }
 }
 
 function m3_sqnut_holder_size(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
@@ -160,14 +175,42 @@ module m3_sqnut_holder(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
     }
 }
 
+module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, chamfer, rounding) {
+    $eps = $fs / 10;
+    size = [l, nt, nw] + wall*[0, 2, 1];
+
+    inner_l = l - nw - 2*wall;
+
+    module _part() {
+        diff("cutme")
+            cuboid(size, rounding=rounding) {
+            position(TOP)
+                up($eps)
+                m3_sqnut_cutout(hole_height=$parent_size.y + 0.1, anchor=TOP,
+                                length=inner_l,
+                                chamfer=chamfer,
+                                $tags="cutme");
+        }
+    }
+    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
+        _part();
+        children();
+    }
+}
+
 if (Show_sample) {
     $fa = $preview ? 10 : 5 ;
     $fs = 0.025;
-    diff("rail")
-        cuboid([85, 40, 2])
-        attach(TOP, $overlap=-$fs/4)
-        m3_screw_rail_grill(w=$parent_size.x-2,
-                            l=$parent_size.y-2,
-                            h=4,
-                            $tags="rail", angle=Sample_angle, maxlen=30);
+
+    if (Part_to_show == "Rail grill") {
+        diff("rail")
+            cuboid([85, 40, 2])
+            attach(TOP, $overlap=-$fs/4)
+            m3_screw_rail_grill(w=$parent_size.x-2,
+                                l=$parent_size.y-2,
+                                h=4,
+                                $tags="rail", angle=Sample_angle, maxlen=30);
+    } else if (Part_to_show == "Square nut rail") {
+        m3_sqnut_rail(l=10, wall=1, chamfer=1/3);
+    }
  }
