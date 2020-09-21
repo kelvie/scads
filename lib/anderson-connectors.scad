@@ -7,6 +7,8 @@ use <fasteners.scad>
 // To show a sample
 Show_sample = false;
 Wire_hider = true;
+// Show shapes for debugging purposes
+Debug_shapes = true;
 
 Part_to_show = "Multi-holder"; // [Cover, Base, Mask, Multi-holder, All]
 Legs = "RIGHT"; // [BOTH, LEFT, RIGHT, NONE]
@@ -378,19 +380,25 @@ module pp15_multi_holder_casing(wall=default_wall, anchor=CENTER, spin=0, orient
 
 // TODO: move out of library? This is a separate part to print, but it shares a
 // bunch of functions still.
-module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0, orient=TOP) {
+module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
+                         spin=0, orient=TOP, tolerance=default_tolerance) {
     casing_wall = wall;
 
     isz = _get_inside_size(jack=false);
     osz = _get_outside_size(isz, wall=casing_wall);
-    size = [width, osz.y+2*wall + 2*$slop, osz.x + wall];
-    echo(size);
+    size = [width, osz.y+2*wall + 2*tolerance, osz.x + wall];
+
     rounding=wall/4;
 
     inner_width = width-osz.z - 2*wall;
     // Extra rounding for chamfers
-    spacing = osz.z + wall + $slop;
+    spacing = osz.z + wall + tolerance;
 
+    module _debug_tolerance() {
+        % if (Debug_shapes)
+            position(LEFT)
+                cuboid(size=[tolerance, $parent_size.y, $parent_size.z], anchor=RIGHT);
+    }
     module _part() {
         % back(- pp15_get_center_yoffset() + osz.y/2)
             xcopies(n=n, spacing=spacing) {
@@ -409,7 +417,9 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0
                     down(wall)
                     cuboid(size=[wall, size.y, osz.x + wall],
                            rounding=rounding,
-                           anchor=RIGHT+BOTTOM);
+                           anchor=RIGHT+BOTTOM) {
+                    _debug_tolerance();
+                };
 
                 back(- pp15_get_center_yoffset() + osz.y/2)
                     up(osz.x/2)
@@ -425,11 +435,13 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0
                 zrot(180)
                 pp15_base_plate(orient=RIGHT, spin=180, anchor=TOP, wall=casing_wall);
         }
-        right(spacing + osz.z/2)
+        right(n*spacing/2 + tolerance/2)
             down(wall)
             cuboid(size=[wall, size.y, osz.x + wall],
                    rounding=rounding,
-                   anchor=LEFT+BOTTOM);
+                   anchor=BOTTOM) {
+            _debug_tolerance();
+        }
 
         // Bottom plate
         cuboid([width, size.y, wall],
@@ -439,15 +451,20 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0
             // Small wall on the front and back to prevent movement
             mirror_copy(BACK)
                 position(FRONT+BOTTOM)
-                cuboid([2*spacing + osz.z + wall, wall, 2*wall], anchor=FRONT+BOTTOM, rounding=rounding);
+                cuboid([n*spacing+wall, wall, 2*wall],
+                       anchor=FRONT+BOTTOM, rounding=rounding);
             // Add rails for nuts
             mirror_copy(LEFT)
                 position(LEFT+BOTTOM)
                 m3_sqnut_rail(l=min(size.y, 3*m3_screw_head_width()),
-                              wall=wall, rounding=rounding,
+                              wall=1.5, rounding=rounding,
                               edges=edges("ALL", except=FRONT),
                               chamfer=1/3, spin=90, anchor=BOTTOM+BACK,
-                              orient=TOP, backwall=false, extra_h=size.z/4);
+                              orient=TOP, backwall=true, extra_h=size.z/4) {
+                // TODO: assert if the wall intersects this
+                if (Debug_shapes)
+                    % position(TOP) cuboid(size=[size.y+2, 2.4 + tolerance, 5.5 ], anchor=TOP);
+            }
         }
     }
 
@@ -482,7 +499,7 @@ if (Show_sample) {
                     spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
     } else if (part== "Multi-holder") {
         add_base(enable=Add_base)
-            pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM, $slop=0.2);
+            pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM);
     }
 
  }

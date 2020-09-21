@@ -130,24 +130,35 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxl
 nw = Nut_width;
 nt = Nut_thickness;
 module m3_sqnut_cutout(hole_height, hole_diameter=Screw_hole_diameter, slop=Slop,
-                       orient=TOP, spin=0, anchor=CENTER, chamfer, length, rounding) {
+                       orient=TOP, spin=0, anchor=CENTER, chamfer, length, rounding,
+                       notch=false) {
     hh = hole_height;
     hd = hole_diameter;
-    chamfer = is_def(chamfer) ? -chamfer : undef;
-    sz=[nw, nt, nw] + (is_def(length) ? [length,0,0] : [0,0,0]);
+    // Can't have notch and chamfer at the same time
+    chamfer = is_def(chamfer) && !notch ? -chamfer : undef;
+    sz=[nw, nt, nw] + slop*[1,1,1]
+        + (is_def(length) ? [length,0,0] : [0,0,0])
+        + (notch ? slop*UP : [0,0,0]);
 
     attachable(size=sz, orient=orient, spin=spin, anchor=anchor) {
         if (is_undef(length)) {
-            cuboid(sz + slop*[1,1,1], chamfer=chamfer, edges=TOP);
+            cuboid(sz, chamfer=chamfer, edges=TOP);
             cyl(d=hd, h=nt+slop+2*hh, orient=FRONT);
         } else {
-            hull() {
-                xcopies(n=2, l=length)
-                    cuboid([nw, nt, nw] + slop*[1,1,1], chamfer=chamfer, edges=TOP);
+            difference() {
+                hull()
+                    xcopies(n=2, l=length)
+                    cuboid([nw+slop, sz.y, sz.z], edges=TOP);
+                if (notch)
+                    mirror_copy(BACK)
+                        fwd(sz.y/2)
+                        up(sz.z/2 - slop)
+                        cyl(h=sz.x, r=slop, orient=RIGHT);
+
             }
-            hull() {
+            hull()
                 xcopies(n=2, l=length)
-                    cyl(d=hd, h=nt+slop+2*hh, orient=FRONT);}
+                    cyl(d=hd, h=nt+slop+2*hh, orient=FRONT);
         }
         children();
     }
@@ -176,7 +187,7 @@ module m3_sqnut_holder(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
 }
 
 module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, backwall=true, chamfer,
-                     rounding, extra_h=0, bottom_l=undef, edges=EDGES_ALL) {
+                     rounding, extra_h=0, bottom_l=undef, edges=EDGES_ALL, notch=true) {
     $eps = $fs / 10;
 
     bottom_l = is_def(bottom_l) ? bottom_l : l;
@@ -195,6 +206,7 @@ module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, backwall=true
                 m3_sqnut_cutout(hole_height=$parent_size.y + 0.1, anchor=pos,
                                 length=inner_l,
                                 chamfer=chamfer,
+                                notch=notch,
                                 $tags="cutme");
         }
     }
@@ -217,6 +229,6 @@ if (Show_sample) {
                                 h=4,
                                 $tags="rail", angle=Sample_angle, maxlen=30);
     } else if (Part_to_show == "Square nut rail") {
-        m3_sqnut_rail(l=10, wall=1, chamfer=1/3);
+        m3_sqnut_rail(l=20, wall=1, chamfer=1/3);
     }
  }
