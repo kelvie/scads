@@ -374,6 +374,8 @@ module pp15_multi_holder_casing(wall=default_wall, anchor=CENTER, spin=0, orient
                 wall=casing_wall, rounding=casing_wall/2);
 }
 
+// TODO: move out of library? This is a separate part to print, but it shares a
+// bunch of functions still.
 module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0, orient=TOP) {
     casing_wall = wall;
 
