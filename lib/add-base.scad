@@ -13,7 +13,7 @@
 //
 // `zcut` cuts the model by `zcut` in the z direction, to help preserve overall
 //     z-h if necessary.
-module add_base(h, inset=-1, zcut=0, chamfer=false, enable=true) {
+module add_base(h=0.3, inset=1.5, zcut=0.1, chamfer=false, enable=true) {
     // epsilon to make sure layers merge without coplanar surfaces
     layers = chamfer ? h / $fs : 1;
     $eps = h / layers / 100;

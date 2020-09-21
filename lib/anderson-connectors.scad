@@ -1,6 +1,7 @@
 include <BOSL2/std.scad>
 include <BOSL2/joiners.scad>
 include <text.scad>
+include <add-base.scad>
 use <fasteners.scad>
 
 // To show a sample
@@ -8,8 +9,9 @@ Show_sample = false;
 Wire_hider = true;
 
 Part_to_show = "Multi-holder"; // [Cover, Base, Mask, Multi-holder, All]
-Legs = "BOTH"; // [BOTH, LEFT, RIGHT, NONE]
+Legs = "RIGHT"; // [BOTH, LEFT, RIGHT, NONE]
 
+Add_base = true;
 /* [Hidden] */
 $fa = $preview ? 10 : 5;
 $fs = 0.025;
@@ -399,9 +401,7 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0
 
         }
 
-        // Walls to hold the connectors
         // TODO:
-        // - fillets for strength...
         // - handle front plate, probably with cutouts
         xcopies(n=n, spacing=spacing) {
             difference()  {
@@ -475,9 +475,15 @@ if (Show_sample) {
     } else if (part == "Mask") {
         pp15_casing(anchor=TOP, mask=3);
     } else if (part == "Cover") {
-        pp15_casing(anchor=TOP, wireHider=Wire_hider, legs=Legs);
+        // pp15_casing(anchor=TOP, wireHider=Wire_hider, legs=Legs);
+        add_base(enable=Add_base)
+        pp15_casing(orient=TOP, wireHider=false,
+                    legs="RIGHT",
+                    spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
     } else if (part== "Multi-holder") {
-        pp15_multi_holder(n=3, width=55, wall=2);
+        add_base(enable=Add_base)
+            pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM);
     }
 
  }
+$export_suffix = Part_to_show;
