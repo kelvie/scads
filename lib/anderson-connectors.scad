@@ -5,8 +5,10 @@ use <fasteners.scad>
 
 // To show a sample
 Show_sample = false;
+Wire_hider = true;
 
 Part_to_show = "Multi-holder"; // [Cover, Base, Mask, Multi-holder, All]
+Legs = "BOTH"; // [BOTH, LEFT, RIGHT, NONE]
 
 /* [Hidden] */
 $fa = $preview ? 10 : 5;
@@ -72,11 +74,13 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
 //
 //   `mask` when nonzero creates a cutout mask of the specified height, suitable
 //          for cutting openings to mount this onto
+//
+//   `legs` can be "BOTH", "LEFT", "RIGHT", or "NONE" (default "BOTH")
 module pp15_casing(middlePin=true, tolerance=default_tolerance,
                    dovetailLeft=true, jack=false, wall=default_wall,
                    wireHider=true, mask=0, wirehider_mask=0,
                    anchor=CENTER, spin=0, orient=UP, text, rounding=default_wall/2,
-                   leg_height
+                   leg_height, legs="BOTH"
                    ) {
 
     housingLength = jack ? fullLength : matedFullLength - fullLength;
@@ -155,52 +159,80 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                   anchor=FRONT+BOTTOM+RIGHT
                   );
 
+        // If wall doesn't have legs, remove the extra wall spacing, since this
+        // won't attach to anything anyway
+        left_wall_h = outsideSz.z - (legs == "BOTH" || legs == "LEFT" ? 0 : wall);
+        left_wall_edges = legs == "BOTH" || legs == "LEFT" ? edges("ALL", except=edge_nochamf) : edges("ALL");
+
+        right_wall_h = outsideSz.z - (legs == "BOTH" || legs == "RIGHT" ? 0 : wall);
+        right_wall_edges = legs == "BOTH" || legs == "RIGHT" ? edges("ALL", except=edge_nochamf) : edges("ALL");
+
         // left wall
         left(outsideSz.x/2)
             cuboid(
-                size=[leftWallThickness, outsideSz.y, outsideSz.z],
+                size=[leftWallThickness, outsideSz.y, left_wall_h],
                 anchor=BOTTOM+BACK+LEFT,
                 rounding=rounding,
-                edges=edges("ALL", except=edge_nochamf)
+                edges=left_wall_edges
                 ) {
 
             if (is_def(text))
                 attach(LEFT) label(text);
 
-            left((leftWallThickness - wall)/2) attach(TOP) {
-                fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
-                back((outsideSz.y - wall - 2*rounding)/2) make_dovetail("male", wall);
-            }
+            if (legs == "BOTH" || legs == "LEFT")
+                left((leftWallThickness - wall)/2) attach(TOP) {
+                    fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
+                    back((outsideSz.y - wall - 2*rounding)/2) make_dovetail("male", wall);
+                }
         }
 
         // right wall, with connectors on the back
         right(outsideSz.x/2)
             cuboid(
-                size=[rightWallThickness, outsideSz.y, outsideSz.z],
+                size=[rightWallThickness, outsideSz.y, right_wall_h],
                 anchor=BOTTOM+BACK+RIGHT,
                 rounding=rounding,
-                edges=edges("ALL", except=edge_nochamf)
+                edges=right_wall_edges
                 ) {
             if (is_def(text))
                 attach(RIGHT) label(text);
 
-        right((rightWallThickness - wall)/2)
-            attach(TOP) {
-            fwd((outsideSz.y - wall)/2)
-                make_dovetail("male", wall);
-            back((outsideSz.y - wall - 2*rounding)/2)
-                make_dovetail("male", wall);
-            }
+            if (legs == "BOTH" || legs == "RIGHT")
+                right((rightWallThickness - wall)/2)
+                    attach(TOP) {
+                    fwd((outsideSz.y - wall)/2)
+                        make_dovetail("male", wall);
+                    back((outsideSz.y - wall - 2*rounding)/2)
+                        make_dovetail("male", wall);
+                }
         }
 
         // Add thickness for sides that don't have a dovetail sticking out
-       mirror_copy(LEFT)
+        module _xtra_thicc(height, edges) {
             left(outsideSz.x / 2)
-            cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, outsideSz.z],
-                   anchor=BOTTOM+BACK+LEFT,
-                   rounding=rounding,
-                   edges=edges("ALL", except=edge_nochamf)
-                );
+                cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, height],
+                       anchor=BOTTOM+BACK+LEFT,
+                       rounding=rounding,
+                       edges=edges
+                       );
+        }
+
+        _xtra_thicc(left_wall_h, left_wall_edges);
+        mirror(LEFT) _xtra_thicc(right_wall_h, right_wall_edges);
+
+
+        // Add a back wall for the wire holes
+        module _back_wall(height, edges) {
+            wireHoleWallWidth = (width - wireHoleWidth) / 2;
+            fwd(outsideSz.y) left(outsideSz.x/2)
+                cuboid(size=[wireHoleWallWidth+wall, wall, height],
+                       anchor=FRONT+BOTTOM+LEFT,
+                       rounding=rounding,
+                       edges=edges
+                       );
+        }
+        _back_wall(left_wall_h, left_wall_edges);
+        mirror(LEFT) _back_wall(right_wall_h, right_wall_edges);
 
         // Bottom wall
         if (attachment_is_shown($tags)) // to workaround weird diff bugs
@@ -235,15 +267,6 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                 cyl(r=pin_r, h=rollPinHeight, chamfer=chamfer, anchor=BOTTOM);
 
         }
-
-        // Add a back wall for the wire holes
-        wireHoleWallWidth = (width - wireHoleWidth) / 2;
-        fwd(outsideSz.y) mirror_copy(LEFT) left(outsideSz.x/2)
-            cuboid(size=[wireHoleWallWidth+wall, wall, outsideSz.z],
-                   anchor=FRONT+BOTTOM+LEFT,
-                   rounding=rounding,
-                   edges=edges("ALL", except=edge_nochamf)
-                );
 
         // wire hider cube
         module wh_cube() {
@@ -356,7 +379,7 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0
 
     isz = _get_inside_size(jack=false);
     osz = _get_outside_size(isz, wall=casing_wall);
-    size = [width, osz.y+2*wall, osz.x + wall];
+    size = [width, osz.y+2*wall + 2*$slop, osz.x + wall];
     echo(size);
     rounding=wall/4;
 
@@ -368,15 +391,16 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0
         % back(- pp15_get_center_yoffset() + osz.y/2)
             xcopies(n=n, spacing=spacing) {
             up(osz.x/2)
-                zrot(180) pp15_casing(orient=RIGHT, wireHider=false, spin=180, wall=casing_wall, rounding=casing_wall/2);
+                zrot(180) pp15_casing(orient=RIGHT, wireHider=false,
+                                      legs="RIGHT",
+                                      spin=180, wall=casing_wall, rounding=casing_wall/2);
 
         }
 
         // Walls to hold the connectors
-        // TODO: fillets for strength...
-        // TODO: maybe make the whole thing slide in from the top using rails instead, then the walls can be thicker
-        // TODO: maybe build in front plate?
-        // TODO: move sqnut rail up
+        // TODO:
+        // - fillets for strength...
+        // - handle front plate, probably with cutouts
         xcopies(n=n, spacing=spacing) {
             difference()  {
                 left(osz.z/2)
@@ -387,7 +411,10 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0
 
                 back(- pp15_get_center_yoffset() + osz.y/2)
                     up(osz.x/2)
-                    zrot(180) pp15_casing(orient=RIGHT, wireHider=false, spin=180, mask=3, wall=casing_wall, rounding=casing_wall/2);
+                    zrot(180) pp15_casing(orient=RIGHT, spin=180, mask=3,
+                                          wall=casing_wall,
+                                          // rounding=casing_wall/2,
+                                          wireHider=false, legs="RIGHT");
 
             }
             back(- pp15_get_center_yoffset() + osz.y/2)
@@ -396,17 +423,29 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER, spin=0
                 zrot(180)
                 pp15_base_plate(orient=RIGHT, spin=180, anchor=TOP, wall=casing_wall);
         }
+        right(spacing + osz.z/2)
+            down(wall)
+            cuboid(size=[wall, size.y, osz.x + wall],
+                   rounding=rounding,
+                   anchor=LEFT+BOTTOM);
 
         // Bottom plate
         cuboid([width, size.y, wall],
                rounding=rounding,
                anchor=TOP) {
+
+            // Small wall on the front and back to prevent movement
+            mirror_copy(BACK)
+                position(FRONT+BOTTOM)
+                cuboid([2*spacing + osz.z + wall, wall, 2*wall], anchor=FRONT+BOTTOM, rounding=rounding);
             // Add rails for nuts
-            // TODO: this should move up a bunch, and should merge with the connector walls if too close
             mirror_copy(LEFT)
                 position(LEFT+BOTTOM)
-                m3_sqnut_rail(l=size.y, wall=1, rounding=rounding,
-                              chamfer=1/3, spin=90, anchor=BOTTOM+BACK, orient=TOP);
+                m3_sqnut_rail(l=min(size.y, 3*m3_screw_head_width()),
+                              wall=wall, rounding=rounding,
+                              edges=edges("ALL", except=FRONT),
+                              chamfer=1/3, spin=90, anchor=BOTTOM+BACK,
+                              orient=TOP, backwall=false, extra_h=size.z/4);
         }
     }
 
@@ -434,7 +473,7 @@ if (Show_sample) {
     } else if (part == "Mask") {
         pp15_casing(anchor=TOP, mask=3);
     } else if (part == "Cover") {
-        pp15_casing(anchor=TOP, wireHider=false);
+        pp15_casing(anchor=TOP, wireHider=Wire_hider, legs=Legs);
     } else if (part== "Multi-holder") {
         pp15_multi_holder(n=3, width=55, wall=2);
     }

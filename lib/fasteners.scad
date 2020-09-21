@@ -130,7 +130,7 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxl
 nw = Nut_width;
 nt = Nut_thickness;
 module m3_sqnut_cutout(hole_height, hole_diameter=Screw_hole_diameter, slop=Slop,
-                       orient=TOP, spin=0, anchor=CENTER, chamfer, length) {
+                       orient=TOP, spin=0, anchor=CENTER, chamfer, length, rounding) {
     hh = hole_height;
     hd = hole_diameter;
     chamfer = is_def(chamfer) ? -chamfer : undef;
@@ -175,18 +175,24 @@ module m3_sqnut_holder(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
     }
 }
 
-module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, chamfer, rounding) {
+module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, backwall=true, chamfer,
+                     rounding, extra_h=0, bottom_l=undef, edges=EDGES_ALL) {
     $eps = $fs / 10;
-    size = [l, nt, nw] + wall*[0, 2, 1];
 
+    bottom_l = is_def(bottom_l) ? bottom_l : l;
+    size = [max(bottom_l, l), nt, nw] + wall*[0, backwall ? 2 : 1, 1] + extra_h * UP;
     inner_l = l - nw - 2*wall;
 
+    pos = TOP + (backwall ? [0,0,0] :  FRONT);
+
+    // TODO: make this out of rounded cuboid walls instead
+    // TODO: use a prismoid and handle bottom_l
     module _part() {
         diff("cutme")
-            cuboid(size, rounding=rounding) {
-            position(TOP)
+            cuboid(size, rounding=rounding, edges=edges) {
+            position(pos)
                 up($eps)
-                m3_sqnut_cutout(hole_height=$parent_size.y + 0.1, anchor=TOP,
+                m3_sqnut_cutout(hole_height=$parent_size.y + 0.1, anchor=pos,
                                 length=inner_l,
                                 chamfer=chamfer,
                                 $tags="cutme");
