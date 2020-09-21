@@ -10,7 +10,7 @@ Wire_hider = true;
 // Show shapes for debugging purposes
 Debug_shapes = true;
 
-Part_to_show = "Multi-holder"; // [Cover, Base, Mask, Multi-holder, All]
+Part_to_show = "Multi-holder"; // [Casing, Base, Mask, Multi-holder, Multi-holder casing, All]
 Legs = "RIGHT"; // [BOTH, LEFT, RIGHT, NONE]
 
 Add_base = true;
@@ -491,16 +491,16 @@ if (Show_sample) {
         % pp15_casing_wirehider_mask(3, anchor=TOP);
     } else if (part == "Mask") {
         pp15_casing(anchor=TOP, mask=3);
-    } else if (part == "Cover") {
-        // pp15_casing(anchor=TOP, wireHider=Wire_hider, legs=Legs);
-        add_base(enable=Add_base)
-        pp15_casing(orient=TOP, wireHider=false,
-                    legs="RIGHT",
-                    spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
+    } else if (part == "Casing") {
+        pp15_casing(anchor=TOP, wireHider=Wire_hider, legs=Legs);
+    } else if (part == "Multi-holder casing") {
+        add_base(enable=Add_base, zcut=0.2)
+            pp15_casing(orient=TOP, wireHider=false,
+                        legs="RIGHT",
+                        spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
     } else if (part== "Multi-holder") {
         add_base(enable=Add_base)
             pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM);
     }
-
  }
 $export_suffix = Part_to_show;
