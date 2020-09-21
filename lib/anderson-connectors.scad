@@ -482,7 +482,7 @@ if (Show_sample) {
                     spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
     } else if (part== "Multi-holder") {
         add_base(enable=Add_base)
-            pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM);
+            pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM, $slop=0.2);
     }
 
  }
