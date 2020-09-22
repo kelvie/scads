@@ -522,6 +522,7 @@ module explode_out(direction) {
         children(0);
 }
 
+
 // Optionally show the pieces exploded for "All"
 if (Piece == "All") {
     color(palette[1], alpha=1) make_bottom(anchor=TOP);
@@ -553,15 +554,11 @@ if (Piece == "All") {
     zrot(180) right(bd.x/2 + wt)
         pp15_casing(anchor=TOP+RIGHT, orient=LEFT, text=Left_connector_label);
 
-
-    // show("main connector") make_part();
  } else if (Piece == "Front") {
     // Front is really thin so needs less inset
     add_base(0.3, 0.75, 0.1, enable=Add_base)
         make_front(anchor=TOP, orient=BOTTOM);
  } else if (Piece == "Top") {
-    // Top piece can't be printed directly on the platform or it warps during
-    // curing
     make_top(anchor=BOTTOM, orient=TOP);
  } else if (Piece == "Bottom") {
     make_bottom(anchor=BOTTOM);

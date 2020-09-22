@@ -503,5 +503,6 @@ if (Show_sample) {
         add_base(enable=Add_base)
             pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM);
     }
+    $export_suffix = Part_to_show;
  }
-$export_suffix = Part_to_show;
+
