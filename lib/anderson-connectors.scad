@@ -1,4 +1,5 @@
 include <BOSL2/std.scad>
+include <BOSL2/hull.scad>
 include <BOSL2/joiners.scad>
 include <text.scad>
 include <add-base.scad>
@@ -39,6 +40,9 @@ function _get_inside_size(jack=false) =
 
 function _get_outside_size(isz=_get_inside_size(), wall=default_wall, tolerance=default_tolerance) =
     isz + wall * [2, 1, 2] + tolerance * [1, 0, 1];
+
+function pp15_get_inside_size(jack=false) = _get_inside_size(jack=jack);
+function pp15_get_outside_size(jack=false) = _get_outside_size(isz=pp15_get_inside_size(jack=jack), jack=jack);
 
 function pp15_get_center_yoffset(jack=false, wall=default_wall,
                                 tolerance=default_tolerance) =
@@ -378,6 +382,35 @@ module pp15_multi_holder_casing(wall=default_wall, anchor=CENTER, spin=0, orient
                 wall=casing_wall, rounding=casing_wall/2);
 }
 
+module pp15_multi_holder_cutout(t, n=3, width=55, wall=default_wall,
+                                tolerance=default_tolerance,
+                                anchor=CENTER, spin=0, orient=TOP) {
+    isz = _get_inside_size(jack=false);
+    osz = _get_outside_size(isz, wall=wall);
+    inner_width = width-osz.z - 2*wall;
+
+    size = [inner_width+wall, t, osz.x+wall];
+
+    eps=$fs/4;
+    rounding=wall/4;
+
+    // Extra rounding for chamfers
+    spacing = osz.z + wall + tolerance;
+
+    module _part() {
+        xcopies(n=n, spacing=spacing)
+            prismoid(size1=[isz.z, isz.x] + wall * [1,1],
+                     size2=[isz.z, isz.x] + wall*3/4 * [1,1],
+                     rounding=t/4,
+                     h=t+2*eps, orient=BACK, center=true);
+    }
+
+    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
+        _part();
+        children();
+    }
+}
+
 // TODO: move out of library? This is a separate part to print, but it shares a
 // bunch of functions still.
 module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
@@ -409,8 +442,6 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
 
         }
 
-        // TODO:
-        // - handle front plate, probably with cutouts
         xcopies(n=n, spacing=spacing) {
             difference()  {
                 left(osz.z/2)
@@ -500,8 +531,14 @@ if (Show_sample) {
                         legs="RIGHT",
                         spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
     } else if (part== "Multi-holder") {
-        add_base(enable=Add_base)
+        add_base(enable=Add_base) union() {
             pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM);
+            if (Debug_shapes)
+                % fwd(10)
+                      color("gray", alpha=0.2)
+                      pp15_multi_holder_cutout(t=4, n=3, width=55, wall=2,
+                                               anchor=BOTTOM);
+        }
     }
     $export_suffix = Part_to_show;
  }

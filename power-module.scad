@@ -55,7 +55,7 @@ Dovetail_slop = 0.1; // [0:0.025:0.2]
 
 
 /* [Front Connector options] */
-Opening_type = "USB-C+A"; // [USB-C+A, Modular]
+Opening_type = "USB-C+A"; // [USB-C+A, Anderson PP]
 
 /*  [Labels] */
 Left_connector_label = "24V";
@@ -86,6 +86,10 @@ USB_C_hole_tolerance = 0.75;
 
 // Also from the bottom inside wall
 Bottom_USB_A_port_offset = 16;
+
+/* [Front Anderson PP options] */
+// Only applicable when the front connector type is Anderson PP
+Number_of_front_PP_connectors = 3;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -200,8 +204,7 @@ module bottom_wall(size) {
                        l=$parent_size.y/2 - 2*wt);
         }
 
-        if (Opening_type == "USB-C+A") {
-        } else {
+        if (Opening_type == "Modular") {
             // TODO: make better slots that allow insertion from the front
             // Slot for front plate
             position(FRONT+TOP)
@@ -233,8 +236,7 @@ module right_wall(size, inner_size) {
                rounding=rounding,
                edges=edges("ALL", except=[TOP, LEFT])) {
 
-        if (Opening_type == "USB-C+A") {
-        } else {
+        if (Opening_type == "Modular") {
             // Dovetails for front
             up(wt/2 - inner_size.z/4)
                 fwd(bd.y/2 + wt/2)
@@ -245,6 +247,7 @@ module right_wall(size, inner_size) {
         children();
     }
 }
+
 
 module front_wall(size, inner_size, height,
                   anchor=CENTER, orient=TOP, spin=0) {
@@ -269,6 +272,28 @@ module front_wall(size, inner_size, height,
             }
             children();
         }
+    } else if (Opening_type == "Anderson PP") {
+        size = [inner_size.x, wt, height];
+        psz = pp15_get_inside_size();
+
+        attachable(size=size, orient=orient, anchor=anchor, spin=spin) {
+            diff("diffme")
+                cuboid(size) tags("diffme") {
+
+                if (orient == BOTTOM) {
+                    // Top piece, cut out windows for anderson connectors
+                    position(TOP)
+                        pp15_multi_holder_cutout(t=wt,
+                                                 n=Number_of_front_PP_connectors,
+                                                 width=get_box_dimensions().x,
+                                                 orient=TOP,
+                                                 anchor=TOP);
+                } else if (orient == TOP) {
+                }
+            }
+            children();
+        }
+
     }
 }
 
@@ -326,10 +351,10 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
 
             // Add a notch to fit the other part in the front
             position(FRONT+TOP)
-                cuboid([wt, wt, wt],
-                       rounding=rounding,
-                       edges=edges(RIGHT+FRONT),
-                       anchor=FRONT+BOTTOM);
+                    cuboid([wt, wt, wt],
+                           rounding=rounding,
+                           edges=edges(RIGHT+FRONT),
+                           anchor=FRONT+BOTTOM);
 
             children();
         }
@@ -538,7 +563,7 @@ if (Piece == "All") {
     explode_out(UP)
         color(palette[3], alpha=0.99) make_top(anchor=TOP, orient=BOTTOM);
 
-    if (Opening_type == "USB-C+A" || Opening_type == "Modular") {
+    if (Opening_type == "USB-C+A" || Opening_type == "Anderson PP") {
     } else {
          explode_out(FORWARD)
              fwd(bd.y/2)
