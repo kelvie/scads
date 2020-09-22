@@ -400,7 +400,7 @@ module pp15_multi_holder_cutout(t, n=3, width=55, wall=default_wall,
     module _part() {
         xcopies(n=n, spacing=spacing)
             prismoid(size1=[isz.z, isz.x] + wall * [1,1],
-                     size2=[isz.z, isz.x] + wall*3/4 * [1,1],
+                     size2=[isz.z, isz.x] + wall*2/3 * [1,1],
                      rounding=t/4,
                      h=t+2*eps, orient=BACK, center=true);
     }

@@ -31,7 +31,7 @@ Add_base = true;
 /* [Measurements] */
 // Inner dimensions of the enclosure
 
-Predefined_size = "25mm"; // [Custom, 25mm: 25mm wide, 55mm: 55mm wide]
+Predefined_size = "55mm"; // [Custom, 25mm: 25mm wide, 55mm: 55mm wide]
 
 // Only applicable when predefined size is Custom. Keep Y and Z the same if you want them to connect nicely...
 Custom_width = 55;
@@ -56,7 +56,7 @@ Dovetail_slop = 0.1; // [0:0.025:0.2]
 
 
 /* [Front Connector options] */
-Opening_type = "USB-C+A"; // [USB-C+A, Anderson PP]
+Opening_type = "Anderson PP"; // [USB-C+A, Anderson PP]
 
 /*  [Labels] */
 Left_connector_label = "24V";
@@ -93,7 +93,7 @@ Bottom_USB_A_port_offset = 16;
 Number_of_front_PP_connectors = 3;
 // Left to right, needs to be same size as the number of connectors
 Front_labels = ["5.0V", "14.5V", "19.5V"];
-Front_label_size = 3;
+Front_label_text_size = 3;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -209,8 +209,7 @@ module bottom_wall(size) {
         }
 
         if (Opening_type == "Modular") {
-            // TODO: make better slots that allow insertion from the front
-            // Slot for front plate
+            // TODO: finish this, there aren't modular ones yet
             position(FRONT+TOP)
                 up($eps)
                 back(wt/2)
@@ -302,7 +301,8 @@ module front_wall(size, inner_size, height,
                         fwd($eps) right(i*spacing) label(text=Front_labels[i-1],
                                                          orient=FRONT,
                                                          anchor=TOP,
-                                                         h=Front_label_size);
+                                                         h=Front_label_text_size,
+                                                         font="Noto Sans:style=Bold");
                     }
 
                 }
@@ -319,11 +319,10 @@ module front_wall(size, inner_size, height,
 
 // nearterm TODO:
 // - round the USB openings
-// - dovetail sides are easy to chip off (needs reinforcement)
 
 // Size of dovetails that fit the bottom to the top piece
-back_dovetail_ratio = 1/8;
-front_dovetail_ratio = 1/8;
+back_dovetail_ratio = 0.15;
+front_dovetail_ratio = 0.15;
 
 module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
     inner_size = [bd.x, bd.y, bd.z/2];
@@ -355,14 +354,24 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             position(BACK+TOP)
                 back($eps)
                 up($eps)
-                cuboid([size.x, wt+$eps, wt+$eps], anchor=BACK+TOP, $tags="mask");
+                cuboid([size.x, wt+$eps, wt+$eps], anchor=BACK+TOP, $tags="mask") {
+                position(FRONT+BOTTOM)
+                    xrot(45)
+                    cuboid(size=[$parent_size.x, $parent_size.y, 2/sqrt(2)*$parent_size.z], anchor=BOTTOM+FRONT);
+            }
 
             // Add a notch to fit the other part in the front
             position(FRONT+TOP)
                     cuboid([wt, wt, wt],
                            rounding=rounding,
                            edges=edges(RIGHT+FRONT),
-                           anchor=FRONT+BOTTOM);
+                           anchor=FRONT+BOTTOM) {
+                        position(BACK+TOP) {
+                            back_half(s=2*$parent_size.y) xrot(45)
+                                cuboid(size=[$parent_size.x, $parent_size.y, sqrt(2)*$parent_size.z],
+                                       anchor=BACK+TOP);
+                        }
+                    }
 
             children();
         }
@@ -439,7 +448,11 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                 // when printed with the opening straithgt up, square nuts seem
                 // to require less slop
                 sqnut_slop = 0.75 * Slop;
-                position(TOP+FRONT)
+
+                // Make sure there is at least 40mm between screw holes
+                n = ceil($parent_size.x/40);
+                xcopies(n=n, l=$parent_size.x * (1 - 1/n))
+                    position(TOP+FRONT)
                     m3_sqnut_holder(wall=wt/2,
                                     chamfer=chamf/2,
                                     edges=edges("ALL", except=[BACK, BOTTOM]),
@@ -513,7 +526,11 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
                     up($eps)
                     fwd($eps)
                     cuboid((wt+$eps) * [1, 1, 1],
-                           anchor=FRONT+TOP, $tags="mask");
+                           anchor=FRONT+TOP, $tags="mask") {
+                    position(BACK+BOTTOM)
+                        xrot(-45)
+                        cuboid(size=[$parent_size.x, $parent_size.y, 2/sqrt(2)*$parent_size.z], anchor=BOTTOM+BACK);
+                }
             }
 
             // Back wall
@@ -523,10 +540,21 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
                        anchor=BACK+BOTTOM,
                        rounding=rounding,
                        edges=edges("ALL", except=[TOP, FRONT])) {
-                down(2*wt - 2*Slop)
+                // Make sure there is at least 40mm between screw holes
+                n = ceil($parent_size.x/40);
+                xcopies(n=n, l=$parent_size.x * (1 - 1/n))
+                    down(2*wt - 2*Slop)
                     position(TOP+BACK)
                     back($eps)
                     m3_screw_rail(l=0, h=2*wt, orient=BACK, $tags="mask");
+
+                // Add an angled block before the back notch; if this area wre
+                // on the other side (with the dovetail cutout), it breaks easily.
+                mirror_copy(RIGHT) position(FRONT+TOP+LEFT) {
+                    front_half(s=100) xrot(-45)
+                        cuboid(size=[wt, $parent_size.y, sqrt(2)*wt],
+                               anchor=FRONT+TOP+LEFT);
+                }
             }
 
             // Optional front plate

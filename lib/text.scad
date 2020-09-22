@@ -3,12 +3,12 @@
 include <BOSL2/std.scad>
 default_thickness = 0.4;
 default_height = 2;
-default_font="Noto Sans";
+default_font="Noto Sans:style=Bold";
 
 $fs=0.025;
 
 module label(text, t=default_thickness, h=default_height, font=default_font,
-                orient=TOP, anchor=BOTTOM, spin=0) {
+             orient=TOP, anchor=BOTTOM, spin=0) {
     size = [100, h, t];
     attachable(size=size, orient=orient, anchor=anchor, spin=spin) {
         down(t/2) linear_extrude(t)
