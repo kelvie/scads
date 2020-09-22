@@ -14,6 +14,7 @@ include <lib/usb-c.scad>
 include <lib/fasteners.scad>
 include <lib/add-base.scad>
 include <lib/supports.scad>
+include <lib/text.scad>
 
 /* [View options] */
 // Which piece to render.
@@ -90,6 +91,9 @@ Bottom_USB_A_port_offset = 16;
 /* [Front Anderson PP options] */
 // Only applicable when the front connector type is Anderson PP
 Number_of_front_PP_connectors = 3;
+// Left to right, needs to be same size as the number of connectors
+Front_labels = ["5.0V", "14.5V", "19.5V"];
+Front_label_size = 3;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -277,6 +281,8 @@ module front_wall(size, inner_size, height,
         psz = pp15_get_inside_size();
 
         attachable(size=size, orient=orient, anchor=anchor, spin=spin) {
+            w=get_box_dimensions().x;
+
             diff("diffme")
                 cuboid(size) tags("diffme") {
 
@@ -285,10 +291,20 @@ module front_wall(size, inner_size, height,
                     position(TOP)
                         pp15_multi_holder_cutout(t=wt,
                                                  n=Number_of_front_PP_connectors,
-                                                 width=get_box_dimensions().x,
+                                                 width=w,
                                                  orient=TOP,
                                                  anchor=TOP);
                 } else if (orient == TOP) {
+                    n = len(Front_labels);
+                    // Add labels
+                    spacing = w / (n + 1);
+                    up($parent_size.z/4) position(LEFT+FRONT) for (i=[1:n]) {
+                        fwd($eps) right(i*spacing) label(text=Front_labels[i-1],
+                                                         orient=FRONT,
+                                                         anchor=TOP,
+                                                         h=Front_label_size);
+                    }
+
                 }
             }
             children();
@@ -298,20 +314,12 @@ module front_wall(size, inner_size, height,
 }
 
 // future TODOs
-// TODO: removeable inner plate to swap in and out... this way I can swap this
-//       between the buck convertor and this
-// TODO: text on side connectors to know which one's which, and what voltages
-// TODO: customize front plate
-// TODO: front anderson powerpole holder
 // TODO: build in PCB holder (problem is that it's hard to do z adjustments),
 //       will need to have guides for the clamp which adds height...
 
 // nearterm TODO:
-// - round the anderson connectors edges
 // - round the USB openings
 // - dovetail sides are easy to chip off (needs reinforcement)
-// - 3-up front
-// - think about wire management (and how to stuff wires for assembly)
 
 // Size of dovetails that fit the bottom to the top piece
 back_dovetail_ratio = 1/8;
