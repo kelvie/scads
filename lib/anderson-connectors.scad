@@ -449,6 +449,7 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
                anchor=TOP) {
 
             // Small wall on the front and back to prevent movement
+            // TODO: add grooves here to prevent cupping (in the back?)
             mirror_copy(BACK)
                 position(FRONT+BOTTOM)
                 cuboid([n*spacing+wall, wall, 2*wall],
