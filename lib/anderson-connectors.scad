@@ -11,7 +11,7 @@ Wire_hider = true;
 // Show shapes for debugging purposes
 Debug_shapes = true;
 
-Part_to_show = "Multi-holder"; // [Casing, Base, Mask, Multi-holder, Multi-holder casing, All]
+Part_to_show = "Multi-holder"; // [Casing, Base, Mask, Multi-holder, Multi-holder casing, Cable connector, All]
 Legs = "RIGHT"; // [BOTH, LEFT, RIGHT, NONE]
 
 Add_base = true;
@@ -75,7 +75,7 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
 //
 //   `wall` is the minimum thickness of the walls generated
 //
-//   `wireHider` if set to true will add a part to the back that hides the wires
+//   `wirehider` if set to true will add a part to the back that hides the wires
 //
 //   `anchor`, `spin`, and `orient` have their normal meanings within BOSL2 (see
 //       attachments.scad)
@@ -86,7 +86,7 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
 //   `legs` can be "BOTH", "LEFT", "RIGHT", or "NONE" (default "BOTH")
 module pp15_casing(middlePin=true, tolerance=default_tolerance,
                    dovetailLeft=true, jack=false, wall=default_wall,
-                   wireHider=true, mask=0, wirehider_mask=0,
+                   wirehider=true, mask=0, wirehider_mask=0,
                    anchor=CENTER, spin=0, orient=UP, text, rounding=default_wall/2,
                    leg_height, legs="BOTH"
                    ) {
@@ -96,13 +96,13 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
     insideSz = _get_inside_size(jack);
     outsideSz = _get_outside_size(insideSz, wall, tolerance);
 
-    wireHiderWidth = wireHider ? outsideSz.z : 0;
+    wireHiderWidth = wirehider ? outsideSz.z : 0;
 
     fullOutsideSz = outsideSz + (matedFullLength-housingLength+wall)*[0,1,0] +
         wireHiderWidth*[0,2,0];
 
     chamfer = wall / 3;
-    edge_nochamf = wireHider ? [TOP, FRONT] : [TOP];
+    edge_nochamf = wirehider ? [TOP, FRONT] : [TOP];
 
     $eps = wall / 100;
 
@@ -249,7 +249,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                 size=[outsideSz.x, outsideSz.y, wall],
                 rounding=rounding,
                 anchor=BOTTOM+BACK,
-                edges=edges("ALL", except=wireHider ? FRONT : [])
+                edges=edges("ALL", except=wirehider ? FRONT : [])
                 );
 
             // Draw an icon indicating which side to put in the connectors
@@ -285,7 +285,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         }
 
 
-        if (!has_mask && wireHider) {
+        if (!has_mask && wirehider) {
             diag = wireHiderWidth * sqrt(2);
             diag_nowall = diag - wall * sqrt(2);
 
@@ -378,7 +378,7 @@ module pp15_base_plate(wall=2, tolerance=default_tolerance,
 
 module pp15_multi_holder_casing(wall=default_wall, anchor=CENTER, spin=0, orient=TOP) {
     casing_wall = wall;
-    pp15_casing(wireHider=false, spin=spin, orient=orient, anchor=anchor,
+    pp15_casing(wirehider=false, spin=spin, orient=orient, anchor=anchor,
                 wall=casing_wall, rounding=casing_wall/2);
 }
 
@@ -436,7 +436,7 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
         % back(- pp15_get_center_yoffset() + osz.y/2)
             xcopies(n=n, spacing=spacing) {
             up(osz.x/2)
-                zrot(180) pp15_casing(orient=RIGHT, wireHider=false,
+                zrot(180) pp15_casing(orient=RIGHT, wirehider=false,
                                       legs="RIGHT",
                                       spin=180, wall=casing_wall, rounding=casing_wall/2);
 
@@ -457,7 +457,7 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
                     zrot(180) pp15_casing(orient=RIGHT, spin=180, mask=3,
                                           wall=casing_wall,
                                           // rounding=casing_wall/2,
-                                          wireHider=false, legs="RIGHT");
+                                          wirehider=false, legs="RIGHT");
 
             }
             back(- pp15_get_center_yoffset() + osz.y/2)
@@ -524,10 +524,10 @@ if (Show_sample) {
     } else if (part == "Mask") {
         pp15_casing(anchor=TOP, mask=3);
     } else if (part == "Casing") {
-        pp15_casing(anchor=TOP, wireHider=Wire_hider, legs=Legs);
+        pp15_casing(anchor=TOP, wirehider=Wire_hider, legs=Legs);
     } else if (part == "Multi-holder casing") {
         add_base(enable=Add_base, zcut=0.2)
-            pp15_casing(orient=TOP, wireHider=false,
+            pp15_casing(orient=TOP, wirehider=false,
                         legs="RIGHT",
                         spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
     } else if (part== "Multi-holder") {
