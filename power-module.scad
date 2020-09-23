@@ -92,7 +92,7 @@ Bottom_USB_A_port_offset = 16;
 // Only applicable when the front connector type is Anderson PP
 Number_of_front_PP_connectors = 3;
 // Left to right, needs to be same size as the number of connectors
-Front_labels = ["5.0V", "14.5V", "19.5V"];
+Front_labels = ["5.0V", "14.0V", "19.5V"];
 Front_label_text_size = 3;
 
 /* [Hidden] */
@@ -584,6 +584,8 @@ module explode_out(direction) {
 }
 
 
+$export_suffix = str(Opening_type, "-", Piece, "-", get_box_dimensions().x, "mm");
+
 // Optionally show the pieces exploded for "All"
 if (Piece == "All") {
     color(palette[1], alpha=1) make_bottom(anchor=TOP);
@@ -630,6 +632,7 @@ if (Piece == "All") {
         } else if (Piece == "Left connector") {
             pp15_casing(jack=false, anchor=BOTTOM, text=Left_connector_label);
         }
+    $export_suffix = str(Opening_type, "-", Piece);
  }
 
-$export_suffix = str(Opening_type, "-", Piece);
+
