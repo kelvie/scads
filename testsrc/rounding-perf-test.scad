@@ -80,12 +80,15 @@ module part2(anchor=CENTER, spin=0, orient=TOP) {
 }
 
 module part3(anchor=CENTER, spin=0, orient=TOP, edges=edges(RIGHT+FRONT)) {
-    size = [5, 5, 5];
+    size = 5*[1, 1, 1];
     rounding = 1;
     echo(edges);
 
     attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
-        cuboid(size, rounding=rounding, edges=edges);
+        difference() {
+            //            cube(size, center=true);
+            cuboid(size, rounding=rounding, edges=edges);
+        }
 
         children();
     }
@@ -103,5 +106,5 @@ echo("all except left")
 right(15)
 part3(edges=edges("ALL", except=LEFT));
 
- echo("all except left+top")
- up(15) part3(edges=edges("ALL", except=[LEFT, TOP]));
+echo("all except left+top")
+up(15) part3(edges=edges("ALL", except=[LEFT, TOP]));

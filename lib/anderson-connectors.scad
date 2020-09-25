@@ -42,7 +42,9 @@ function _get_outside_size(isz=_get_inside_size(), wall=default_wall, tolerance=
     isz + wall * [2, 1, 2] + tolerance * [1, 0, 1];
 
 function pp15_get_inside_size(jack=false) = _get_inside_size(jack=jack);
-function pp15_get_outside_size(jack=false) = _get_outside_size(isz=pp15_get_inside_size(jack=jack), jack=jack);
+function pp15_get_outside_size(jack=false, tolerance=default_tolerance) =
+    _get_outside_size(isz=pp15_get_inside_size(jack=jack),
+                      tolerance=tolerance);
 
 function pp15_get_center_yoffset(jack=false, wall=default_wall,
                                 tolerance=default_tolerance) =
@@ -84,27 +86,32 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
 //          for cutting openings to mount this onto
 //
 //   `legs` can be "BOTH", "LEFT", "RIGHT", or "NONE" (default "BOTH")
+//
+//   `real_size` when set to true uses the actual object size rather than two
+//       mated connectors, useful for when you want to attach things
 module pp15_casing(middlePin=true, tolerance=default_tolerance,
                    dovetailLeft=true, jack=false, wall=default_wall,
                    wirehider=true, mask=0, wirehider_mask=0,
                    anchor=CENTER, spin=0, orient=UP, text, rounding=default_wall/2,
-                   leg_height, legs="BOTH"
+                   leg_height, legs="BOTH", real_size=false, side_grip=false,
                    ) {
 
     housingLength = jack ? fullLength : matedFullLength - fullLength;
 
     insideSz = _get_inside_size(jack);
     outsideSz = _get_outside_size(insideSz, wall, tolerance);
+    real_outside_sz = outsideSz - (legs == "NONE" ? wall * UP : [0,0,0]);
 
     wireHiderWidth = wirehider ? outsideSz.z : 0;
 
     fullOutsideSz = outsideSz + (matedFullLength-housingLength+wall)*[0,1,0] +
         wireHiderWidth*[0,2,0];
 
+
     chamfer = wall / 3;
     edge_nochamf = wirehider ? [TOP, FRONT] : [TOP];
 
-    $eps = wall / 100;
+    $eps = $fs/4;
 
     pin_r = rollPinRadius - tolerance/2;
 
@@ -318,10 +325,12 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
     }
 
-    attachable(anchor=anchor, spin=spin, orient=orient, size=fullOutsideSz) {
+    attachable(anchor=anchor, spin=spin, orient=orient,
+               size=real_size ? real_outside_sz : fullOutsideSz) {
         union() {
-            down(outsideSz.z/2)
-            back(pp15_get_center_yoffset(jack, wall, tolerance))
+
+            down(real_size ? real_outside_sz.z / 2 : outsideSz.z/2)
+                back(real_size ? outsideSz.y/2 : pp15_get_center_yoffset(jack, wall, tolerance))
                 if (mask == 0 && wirehider_mask == 0) {
                     hide("mask wire-hider-mask") make();
                 } else {
@@ -335,6 +344,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
             // For debugging
             // % cuboid(fullOutsideSz);
+            // %cuboid(pp15_get_outside_size(jack=false));
         }
         children();
     }
@@ -511,6 +521,69 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
     }
 }
 
+// TODO:
+// - make top and bottom half come apart and snap together.
+// - Maybe have top and bottom parts each have different side walls
+// - make sure there are grips on the side
+module pp15_cable_connector(wire_width=2.7, h=10,
+                            anchor=CENTER, spin=0, orient=TOP,
+                            wall=default_wall) {
+
+    rounding = wall/2;
+    module _corner(anchor=CENTER) {
+        // Needs to be "octa" because we're hulling these, otherwise the hulled
+        // walls will be a bit thinner
+        spheroid(d=wall, anchor=anchor, style="octa");
+    }
+    pp15_casing(anchor=anchor, spin=spin, orient=orient, legs="NONE",
+                tolerance=0.1, jack=false, real_size=true,
+                wirehider=false) {
+        position(FRONT) {
+            psz = $parent_size;
+            // Interface between the casing and the wire strain relief part has
+            // a weird indent, I think due to the fillets or tolerances
+            mirror_copy(RIGHT) back(wall/2) {
+                left(psz.x/2)
+                    cuboid([wall, 2*wall, psz.z],
+                           anchor=LEFT,
+                           rounding=rounding,
+                           edges=FRONT
+                           );
+
+
+                position(BOTTOM)
+                up(wall/2)
+                    cuboid([psz.x, 2*wall, wall], rounding=rounding);
+            }
+
+            xoff = (psz.x - wire_width - 2*wall)/2;
+
+            // Side walls for wire part
+            mirror_copy(RIGHT) hull() {
+                position(LEFT+TOP) down(wall/2) {
+                    right(wall/2)  _corner();
+                    fwd(h) right(xoff) _corner(RIGHT);
+                }
+                position(LEFT+BOTTOM) up(wall/2) {
+                    right(wall/2) _corner();
+                    fwd(h) right(xoff) _corner(RIGHT);
+                }
+            }
+
+            // Bottom wall
+            hull() {
+                mirror_copy(RIGHT) position(BOTTOM) up(wall/2) {
+                    position(LEFT) {
+                        right(wall/2) _corner();
+                        fwd(h) right(xoff) _corner(RIGHT);
+                    }
+                }
+            }
+
+        }
+    }
+}
+
 
 if (Show_sample) {
     part = Part_to_show;
@@ -539,6 +612,9 @@ if (Show_sample) {
                       pp15_multi_holder_cutout(t=4, n=3, width=55, wall=2,
                                                anchor=BOTTOM);
         }
+    } else if (part == "Cable connector") {
+        add_base(enable=Add_base)
+            pp15_cable_connector(anchor=BOTTOM);
     }
     $export_suffix = Part_to_show;
  }
