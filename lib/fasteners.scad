@@ -160,7 +160,14 @@ module m3_sqnut_cutout(hole_height, hole_diameter=Screw_hole_diameter, slop=Slop
 
     attachable(size=sz, orient=orient, spin=spin, anchor=anchor) {
         if (is_undef(length)) {
-            cuboid(sz, chamfer=chamfer, edges=TOP);
+            difference() {
+                cuboid(sz, chamfer=chamfer, edges=TOP);
+                if (notch)
+                    mirror_copy(BACK)
+                        fwd(sz.y/2)
+                        up(sz.z/2 - slop)
+                        cyl(h=sz.x, r=slop, orient=RIGHT);
+            }
             cyl(d=hd, h=nt+slop+2*hh, orient=FRONT);
         } else {
             difference() {
@@ -187,18 +194,18 @@ function m3_sqnut_holder_size(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
     [nw, nt, nw] + wall * [2,2,1] + slop*[1,1,1];
 
 module m3_sqnut_holder(wall, orient=TOP, spin=0, anchor=CENTER, chamfer,
-                       edges=edges("ALL"), slop=Slop) {
+                       edges=edges("ALL"), slop=Slop, rounding, notch=true) {
     eps = $fs/10;
     sz = m3_sqnut_holder_size(wall, orient, spin, anchor, chamfer, edges, slop);
 
     attachable(size=sz, orient=orient, spin=spin, anchor=anchor) {
         difference() {
             cuboid(sz,
-                   chamfer=chamfer,
+                   chamfer=chamfer, rounding=rounding,
                    edges=edges);
             up(wall/2 + eps)
                 m3_sqnut_cutout(hole_height=wall+eps,
-                                chamfer=chamfer, slop=slop);
+                                chamfer=chamfer, slop=slop, notch=notch);
         }
         children();
     }
