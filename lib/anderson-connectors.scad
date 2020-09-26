@@ -634,5 +634,5 @@ if (Show_sample) {
         add_base(enable=Add_base)
             pp15_cable_connector(anchor=BOTTOM);
     }
+    $export_suffix = Part_to_show;
  }
-$export_suffix = Part_to_show;
