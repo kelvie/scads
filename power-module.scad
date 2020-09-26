@@ -271,6 +271,7 @@ module front_wall(size, inner_size, height,
                 if (orient == BOTTOM) {
                     // Top piece, cut out windows for anderson connectors
                     position(TOP)
+                        down(extra_height)
                         pp15_multi_holder_cutout(t=wt,
                                                  n=Number_of_front_PP_connectors,
                                                  width=w,
@@ -292,7 +293,6 @@ module front_wall(size, inner_size, height,
             }
             children();
         }
-
     }
 }
 
