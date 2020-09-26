@@ -182,6 +182,14 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         right_wall_h = outsideSz.z - (legs == "BOTH" || legs == "RIGHT" ? 0 : wall);
         right_wall_edges = legs == "BOTH" || legs == "RIGHT" ? edges("ALL", except=edge_nochamf) : edges("ALL");
 
+        module _grips() {
+            ycopies(n=4, spacing=wall)
+                hull()
+                mirror_copy(DOWN)
+                down(wall)
+                position(TOP)
+                spheroid(d=wall/2);
+        }
         // left wall
         left(outsideSz.x/2)
             cuboid(
@@ -193,6 +201,10 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
             if (is_def(text))
                 attach(LEFT) label(text);
+
+            if (side_grip)
+                position(LEFT)
+                    _grips();
 
             if (legs == "BOTH" || legs == "LEFT")
                 left((leftWallThickness - wall)/2) attach(TOP) {
@@ -213,6 +225,10 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                 ) {
             if (is_def(text))
                 attach(RIGHT) label(text);
+
+            if (side_grip)
+                position(RIGHT)
+                    _grips();
 
             if (legs == "BOTH" || legs == "RIGHT")
                 right((rightWallThickness - wall)/2)
@@ -526,7 +542,6 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
 // TODO:
 // - make top and bottom half come apart and snap together.
 // - Maybe have top and bottom parts each have different side walls
-// - make sure there are grips on the side
 module pp15_cable_connector(wire_width=2.7, h=10,
                             anchor=CENTER, spin=0, orient=TOP,
                             wall=default_wall) {
@@ -537,8 +552,9 @@ module pp15_cable_connector(wire_width=2.7, h=10,
         // walls will be a bit thinner
         spheroid(d=wall, anchor=anchor, style="octa");
     }
+
     pp15_casing(anchor=anchor, spin=spin, orient=orient, legs="NONE",
-                tolerance=0.1, jack=false, real_size=true,
+                tolerance=0.1, jack=false, real_size=true, side_grip=true,
                 wirehider=false) {
         position(FRONT) {
             psz = $parent_size;
@@ -554,8 +570,9 @@ module pp15_cable_connector(wire_width=2.7, h=10,
 
 
                 position(BOTTOM)
-                up(wall/2)
-                    cuboid([psz.x, 2*wall, wall], rounding=rounding);
+                    up(wall/2)
+                    fwd(wall/2)
+                    cuboid([psz.x, wall, wall], rounding=rounding, edges=FRONT);
             }
 
             xoff = (psz.x - wire_width - 2*wall)/2;
@@ -564,11 +581,11 @@ module pp15_cable_connector(wire_width=2.7, h=10,
             mirror_copy(RIGHT) hull() {
                 position(LEFT+TOP) down(wall/2) {
                     right(wall/2)  _corner();
-                    fwd(h) right(xoff) _corner(RIGHT);
+                    fwd(h) right(xoff) _corner(LEFT);
                 }
                 position(LEFT+BOTTOM) up(wall/2) {
                     right(wall/2) _corner();
-                    fwd(h) right(xoff) _corner(RIGHT);
+                    fwd(h) right(xoff) _corner(LEFT);
                 }
             }
 
@@ -577,11 +594,10 @@ module pp15_cable_connector(wire_width=2.7, h=10,
                 mirror_copy(RIGHT) position(BOTTOM) up(wall/2) {
                     position(LEFT) {
                         right(wall/2) _corner();
-                        fwd(h) right(xoff) _corner(RIGHT);
+                        fwd(h) right(xoff) _corner(LEFT);
                     }
                 }
             }
-
         }
     }
 }
@@ -618,6 +634,5 @@ if (Show_sample) {
         add_base(enable=Add_base)
             pp15_cable_connector(anchor=BOTTOM);
     }
-    $export_suffix = Part_to_show;
  }
-
+$export_suffix = Part_to_show;
