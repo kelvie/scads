@@ -28,6 +28,9 @@ Explode_offset = 20; // [0:1:100]
 // Adds a extra base on the bottom to prevent elephant's foot
 Add_base = true;
 
+// Extra height for z-compression compensation
+Extra_height = 0.3;
+
 /* [Measurements] */
 // Inner dimensions of the enclosure
 
@@ -123,6 +126,8 @@ function get_box_dimensions() =
 bd = get_box_dimensions() + Inner_width_slop * [1,0,0];
 wt = Wall_thickness;
 
+extra_height = Add_base ? Extra_height : 0;
+
 module edge_dovetail(type, length, spin=0) {
     dovetail(type,
              length=length,
@@ -180,33 +185,11 @@ module make_front(anchor=BACK, orient=TOP) {
 
 module bottom_wall(size) {
 
-    module _grill(w, l, angle) {
-        back(l/2)
-            m3_screw_rail_grill(l=l, w=w, h=wt*2,
-                                angle=angle,
-                                spacing_mult=Bottom_grill_spacing,
-                                maxlen=30);
-    }
-
     diff("mask")
-        cuboid([size.x, size.y, 0] + wt*[0, 0,1],
+        cuboid([size.x, size.y, 0] + (wt+(extra_height))*[0, 0, 1],
                anchor=BOTTOM, rounding=rounding,
                edges=edges("ALL", except=[TOP])) {
 
-        // Grill for screws
-        attach(BOTTOM, $overlap=-$eps)
-            tags("mask") {
-            back(wt)
-            _grill(angle=90,
-                   w=$parent_size.x - 2*wt,
-                   l=$parent_size.y/2 - 2*wt
-                   );
-
-            mirror(BACK)
-                _grill(angle=0,
-                       w=$parent_size.x - 2*wt,
-                       l=$parent_size.y/2 - 2*wt);
-        }
 
         if (Opening_type == "Modular") {
             // TODO: finish this, there aren't modular ones yet
@@ -225,11 +208,11 @@ module bottom_wall(size) {
 
 
 module side_wall_grill(d) {
-        m3_screw_rail_grill(l=$parent_size.z - 2*wt,
-                            w=d,
-                            h=wt*2,
-                            angle=Rail_angle,
-                            spacing_mult=Side_grill_spacing);
+    m3_screw_rail_grill(l=$parent_size.z-2*wt,
+                        w=d,
+                        h=wt*2,
+                        angle=Rail_angle,
+                        spacing_mult=Side_grill_spacing);
 }
 
 module right_wall(size, inner_size) {
@@ -313,9 +296,32 @@ module front_wall(size, inner_size, height,
     }
 }
 
-// future TODOs
-// TODO: build in PCB holder (problem is that it's hard to do z adjustments),
-//       will need to have guides for the clamp which adds height...
+module bottom_grill() {
+    module _grill(w, l, angle) {
+        back(l/2)
+            m3_screw_rail_grill(l=l, w=w, h=wt*2,
+                                angle=angle,
+                                spacing_mult=Bottom_grill_spacing,
+                                maxlen=30, outset=1.25, extra_height=extra_height);
+    }
+    edge_size = 2*m3_screw_head_height_countersunk();
+
+    // Grill for screws
+    attach(BOTTOM, $overlap=-$eps)
+        tags("mask") {
+        back(wt)
+            _grill(angle=90,
+                   w=$parent_size.x - edge_size,
+                   l=$parent_size.y/2 - edge_size
+                   );
+
+        mirror(BACK)
+            _grill(angle=0,
+                   w=$parent_size.x - edge_size,
+                   l=$parent_size.y/2 - edge_size);
+    }
+
+}
 
 // nearterm TODO:
 // - round the USB openings
@@ -326,7 +332,7 @@ front_dovetail_ratio = 0.15;
 
 module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
     inner_size = [bd.x, bd.y, bd.z/2];
-    size = inner_size + wt*[2,2,1];
+    size = inner_size + wt*[2,2,1] + extra_height*[0,0,1];
 
     module _right_wall() {
         right_wall(size, inner_size) {
@@ -356,8 +362,9 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                 up($eps)
                 cuboid([size.x, wt+$eps, wt+$eps], anchor=BACK+TOP, $tags="mask") {
                 position(FRONT+BOTTOM)
+                    hull() move_copies([[0,0,0], Slop*FRONT])
                     xrot(45)
-                    cuboid(size=[$parent_size.x, $parent_size.y, 2/sqrt(2)*$parent_size.z], anchor=BOTTOM+FRONT);
+                        cuboid(size=[$parent_size.x, $parent_size.y, 2/sqrt(2)*$parent_size.z], anchor=BOTTOM+FRONT);
             }
 
             // Add a notch to fit the other part in the front
@@ -366,7 +373,7 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
                            rounding=rounding,
                            edges=edges(RIGHT+FRONT),
                            anchor=FRONT+BOTTOM) {
-                        position(BACK+TOP) {
+                position(BACK+TOP) {
                             back_half(s=2*$parent_size.y) xrot(45)
                                 cuboid(size=[$parent_size.x, $parent_size.y, sqrt(2)*$parent_size.z],
                                        anchor=BACK+TOP);
@@ -385,17 +392,10 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             tags("nothidden") {
             position(BOTTOM)
                 bottom_wall(size);
-
-            grill_length = $parent_size.y/2 - 2*wt + abs(pp15_get_center_yoffset());
-
             // left wall
             mirror(LEFT)
                 position(RIGHT+TOP)
                 _right_wall() {
-                attach(RIGHT, $overlap=-$eps)
-                    left(grill_length / 2 - abs(pp15_get_center_yoffset()) + wt)
-                    side_wall_grill(d=grill_length, $tags="mask");
-
                 mirror(FRONT) position(TOP+RIGHT) {
                     pp15_base_plate(anchor=TOP+RIGHT, orient=LEFT);
                     tags("mask")
@@ -415,10 +415,6 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
             // right wall
             position(RIGHT+TOP)
             _right_wall() {
-                attach(RIGHT, $overlap=-$eps)
-                    right(grill_length / 2 - abs(pp15_get_center_yoffset()) + wt)
-                    side_wall_grill(d=grill_length, $tags="mask");
-
                 position(TOP+RIGHT) {
                     pp15_base_plate(anchor=TOP+RIGHT, orient=LEFT);
                     // cutout into wall
@@ -474,14 +470,29 @@ module make_bottom(anchor=BOTTOM, orient=TOP, spin=0) {
     }
 
     attachable(size=size, anchor=anchor, orient=orient, spin=spin) {
-        _part();
+        difference() {
+            grill_length = size.y/2 - 2*wt + abs(pp15_get_center_yoffset());
+
+            _part();
+            down(wt/2) {
+            attach(RIGHT, $overlap=-$eps)
+                right(grill_length / 2 - abs(pp15_get_center_yoffset()) + wt)
+                side_wall_grill(d=grill_length, $tags="mask");
+
+            attach(LEFT, $overlap=-$eps)
+                right(grill_length / 2 - abs(pp15_get_center_yoffset()) + wt)
+                side_wall_grill(d=grill_length, $tags="mask");
+            }
+
+            bottom_grill();
+        }
         children();
     }
 }
 
 module make_top(anchor=CENTER, orient=TOP, spin=0) {
     inner_size = [bd.x, bd.y, bd.z/2];
-    size = inner_size + wt*[2,2,1];
+    size = inner_size + wt*[2,2,1] + extra_height*[0,0,1];
 
     module _part() {
         // Debug
@@ -497,9 +508,6 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
             mirror_copy(LEFT)
                 position(RIGHT+TOP)
                 right_wall(size, inner_size) {
-                attach(RIGHT, $overlap=-$eps)
-                    side_wall_grill(d=$parent_size.y - 2*wt,
-                                    $tags="mask");
 
                 dovetail_base_l = inner_size.y;
 
@@ -528,6 +536,7 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
                     cuboid((wt+$eps) * [1, 1, 1],
                            anchor=FRONT+TOP, $tags="mask") {
                     position(BACK+BOTTOM)
+                        hull() move_copies([CENTER, Slop*BACK])
                         xrot(-45)
                         cuboid(size=[$parent_size.x, $parent_size.y, 2/sqrt(2)*$parent_size.z], anchor=BOTTOM+BACK);
                 }
@@ -564,7 +573,15 @@ module make_top(anchor=CENTER, orient=TOP, spin=0) {
     }
 
     attachable(size=size, anchor=anchor, orient=orient, spin=spin) {
-        _part();
+        difference() {
+            _part();
+            down(wt/2)
+            mirror_copy(LEFT) attach(RIGHT, $overlap=-$eps)
+                side_wall_grill(d=size.y - 2*wt,
+                                $tags="mask");
+            bottom_grill();
+        }
+
         children();
     }
 }
@@ -622,9 +639,15 @@ if (Piece == "All") {
     add_base(0.3, 0.75, 0.1, enable=Add_base)
         make_front(anchor=TOP, orient=BOTTOM);
  } else if (Piece == "Top") {
-    make_top(anchor=BOTTOM, orient=TOP);
+    add_base(Extra_height, 1.5, Extra_height, enable=Add_base) {
+        make_top(anchor=BOTTOM, orient=TOP);
+        rect([bd.x, bd.y], center=true);
+    }
  } else if (Piece == "Bottom") {
-    make_bottom(anchor=BOTTOM);
+    add_base(Extra_height, 1.5, Extra_height, enable=Add_base) {
+        make_bottom(anchor=BOTTOM);
+        rect([bd.x, bd.y], center=true);
+    }
  } else {
     add_base(0.3, 1, 0.1, enable=Add_base)
         if (Piece == "Right connector") {

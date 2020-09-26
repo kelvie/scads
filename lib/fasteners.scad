@@ -20,25 +20,34 @@ hole_d = Screw_hole_diameter;
 screw_head_h = Screw_head_height;
 screw_head_w = Screw_size + 2*screw_head_h;
 
-module m3_screw_rail(l, h, anchor=TOP, orient=TOP, spin=0) {
-    size = [l + screw_head_w, screw_head_w, h];
+module m3_screw_rail(l, h, extra_height=0, outset=0,
+                     anchor=TOP, orient=TOP, spin=0) {
+    size = [l + screw_head_w, screw_head_w, h+extra_height];
 
     inner_length = l;
     module _cutout() {
-        hull()
-            mirror_copy(LEFT)
+        if (extra_height > 0) hull()
+        mirror_copy(LEFT)
             left(inner_length/2)
-            cyl(d=hole_d, h=h);
+            up(size.z/2+$eps)
+            cyl(d=screw_head_w+2*outset, h=extra_height, anchor=TOP);
 
-        hull()
-            mirror_copy(LEFT)
-            left(inner_length/2)
-            up(h/2)
-            cyl(d2=screw_head_w,
-                d1=Screw_size,
-                h=screw_head_h,
-                anchor=TOP);
+        down(extra_height) {
+            hull()
+                mirror_copy(LEFT)
+                left(inner_length/2)
+                cyl(d=hole_d, h=h);
+
+            hull()
+                mirror_copy(LEFT)
+                left(inner_length/2)
+                    up(size.z/2+2*$eps)
+                cyl(d2=screw_head_w,
+                    d1=Screw_size,
+                    h=screw_head_h,
+                    anchor=TOP);
     }
+}
 
     attachable(size=size, anchor=anchor, orient=orient, spin=spin) {
         _cutout();
@@ -47,6 +56,7 @@ module m3_screw_rail(l, h, anchor=TOP, orient=TOP, spin=0) {
 }
 
 function m3_screw_head_width() = screw_head_w;
+function m3_screw_head_height_countersunk() = screw_head_h;
 
 // Creates a screw rail grill -- that is, a grill that can be used as a
 // countersunk screw rail.
@@ -58,7 +68,11 @@ function m3_screw_head_width() = screw_head_w;
 //   `angle` is the angle of the rail
 //   `maxlen` ensures that rails won't be longer than the specified length by
 //       breaking them up
-module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxlen=undef) {
+//   `outset` when used with `extra_height`, the extra width (in all
+//       directions) to make the extra height
+//   `extra_height` is the extra cut out on top of the screw head
+module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45,
+                           maxlen=undef, outset=0, extra_height=0) {
     inner_l = l - screw_head_w;
     inner_w = w - screw_head_w;
 
@@ -67,6 +81,10 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxl
     y_spacing = spacing * sqrt(pow(slope, 2) + 1);
     x_spacing = y_spacing / slope;
 
+    module _rail(l, anchor) {
+        m3_screw_rail(l=l, anchor=anchor, h=h, spin=angle, outset=outset,
+                      extra_height=extra_height);
+    }
     function _rail_len(l, n) = (l - spacing * (n-1)) / n;
     function _get_n(l, maxlen, n=1) =
         (_rail_len(l, n) < maxlen) ? n : _get_n(l, maxlen, n+1);
@@ -85,10 +103,10 @@ module m3_screw_rail_grill(w, l, h, anchor=TOP, spacing_mult=1.1, angle=45, maxl
                     raillen = needs_offset && (i == 0 || i == n) ? shortlen : longlen;
                     y_adjust = (needs_offset && i > 0 ? -shortlen -spacing: 0);
                     translate(zrot(angle, p=(i*(longlen+spacing) + y_adjust) * RIGHT))
-                        m3_screw_rail(l=raillen, h=h, anchor=TOP+LEFT, spin=angle);
+                        _rail(l=raillen, anchor=TOP+LEFT);
                 }
         } else {
-            m3_screw_rail(l=l, h=h, anchor=anchor, spin=angle);
+            _rail(l=l, anchor=anchor);
         }
     }
 

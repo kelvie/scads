@@ -22,11 +22,14 @@ module add_base(h=0.3, inset=1.5, zcut=0.1, chamfer=false, enable=true) {
     module add_base_with_projection() {
 
         // TODO: do a hull instead with a thin top and bottom layer
-        for (i = [0:layers-1])
-            translate([0, 0, i*h/layers])
-                linear_extrude(h/layers + $eps)
-                offset(delta=-(inset -i*inset/layers), chamfer=true)
-                children(1);
+        intersection() {
+            for (i = [0:layers-1])
+                translate([0, 0, i*h/layers])
+                    linear_extrude(h/layers + $eps)
+                    offset(delta=-(inset -i*inset/layers), chamfer=true)
+                    children(1);
+            children(0);
+        }
 
         translate([0, 0, h])
             if (zcut ==  0) {

@@ -123,7 +123,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
     rollPinHeight = widthWithDovetail + tolerance + wall;
 
     // Aka the legs
-    module make_dovetail(type, length, width=2, taper=3) {
+    module make_dovetail(type, length, width=4, taper=3) {
         slop=0.05;
         leg_height = is_undef(leg_height) ? wall : leg_height;
         module create_mask() {
@@ -146,7 +146,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         dovetail(type,
                  length=length,
                  height=leg_height,
-                 width=2,
+                 width=width,
                  spin=90,
                  chamfer=leg_height/8,
                  anchor=BOTTOM,
@@ -196,8 +196,10 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
             if (legs == "BOTH" || legs == "LEFT")
                 left((leftWallThickness - wall)/2) attach(TOP) {
-                    fwd((outsideSz.y - wall)/2) make_dovetail("male", wall);
-                    back((outsideSz.y - wall - 2*rounding)/2) make_dovetail("male", wall);
+                    fwd((outsideSz.y - 2*wall)/2)
+                        make_dovetail("male", wall);
+                    back((outsideSz.y - 2*wall - 2*rounding)/2)
+                        make_dovetail("male", wall);
                 }
         }
 
@@ -215,9 +217,9 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
             if (legs == "BOTH" || legs == "RIGHT")
                 right((rightWallThickness - wall)/2)
                     attach(TOP) {
-                    fwd((outsideSz.y - wall)/2)
+                    fwd((outsideSz.y - 2*wall)/2)
                         make_dovetail("male", wall);
-                    back((outsideSz.y - wall - 2*rounding)/2)
+                    back((outsideSz.y - 2*wall - 2*rounding)/2)
                         make_dovetail("male", wall);
                 }
         }
