@@ -29,7 +29,7 @@ Explode_offset = 20; // [0:1:100]
 Add_base = true;
 
 // Extra height for z-compression compensation
-Extra_height = 0.3;
+Extra_height = 0.2;
 
 /* [Measurements] */
 // Inner dimensions of the enclosure
@@ -302,7 +302,7 @@ module bottom_grill() {
             m3_screw_rail_grill(l=l, w=w, h=wt*2,
                                 angle=angle,
                                 spacing_mult=Bottom_grill_spacing,
-                                maxlen=30, outset=1.25, extra_height=extra_height);
+                                maxlen=30, outset=1.25, extra_height=0.3);
     }
     edge_size = 2*m3_screw_head_height_countersunk();
 
@@ -639,12 +639,12 @@ if (Piece == "All") {
     add_base(0.3, 0.75, 0.1, enable=Add_base)
         make_front(anchor=TOP, orient=BOTTOM);
  } else if (Piece == "Top") {
-    add_base(Extra_height, 1.5, Extra_height, enable=Add_base) {
+    add_base(0.3, 1.5, 0.3, enable=Add_base) {
         make_top(anchor=BOTTOM, orient=TOP);
         rect([bd.x, bd.y], center=true);
     }
  } else if (Piece == "Bottom") {
-    add_base(Extra_height, 1.5, Extra_height, enable=Add_base) {
+    add_base(0.3, 1.5, 0.3, enable=Add_base) {
         make_bottom(anchor=BOTTOM);
         rect([bd.x, bd.y], center=true);
     }
