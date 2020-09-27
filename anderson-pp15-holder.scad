@@ -1,32 +1,21 @@
 include <lib/BOSL2/std.scad>
 
 include <lib/anderson-connectors.scad> // pp15_casing
-include <lib/addBase.scad> // addBase
+include <lib/add-base.scad> // add_base
 use <lib/text.scad>
-
-Wall_thickness = 2;
-
-// 0.2 seems to be a good balance between removability and stability
-Tolerance = 0.2; // [0.1:0.05:0.31]
-
-// Include a pin in the middle for attaching the connectors (WARNING: this makes it more difficult to take out for the same tolerance)
-Include_roll_pin = true;
-
-// Add a base in the bottom to account for compression in the first layers
-Add_bottom_base = true;
 
 // Whether or not to engrave the tolerance on the part (mainly used for testing)
 Print_tolerance = false;
 
-// Housing type -- plugs don't cover the areas that mate
-Housing_type = 0; // [0: Jack, 1: Plug]
-
-// Which way the dovetail should point -- use "Either" if you want to fit either, but the fit will be looser
-Dovetail_direction = 1; // [0: Either, 1: Left, 2: Right]
-
 Show_mask = false;
 
-/* [ hidden ] */
+Part_to_show = "Multi-holder"; // [Casing, Base, Mask, Multi-holder, Multi-holder casing, All]
+Legs = "RIGHT"; // [BOTH, LEFT, RIGHT, NONE]
+Add_base = true;
+
+Debug_shapes = false;
+
+/* [Hidden] */
 $fs = 0.025;
 $fa = $preview ? 10 : 5;
 
@@ -37,22 +26,35 @@ module changeDirection(direction=Dovetail_direction) {
         children(0);
 }
 
-// this adds 0.22mm ...
-addBase(0.3, 1.5, enable=Add_bottom_base)
-difference() {
-    changeDirection() pp15_casing(
-        middlePin=Include_roll_pin,
-        jack=Housing_type == 0,
-        tolerance=Tolerance,
-        wall=Wall_thickness,
-        dovetailLeft=Dovetail_direction != 0,
-        anchor=BOTTOM,
-        mask=Show_mask ? 3 : 0
-        );
-
-    // Print the tolerance for test fits
-    if (Print_tolerance)
-        fwd(9)
-            up(Wall_thickness)
-            addText(text=str("t: ", Tolerance), h=3);
+module show_part() {
+    part = Part_to_show;
+    if (part == "Base") {
+        pp15_base_plate();
+    } else if (part == "All") {
+        pp15_base_plate(anchor=TOP);
+        pp15_casing(anchor=TOP);
+        % pp15_casing(anchor=TOP, mask=3);
+        % pp15_casing_wirehider_mask(3, anchor=TOP);
+    } else if (part == "Mask") {
+        pp15_casing(anchor=TOP, mask=3);
+    } else if (part == "Casing") {
+        pp15_casing(anchor=TOP, wirehider=Wire_hider, legs=Legs);
+    } else if (part == "Multi-holder casing") {
+        add_base(enable=Add_base, zcut=0.2)
+            pp15_casing(orient=TOP, wirehider=false,
+                        legs="RIGHT",
+                        spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
+    } else if (part== "Multi-holder") {
+        add_base(enable=Add_base) union() {
+            pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM);
+            if (Debug_shapes)
+                % fwd(10)
+                      color("gray", alpha=0.2)
+                      pp15_multi_holder_cutout(t=4, n=3, width=55, wall=2,
+                                               anchor=BOTTOM);
+        }
+    }
 }
+
+show_part();
+$export_suffix = Part_to_show;

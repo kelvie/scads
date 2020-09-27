@@ -5,16 +5,10 @@ include <text.scad>
 include <add-base.scad>
 use <fasteners.scad>
 
-// To show a sample
-Show_sample = false;
 Wire_hider = true;
 // Show shapes for debugging purposes
 Debug_shapes = true;
 
-Part_to_show = "Multi-holder"; // [Casing, Base, Mask, Multi-holder, Multi-holder casing, Cable connector, All]
-Legs = "RIGHT"; // [BOTH, LEFT, RIGHT, NONE]
-
-Add_base = true;
 /* [Hidden] */
 $fa = $preview ? 10 : 5;
 $fs = 0.025;
@@ -54,7 +48,6 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
     (osz.y - wall - matedFullLength/2);
 
 // TODO: make all variables camelcase
-// TODO: add optional grip
 // TODO: add wire hider suitable for a cable end
 
 // Creates a holder for a pair of Anderson PowerPole 15/45 connectors.
@@ -89,11 +82,15 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
 //
 //   `real_size` when set to true uses the actual object size rather than two
 //       mated connectors, useful for when you want to attach things
+//
+//   `half_height_pins` makes it so the roll pins will be half the size, so
+//       something else can slot into the other side
 module pp15_casing(middlePin=true, tolerance=default_tolerance,
                    dovetailLeft=true, jack=false, wall=default_wall,
                    wirehider=true, mask=0, wirehider_mask=0,
                    anchor=CENTER, spin=0, orient=UP, text, rounding=default_wall/2,
                    leg_height, legs="BOTH", real_size=false, side_grip=false,
+                   half_height_pins=false
                    ) {
 
     housingLength = jack ? fullLength : matedFullLength - fullLength;
@@ -107,7 +104,6 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
     fullOutsideSz = outsideSz + (matedFullLength-housingLength+wall)*[0,1,0] +
         wireHiderWidth*[0,2,0];
 
-
     chamfer = wall / 3;
     edge_nochamf = wirehider ? [TOP, FRONT] : [TOP];
 
@@ -120,7 +116,9 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
     rightWallThickness = dovetailLeft ? wall + dovetailWidth : wall;
     has_mask = mask > 0 || wirehider_mask > 0;
     rollPinYOffset = tipToRollPinCentre - fullLength + housingLength;
-    rollPinHeight = widthWithDovetail + tolerance + wall;
+    rollPinHeight = half_height_pins ?
+        widthWithDovetail / 2 + wall :
+        widthWithDovetail + tolerance + wall;
 
     // Aka the legs
     module make_dovetail(type, length, width=4, taper=3) {
@@ -539,12 +537,12 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
     }
 }
 
-// TODO:
-// - make top and bottom half come apart and snap together.
-// - Maybe have top and bottom parts each have different side walls
-module pp15_cable_connector(wire_width=2.7, h=10,
+// Requires two parts -- mirror in any direction to get the other part.
+module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                             anchor=CENTER, spin=0, orient=TOP,
                             wall=default_wall) {
+    eps=$fs/4;
+    casing_tolerance = 0.1;
 
     rounding = wall/2;
     module _corner(anchor=CENTER) {
@@ -553,86 +551,87 @@ module pp15_cable_connector(wire_width=2.7, h=10,
         spheroid(d=wall, anchor=anchor, style="octa");
     }
 
-    pp15_casing(anchor=anchor, spin=spin, orient=orient, legs="NONE",
-                tolerance=0.1, jack=false, real_size=true, side_grip=true,
-                wirehider=false) {
-        position(FRONT) {
-            psz = $parent_size;
-            // Interface between the casing and the wire strain relief part has
-            // a weird indent, I think due to the fillets or tolerances
-            mirror_copy(RIGHT) back(wall/2) {
-                left(psz.x/2)
-                    cuboid([wall, 2*wall, psz.z],
-                           anchor=LEFT,
-                           rounding=rounding,
-                           edges=FRONT
-                           );
+    module _wire_hole(extra_od=0) {
+        up(wall/2)
+            fwd(h)
+            mirror_copy(DOWN)
+            up((wires - 1) * (wire_width+default_tolerance)/2)
+            top_half()
+            torus(id=wire_width, od=wire_width+2*wall+extra_od, orient=FRONT);
+    }
 
-
-                position(BOTTOM)
-                    up(wall/2)
-                    fwd(wall/2)
-                    cuboid([psz.x, wall, wall], rounding=rounding, edges=FRONT);
-            }
-
-            xoff = (psz.x - wire_width - 2*wall)/2;
-
-            // Side walls for wire part
-            mirror_copy(RIGHT) hull() {
-                position(LEFT+TOP) down(wall/2) {
-                    right(wall/2)  _corner();
-                    fwd(h) right(xoff) _corner(LEFT);
-                }
-                position(LEFT+BOTTOM) up(wall/2) {
-                    right(wall/2) _corner();
+    module _front_plate(xoff) {
+        // Front wall
+        hull() {
+            mirror_copy(UP) mirror_copy(RIGHT) position(BOTTOM) up(wall/2) {
+                position(LEFT) {
                     fwd(h) right(xoff) _corner(LEFT);
                 }
             }
+        }
+    }
 
-            // Bottom wall
-            hull() {
-                mirror_copy(RIGHT) position(BOTTOM) up(wall/2) {
-                    position(LEFT) {
+    osz = pp15_get_outside_size(tolerance=casing_tolerance);
+    size = [osz.x, osz.y, osz.z/2];
+
+    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
+        up(size.z/2)
+            bottom_half()
+            down(wall/2)
+            pp15_casing(legs="NONE", tolerance=casing_tolerance, jack=false,
+                        real_size=true, side_grip=true, wirehider=false,
+                        half_height_pins=true) {
+            position(FRONT) {
+                psz = $parent_size;
+                // Interface between the casing and the wire strain relief part has
+                // a weird indent, I think due to the fillets or tolerances
+                mirror_copy(RIGHT) back(wall/2) {
+                    left(psz.x/2)
+                        cuboid([wall, 2*wall, psz.z],
+                               anchor=LEFT,
+                               rounding=rounding,
+                               edges=FRONT
+                               );
+
+
+                    position(BOTTOM)
+                        up(wall/2)
+                        fwd(wall/2)
+                        cuboid([psz.x, wall, wall], rounding=rounding, edges=FRONT);
+                }
+
+                xoff = (psz.x - wire_width - 2*wall)/2;
+
+                // Side walls for wire part
+                mirror_copy(RIGHT) hull() {
+                    position(LEFT+TOP) down(wall/2) {
+                        right(wall/2)  _corner();
+                        fwd(h) right(xoff) _corner(LEFT);
+                    }
+                    position(LEFT+BOTTOM) up(wall/2) {
                         right(wall/2) _corner();
                         fwd(h) right(xoff) _corner(LEFT);
                     }
                 }
+
+                // Bottom wall
+                hull() {
+                    mirror_copy(RIGHT) position(BOTTOM) up(wall/2) {
+                        position(LEFT) {
+                            right(wall/2) _corner();
+                            fwd(h) right(xoff) _corner(LEFT);
+                        }
+                    }
+                }
+
+                difference() {
+                    _front_plate(xoff);
+                    hull() _wire_hole(extra_od=eps);
+                }
+
+                _wire_hole();
             }
         }
+        children();
     }
 }
-
-
-if (Show_sample) {
-    part = Part_to_show;
-    if (part == "Base") {
-        pp15_base_plate();
-    } else if (part == "All") {
-        pp15_base_plate(anchor=TOP);
-        pp15_casing(anchor=TOP);
-        % pp15_casing(anchor=TOP, mask=3);
-        % pp15_casing_wirehider_mask(3, anchor=TOP);
-    } else if (part == "Mask") {
-        pp15_casing(anchor=TOP, mask=3);
-    } else if (part == "Casing") {
-        pp15_casing(anchor=TOP, wirehider=Wire_hider, legs=Legs);
-    } else if (part == "Multi-holder casing") {
-        add_base(enable=Add_base, zcut=0.2)
-            pp15_casing(orient=TOP, wirehider=false,
-                        legs="RIGHT",
-                        spin=180, wall=2, rounding=2/2, anchor=BOTTOM);
-    } else if (part== "Multi-holder") {
-        add_base(enable=Add_base) union() {
-            pp15_multi_holder(n=3, width=55, wall=2, anchor=BOTTOM);
-            if (Debug_shapes)
-                % fwd(10)
-                      color("gray", alpha=0.2)
-                      pp15_multi_holder_cutout(t=4, n=3, width=55, wall=2,
-                                               anchor=BOTTOM);
-        }
-    } else if (part == "Cable connector") {
-        add_base(enable=Add_base)
-            pp15_cable_connector(anchor=BOTTOM);
-    }
-    $export_suffix = Part_to_show;
- }
