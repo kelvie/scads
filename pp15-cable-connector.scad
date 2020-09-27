@@ -25,4 +25,4 @@ pp15_cable_connector(wire_width=Wire_width, wires=Number_of_wires,
                      rounding=Wire_width/2);
 }
 
-$export_suffix = str("-", Number_of_wires, "x", Wire_width, "mm-wire");
+$export_suffix = str(Number_of_wires, "x", Wire_width, "mm-wire");
