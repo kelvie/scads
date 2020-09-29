@@ -598,13 +598,23 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
     osz = pp15_get_outside_size(tolerance=tolerance);
     size = [osz.x, osz.y, osz.z/2];
 
-    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
-        up(size.z/2)
-            bottom_half()
-            down(wall/2)
-            pp15_casing(legs="NONE", tolerance=tolerance, jack=false,
-                        real_size=true, side_grip=true, wirehider=false,
-                        half_height_pins=true) {
+    xoff = (size.x - wire_width - 2*wall)/2;
+
+    // Front left corner
+    module _fl_corner() {
+        fwd(h) right(xoff) _corner(LEFT);
+    }
+
+    // back left corner
+    module _bl_corner() {
+        right(wall/2)  _corner();
+    }
+
+    module _part() {
+
+        pp15_casing(legs="NONE", tolerance=tolerance, jack=false,
+                    real_size=true, side_grip=true, wirehider=false,
+                    half_height_pins=true) {
             position(FRONT) {
                 psz = $parent_size;
                 // Interface between the casing and the wire strain relief part
@@ -625,17 +635,15 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                                edges=FRONT);
                 }
 
-                xoff = (psz.x - wire_width - 2*wall)/2;
-
                 // Side walls for wire part
                 mirror_copy(RIGHT) hull() {
                     position(LEFT+TOP) down(wall/2) {
-                        right(wall/2)  _corner();
-                        fwd(h) right(xoff) _corner(LEFT);
+                        _bl_corner();
+                        _fl_corner();
                     }
                     position(LEFT+BOTTOM) up(wall/2) {
-                        right(wall/2) _corner();
-                        fwd(h) right(xoff) _corner(LEFT);
+                        _bl_corner();
+                        _fl_corner();
                     }
                 }
 
@@ -643,8 +651,8 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                 hull() {
                     mirror_copy(RIGHT) position(BOTTOM) up(wall/2) {
                         position(LEFT) {
-                            right(wall/2) _corner();
-                            fwd(h) right(xoff) _corner(LEFT);
+                            _bl_corner();
+                            _fl_corner();
                         }
                     }
                 }
@@ -657,6 +665,14 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                 _wire_hole(-tolerance);
             }
         }
-        children();
+    }
+    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
+        up(size.z/2)
+            bottom_half()
+            down(wall/2)
+            _part();
+        union() {
+            children();
+        }
     }
 }
