@@ -32,7 +32,8 @@ function _get_inside_size(jack=false) =
     let (housingLength = jack ? fullLength : matedFullLength - fullLength)
     [2*widthWithDovetail, housingLength, widthWithDovetail];
 
-function _get_outside_size(isz=_get_inside_size(), wall=default_wall, tolerance=default_tolerance) =
+function _get_outside_size(isz=_get_inside_size(), wall=default_wall,
+                           tolerance=default_tolerance) =
     isz + wall * [2, 1, 2] + tolerance * [1, 0, 1];
 
 function pp15_get_inside_size(jack=false) = _get_inside_size(jack=jack);
@@ -88,8 +89,9 @@ function pp15_get_center_yoffset(jack=false, wall=default_wall,
 module pp15_casing(middlePin=true, tolerance=default_tolerance,
                    dovetailLeft=true, jack=false, wall=default_wall,
                    wirehider=true, mask=0, wirehider_mask=0,
-                   anchor=CENTER, spin=0, orient=UP, text, rounding=default_wall/2,
-                   leg_height, legs="BOTH", real_size=false, side_grip=false,
+                   anchor=CENTER, spin=0, orient=UP, text,
+                   rounding=default_wall/2, leg_height, legs="BOTH",
+                   real_size=false, side_grip=false,
                    half_height_pins=false
                    ) {
 
@@ -174,11 +176,17 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
         // If wall doesn't have legs, remove the extra wall spacing, since this
         // won't attach to anything anyway
-        left_wall_h = outsideSz.z - (legs == "BOTH" || legs == "LEFT" ? 0 : wall);
-        left_wall_edges = legs == "BOTH" || legs == "LEFT" ? edges("ALL", except=edge_nochamf) : edges("ALL");
+        left_wall_h = outsideSz.z - (legs == "BOTH" || legs == "LEFT" ?
+                                     0 : wall);
+        left_wall_edges = legs == "BOTH" || legs == "LEFT" ?
+            edges("ALL", except=edge_nochamf) :
+            edges("ALL");
 
-        right_wall_h = outsideSz.z - (legs == "BOTH" || legs == "RIGHT" ? 0 : wall);
-        right_wall_edges = legs == "BOTH" || legs == "RIGHT" ? edges("ALL", except=edge_nochamf) : edges("ALL");
+        right_wall_h = outsideSz.z - (legs == "BOTH" || legs == "RIGHT" ?
+                                      0 : wall);
+        right_wall_edges = legs == "BOTH" || legs == "RIGHT" ?
+            edges("ALL", except=edge_nochamf) :
+            edges("ALL");
 
         module _grips() {
             ycopies(n=4, spacing=wall)
@@ -241,7 +249,9 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         // Add thickness for sides that don't have a dovetail sticking out
         module _xtra_thicc(height, edges) {
             left(outsideSz.x / 2)
-                cuboid(size=[wall + dovetailWidth, outsideSz.y - dovetailHeight - wall, height],
+                cuboid(size=[wall + dovetailWidth,
+                             outsideSz.y - dovetailHeight - wall,
+                             height],
                        anchor=BOTTOM+BACK+LEFT,
                        rounding=rounding,
                        edges=edges
@@ -278,14 +288,16 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
             // Draw an icon indicating which side to put in the connectors
             if (dovetailLeft)
                 up(wall - 0.4 + $eps) fwd(outsideSz.y-dovetailHeight / 2)
-                    linear_extrude(0.4) import("icons/pp15-dovetail-left.svg", center=true);
+                    linear_extrude(0.4) import("icons/pp15-dovetail-left.svg",
+                                               center=true);
 
 
             // If there's no built-in middle roll pin, we cut out a hole instead
             if (!middlePin)
                 fwd(rollPinYOffset)
                     down($eps)
-                    cyl(r=rollPinRadius + tolerance / 2, h=outsideSz.z+2*$eps, anchor=BOTTOM);
+                    cyl(r=rollPinRadius + tolerance / 2, h=outsideSz.z+2*$eps,
+                        anchor=BOTTOM);
         }
 
         // Side roll pins
@@ -325,7 +337,8 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
                 }
                 show("children") wh_cube() {
                     attach(TOP+BACK)
-                        cuboid(size=[outsideSz.x-2*wall, diag_nowall , diag_nowall]);
+                        cuboid(size=[outsideSz.x-2*wall, diag_nowall,
+                                     diag_nowall]);
                 }
             }
         }
@@ -346,7 +359,8 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         union() {
 
             down(real_size ? real_outside_sz.z / 2 : outsideSz.z/2)
-                back(real_size ? outsideSz.y/2 : pp15_get_center_yoffset(jack, wall, tolerance))
+                back(real_size ? outsideSz.y/2 :
+                     pp15_get_center_yoffset(jack, wall, tolerance))
                 if (mask == 0 && wirehider_mask == 0) {
                     hide("mask wire-hider-mask") make();
                 } else {
@@ -402,7 +416,8 @@ module pp15_base_plate(wall=2, tolerance=default_tolerance,
     }
 }
 
-module pp15_multi_holder_casing(wall=default_wall, anchor=CENTER, spin=0, orient=TOP) {
+module pp15_multi_holder_casing(wall=default_wall, anchor=CENTER, spin=0,
+                                orient=TOP) {
     casing_wall = wall;
     pp15_casing(wirehider=false, spin=spin, orient=orient, anchor=anchor,
                 wall=casing_wall, rounding=casing_wall/2);
@@ -456,7 +471,8 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
     module _debug_tolerance() {
         % if (Debug_shapes)
             position(LEFT)
-                cuboid(size=[tolerance, $parent_size.y, $parent_size.z], anchor=RIGHT);
+                cuboid(size=[tolerance, $parent_size.y, $parent_size.z],
+                       anchor=RIGHT);
     }
     module _part() {
         % back(- pp15_get_center_yoffset() + osz.y/2)
@@ -464,7 +480,8 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
             up(osz.x/2)
                 zrot(180) pp15_casing(orient=RIGHT, wirehider=false,
                                       legs="RIGHT",
-                                      spin=180, wall=casing_wall, rounding=casing_wall/2);
+                                      spin=180, wall=casing_wall,
+                                      rounding=casing_wall/2);
 
         }
 
@@ -490,7 +507,8 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
                 left(osz.z/2)
                 up(osz.x/2)
                 zrot(180)
-                pp15_base_plate(orient=RIGHT, spin=180, anchor=TOP, wall=casing_wall);
+                pp15_base_plate(orient=RIGHT, spin=180, anchor=TOP,
+                                wall=casing_wall);
         }
         right(n*spacing/2 + tolerance/2)
             down(wall)
@@ -521,7 +539,9 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
                               orient=TOP, backwall=true, extra_h=size.z/4) {
                 // TODO: assert if the wall intersects this
                 if (Debug_shapes)
-                    % position(TOP) cuboid(size=[size.y+2, 2.4 + tolerance, 5.5 ], anchor=TOP);
+                    % position(TOP) cuboid(
+                                           size=[size.y+2, 2.4 + tolerance, 5.5],
+                                           anchor=TOP);
             }
         }
     }
@@ -544,7 +564,7 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
 // Requires two parts -- mirror in any direction to get the other part.
 module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                             anchor=CENTER, spin=0, orient=TOP,
-                            wall=default_wall) {
+                            wall=default_wall, snaps="NONE") {
     eps=$fs/4;
     tolerance = 0.1;
 
@@ -587,8 +607,8 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                         half_height_pins=true) {
             position(FRONT) {
                 psz = $parent_size;
-                // Interface between the casing and the wire strain relief part has
-                // a weird indent, I think due to the fillets or tolerances
+                // Interface between the casing and the wire strain relief part
+                // has a weird indent, I think due to the fillets or tolerances
                 mirror_copy(RIGHT) back(wall/2) {
                     left(psz.x/2)
                         cuboid([wall, 2*wall, psz.z],
@@ -601,7 +621,8 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                     position(BOTTOM)
                         up(wall/2)
                         fwd(wall/2)
-                        cuboid([psz.x, wall, wall], rounding=rounding, edges=FRONT);
+                        cuboid([psz.x, wall, wall], rounding=rounding,
+                               edges=FRONT);
                 }
 
                 xoff = (psz.x - wire_width - 2*wall)/2;
