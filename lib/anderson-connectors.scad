@@ -537,12 +537,16 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
     }
 }
 
+// TODO:
+//  - back part doesn't really stay together, needs a clip or something
+//  - small line on the inside between tapered part and the casing
+//  - torus for wire sticks out a bit
 // Requires two parts -- mirror in any direction to get the other part.
 module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                             anchor=CENTER, spin=0, orient=TOP,
                             wall=default_wall) {
     eps=$fs/4;
-    casing_tolerance = 0.1;
+    tolerance = 0.1;
 
     rounding = wall/2;
     module _corner(anchor=CENTER) {
@@ -571,14 +575,14 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
         }
     }
 
-    osz = pp15_get_outside_size(tolerance=casing_tolerance);
+    osz = pp15_get_outside_size(tolerance=tolerance);
     size = [osz.x, osz.y, osz.z/2];
 
     attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
         up(size.z/2)
             bottom_half()
             down(wall/2)
-            pp15_casing(legs="NONE", tolerance=casing_tolerance, jack=false,
+            pp15_casing(legs="NONE", tolerance=tolerance, jack=false,
                         real_size=true, side_grip=true, wirehider=false,
                         half_height_pins=true) {
             position(FRONT) {
@@ -629,7 +633,7 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                     hull() _wire_hole(extra_od=eps);
                 }
 
-                _wire_hole();
+                _wire_hole(-tolerance);
             }
         }
         children();
