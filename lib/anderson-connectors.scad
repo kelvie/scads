@@ -558,13 +558,15 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
 }
 
 // TODO:
-//  - back part doesn't really stay together, needs a clip or something
-//  - small line on the inside between tapered part and the casing
-//  - torus for wire sticks out a bit
-// Requires two parts -- mirror in any direction to get the other part.
+//  - small line on the inside between tapered part and the casing; does this
+//    matter?
+//  - Allow multiple wires per row
+
+// `snaps` can be "male", "female", or "none"
+// `rows` are how many wires can be side by side (vs vertical)
 module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                             anchor=CENTER, spin=0, orient=TOP,
-                            wall=default_wall, snaps="NONE") {
+                            wall=default_wall, snaps="none", rows=1) {
     eps=$fs/4;
     tolerance = 0.1;
 
@@ -662,15 +664,74 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                     hull() _wire_hole(extra_od=eps);
                 }
 
-                _wire_hole(-tolerance);
+                intersection() {
+                    _front_plate(xoff);
+                    _wire_hole();
+                }
             }
         }
     }
-    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
-        up(size.z/2)
-            bottom_half()
-            down(wall/2)
+    anchors = [
+        anchorpt("right-wall-top",
+                 pos=[size.x - xoff - wall, -(size.y + h), size.z]/2, orient=UP,
+                 spin=atan2(h, xoff))
+               ];
+    module _attachable_part() {
+        attachable(size=size, anchors=anchors) {
+            up(size.z/2)
+                bottom_half()
+                down(wall/2)
             _part();
+            children();
+        }
+    }
+
+    // Yeah ease this in the side...
+    module _snap_clip(snaps, eps=0) {
+        snap_length = sqrt(h*h + xoff*xoff) / 2 + (snaps == "male" ? 0 : tolerance);
+        height = wall;
+
+        anchor = FRONT + BOTTOM;
+        cyl_anchor = TOP;
+        pos = FRONT + TOP;
+
+        module _clip() {
+            prismoid(size1=[snap_length + wall, wall/2],
+                     size2=[snap_length, wall/2],
+                     h=height+eps, anchor=anchor,
+                     rounding=wall/4 * [0, 0, 1, 1]) {
+                position(pos) hull() {
+                    d = wall/4;
+                    mirror_copy(RIGHT)
+                        left(snap_length/2-wall/4) spheroid(d=d, anchor=cyl_anchor);
+                }
+            }
+        }
+
+        if (snaps == "male")
+            down(eps) _clip();
+        else
+            up(eps) mirror(DOWN) _clip();
+
+    }
+
+    attachable(size=size, anchor=anchor, spin=spin, orient=orient,
+               anchors=anchors) {
+        if (snaps == "male") {
+            _attachable_part() {
+                mirror_copy(LEFT) attach("right-wall-top", overlap=0)
+                    _snap_clip(snaps, $eps);
+            }
+        } else if (snaps == "female") {
+            difference()  {
+                _attachable_part();
+                show("just-children")
+                    _attachable_part() tags("just-children")
+                    mirror_copy(LEFT) attach("right-wall-top", overlap=0)
+                    _snap_clip(snaps, $eps);
+            }
+        }
+
         union() {
             children();
         }
