@@ -567,7 +567,7 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
 module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                             anchor=CENTER, spin=0, orient=TOP,
                             wall=default_wall, snaps="none", rows=1) {
-    eps=$fs/4;
+    eps=$fs/10;
     tolerance = 0.1;
 
     rounding = wall/2;
@@ -715,7 +715,7 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
         if (snaps == "male")
             down(eps) _clip();
         else
-            up(eps) mirror(DOWN) _clip();
+            back(eps) up(eps) mirror(DOWN) _clip();
 
     }
 
