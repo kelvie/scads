@@ -688,20 +688,24 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
 
     // Yeah ease this in the side...
     module _snap_clip(snaps, eps=0) {
-        snap_length = sqrt(h*h + xoff*xoff) / 2 + (snaps == "male" ? 0 : tolerance);
+        female_tolerance = snaps == "male" ? 0 : tolerance;
+        snap_length = sqrt(h*h + xoff*xoff) / 2 + female_tolerance;
+        snap_depth = wall/2;
         height = wall;
 
         anchor = FRONT + BOTTOM;
         cyl_anchor = TOP;
         pos = FRONT + TOP;
 
+        prismoid_taper = 2*tolerance;
         module _clip() {
-            prismoid(size1=[snap_length + wall, wall/2],
-                     size2=[snap_length, wall/2],
+            d = wall/4;
+            prismoid(size1=[snap_length + wall, snap_depth],
+                     size2=[snap_length, snap_depth - prismoid_taper],
+                     shift=[0, prismoid_taper/2],
                      h=height+eps, anchor=anchor,
                      rounding=wall/4 * [0, 0, 1, 1]) {
                 position(pos) hull() {
-                    d = wall/4;
                     mirror_copy(RIGHT)
                         left(snap_length/2-wall/4) spheroid(d=d, anchor=cyl_anchor);
                 }
