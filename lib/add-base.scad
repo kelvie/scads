@@ -1,3 +1,5 @@
+include <BOSL2/std.scad>
+
 // This adds a h and inset to the part directly on the XYplane (looking
 // downward). The idea behind this is to create a elevated base to account for
 // the z-compression on the first few layers (which is done) for platform

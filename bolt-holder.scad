@@ -9,7 +9,7 @@ Number_of_handles = 3;
 Handle_radius = 30;
 
 
-use <lib/addBase.scad>;
+use <lib/add-base.scad>;
 
 // To hide from customizer
 module hidden() {
@@ -46,5 +46,5 @@ module main() {
     }
 }
 
-addBase(0.3, 2)
+add_base()
 main();
