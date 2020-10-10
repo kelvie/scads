@@ -6,7 +6,7 @@ Wire_width = 5.1; // [2.0: "18AWG (red/black)", 2.2: "18AWG (2xblack)", 4.6: 20A
 Number_of_wires = 1;
 
 // Won't show up on preview
-Add_base = false;
+Add_base = true;
 Preview_wire = true;
 Orientation = "Side-by-side"; // ["Side-by-side", "Together"]
 
