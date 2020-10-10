@@ -225,7 +225,7 @@ module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, backwall=true
     // TODO: use a prismoid and handle bottom_l
     module _part() {
         diff("cutme")
-            cuboid(size, rounding=rounding, edges=edges) {
+            cuboid(size, rounding=rounding, chamfer=chamfer, edges=edges) {
             position(pos)
                 up($eps)
                 m3_sqnut_cutout(hole_height=$parent_size.y + 0.1, anchor=pos,

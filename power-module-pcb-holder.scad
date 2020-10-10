@@ -3,6 +3,7 @@ include <lib/BOSL2/std.scad>
 include <lib/BOSL2/metric_screws.scad>
 
 include <lib/add-base.scad>
+include <lib/fasteners.scad>
 
 /* [Overall dimensions] */
 PCB_size = [18.22, 49.2, 1.57];
@@ -170,46 +171,9 @@ module side_mounts(inner_width, anchor=CENTER, spin=0, orient=TOP) {
                        chamfer=chamf,
                        anchor=BACK);
 
-            // Side plates
             mirror_copy(LEFT)
                 position(RIGHT+FRONT)
-                diff("cutme")
-                cuboid([wall, sz.y, sz.z],
-                       chamfer=chamf,
-                       anchor=RIGHT+FRONT
-                    ) {
-                // Show where the nut would go
-                % position(LEFT) cuboid([nt, nw, nw], anchor=RIGHT);
-
-                // Wall to hold nut in place; 2 * slop for a looser fit
-                position(LEFT)
-                 left(nt + 2*slop)
-                    cuboid($parent_size,
-                           chamfer=chamf,
-                           anchor=RIGHT);
-
-                // Add bottom wall to hold nut
-                position(BOTTOM+LEFT)
-                    right(chamf)
-                    cuboid([nt + 2*slop + 2*chamf, sz.y - wall, ($parent_size.z - nw) / 2 - 2*slop],
-                           anchor=BOTTOM+RIGHT
-                        );
-
-                // Screw hole for the rail
-                tags("cutme")
-                    hull() {
-                    right(eps) back(wall + nw/2) position(RIGHT+FRONT)
-                        cyl(d=Screw_hole_diameter,
-                            h=2*wall + nt + 2*slop + 2*eps,
-                            anchor=TOP,
-                            orient=RIGHT);
-                    right(eps) fwd(wall + nw/2) position(RIGHT+BACK)
-                        cyl(d=Screw_hole_diameter,
-                            h=2*wall + nt + 2*slop + 2*eps,
-                            anchor=TOP,
-                            orient=RIGHT);
-                }
-            }
+                m3_sqnut_rail(sz.y, wall=wall, chamfer=chamf, spin=90, anchor=LEFT+FRONT);
         }
         children();
     }
