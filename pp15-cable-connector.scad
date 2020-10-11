@@ -2,8 +2,9 @@ include <lib/BOSL2/std.scad>
 include <lib/anderson-connectors.scad>
 include <lib/add-base.scad>
 
-Wire_width = 5.1; // [2.0: "18AWG (red/black)", 2.2: "18AWG (2xblack)", 4.6: 20AWG - 2 conductors, 5.1: 18AWG - 2 conductors]
-Number_of_wires = 1;
+Wire_width = 5.1; // [2.0: "18AWG (red/black)", 2.2: "18AWG (2xblack)", 4.4: 22AWG - 2 conductors, 4.6: 20AWG - 2 conductors, 5.1: 18AWG - 2 conductors]
+Wires_per_column = 1; // [1:2]
+Wires_per_row = 1; // [1:3]
 
 // Won't show up on preview
 Add_base = true;
@@ -17,20 +18,22 @@ $eps = $fs/4;
 
 module make_connector(anchor, snaps) {
     add_base(enable=!$preview && Add_base)
-        pp15_cable_connector(wire_width=Wire_width, wires=Number_of_wires,
+        pp15_cable_connector(wire_width=Wire_width, wire_cols=Wires_per_row,
+                             wire_rows=Wires_per_column,
                              anchor=anchor, snaps=snaps, h=10) {
 
+        // TODO: show individual wires as cylinders
         if (Preview_wire)
             % position(TOP)
-                  cuboid([Wire_width, 50, Number_of_wires*Wire_width],
+                  cuboid([Wires_per_row*Wire_width, 50, Wires_per_column*Wire_width],
                          rounding=Wire_width/2);
     }
 }
 
 if (Orientation == "Side-by-side") {
-    right(10)
+    right(5)
         make_connector(anchor=BOTTOM+LEFT, snaps="male");
-    mirror(LEFT) right(10)
+    mirror(LEFT) right(5)
         make_connector(anchor=BOTTOM+LEFT, snaps="female");
  } else if (Orientation == "Together") {
     mirror_copy(TOP)
@@ -38,4 +41,4 @@ if (Orientation == "Side-by-side") {
  }
 
 
-$export_suffix = str(Number_of_wires, "x", Wire_width, "mm-wire");
+$export_suffix = str(Wires_per_row*Wires_per_column, "x", Wire_width, "mm-wire");

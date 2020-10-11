@@ -563,10 +563,10 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
 //  - Allow multiple wires per row
 
 // `snaps` can be "male", "female", or "none"
-// `rows` are how many wires can be side by side (vs vertical)
-module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
+// `wire_rows` and `wire_cols` determine the shape of the wire part
+module pp15_cable_connector(wire_width=5.1, h=10,
                             anchor=CENTER, spin=0, orient=TOP,
-                            wall=default_wall, snaps="none", rows=1) {
+                            wall=default_wall, snaps="none", wire_rows=1, wire_cols=1) {
     eps=$fs/10;
     tolerance = 0.1;
 
@@ -577,13 +577,19 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
         spheroid(d=wall, anchor=anchor, style="octa");
     }
 
+    wire_hole_zoff = (wire_rows - 1) * (wire_width+default_tolerance)/2;
+    wire_hole_id = wire_width;
+    wire_hole_od = wire_width + 2*wall;
     module _wire_hole(extra_od=0) {
         up(wall/2)
             fwd(h)
+            mirror_copy(RIGHT)
             mirror_copy(DOWN)
-            up((wires - 1) * (wire_width+default_tolerance)/2)
+            up(wire_hole_zoff)
+            left((wire_cols - 1) * (wire_width+default_tolerance)/2)
             top_half()
-            torus(id=wire_width, od=wire_width+2*wall+extra_od, orient=FRONT);
+            left_half()
+            torus(id=wire_hole_id, od=wire_hole_od+extra_od, orient=FRONT);
     }
 
     module _front_plate(xoff) {
@@ -600,7 +606,7 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
     osz = pp15_get_outside_size(tolerance=tolerance);
     size = [osz.x, osz.y, osz.z/2];
 
-    xoff = (size.x - wire_width - 2*wall)/2;
+    xoff = (size.x - wire_cols*wire_width - 2*wall)/2;
 
     // Front left corner
     module _fl_corner() {
@@ -647,6 +653,14 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                         _bl_corner();
                         _fl_corner();
                     }
+                }
+
+                // Bottom and top walls for the wire hole
+                hull() {
+                    mirror_copy(RIGHT)
+                        position(LEFT)
+                        down(wire_width/2 + wire_hole_zoff)
+                        _fl_corner();
                 }
 
                 // Bottom wall
@@ -734,6 +748,8 @@ module pp15_cable_connector(wire_width=5.1, h=10, wires=1,
                     mirror_copy(LEFT) attach("right-wall-top", overlap=0)
                     _snap_clip(snaps, $eps);
             }
+        } else {
+            _attachable_part();
         }
 
         union() {
