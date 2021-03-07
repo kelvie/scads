@@ -241,19 +241,3 @@ module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, backwall=true
     }
 }
 
-if (Show_sample) {
-    $fa = $preview ? 10 : 5 ;
-    $fs = 0.025;
-
-    if (Part_to_show == "Rail grill") {
-        diff("rail")
-            cuboid([85, 40, 2])
-            attach(TOP, $overlap=-$fs/4)
-            m3_screw_rail_grill(w=$parent_size.x-2,
-                                l=$parent_size.y-2,
-                                h=4,
-                                $tags="rail", angle=Sample_angle, maxlen=30);
-    } else if (Part_to_show == "Square nut rail") {
-        m3_sqnut_rail(l=20, wall=1, chamfer=1/3);
-    }
- }
