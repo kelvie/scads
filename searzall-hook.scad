@@ -1,4 +1,5 @@
 include <lib/BOSL2/std.scad>
+include <lib/add-base.scad>
 
 
 Small_diameter = 16.1;
@@ -42,7 +43,8 @@ module holder(anchor=CENTER, spin=0, orient=TOP) {
     }
 }
 
-difference() {
+add_base()
+up(Thickness) yrot(-90) difference() {
     union() {
         cuboid([Thickness, outer_sz.y, Hook_height],
                anchor=RIGHT+BOTTOM,
