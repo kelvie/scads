@@ -2,6 +2,7 @@ include <lib/BOSL2/std.scad>
 include <lib/add-base.scad>
 
 
+Add_print_base = false;
 Small_diameter = 16.1;
 Large_diameter = 25.8;
 Thickness = 8;
@@ -43,8 +44,11 @@ module holder(anchor=CENTER, spin=0, orient=TOP) {
     }
 }
 
-add_base()
-up(Thickness) yrot(-90) difference() {
+// TODO: so, this can't be hung because torque will push the whole thing toward
+// the back. Maybe just something to rest it on?
+add_base(enable=Add_print_base)
+// up(Thickness) yrot(-90)
+difference() {
     union() {
         cuboid([Thickness, outer_sz.y, Hook_height],
                anchor=RIGHT+BOTTOM,
