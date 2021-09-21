@@ -130,7 +130,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
             newlength = length;
             right((newlength - length)/2)
                 yrot(180) dovetail(type == "male" ? "female" : "male",
-                                   length=newlength,
+                                   slide=newlength,
                                    height=leg_height,
                                    width=width + (newlength - length)*tan(taper),
                                    spin=90,
@@ -144,7 +144,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         }
 
         dovetail(type,
-                 length=length,
+                 slide=length,
                  height=leg_height,
                  width=width,
                  spin=90,
@@ -161,18 +161,18 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
 
     module make() {
         // cutouts to show connectors
-        % recolor("#ff000033") fwd(outsideSz.y - wall) up(wall)
-            cuboid(
-                size=[widthWithDovetail, fullLength, widthWithDovetail],
-                anchor=FRONT+BOTTOM+LEFT,
-                $color="#ff000033"
+        /* % recolor("#ff000033") fwd(outsideSz.y - wall) up(wall) */
+        /*     cuboid( */
+        /*         size=[widthWithDovetail, fullLength, widthWithDovetail], */
+        /*         anchor=FRONT+BOTTOM+LEFT, */
+        /*         $color="#ff000033" */
 
-                );
-        % recolor("#00000033") fwd(outsideSz.y - wall) up(wall)
-              cuboid(
-                  size=[widthWithDovetail, fullLength, widthWithDovetail],
-                  anchor=FRONT+BOTTOM+RIGHT
-                  );
+        /*         ); */
+        /* % recolor("#00000033") fwd(outsideSz.y - wall) up(wall) */
+        /*       cuboid( */
+        /*           size=[widthWithDovetail, fullLength, widthWithDovetail], */
+        /*           anchor=FRONT+BOTTOM+RIGHT */
+        /*           ); */
 
         // If wall doesn't have legs, remove the extra wall spacing, since this
         // won't attach to anything anyway
@@ -276,7 +276,7 @@ module pp15_casing(middlePin=true, tolerance=default_tolerance,
         mirror(LEFT) _back_wall(right_wall_h, right_wall_edges);
 
         // Bottom wall
-        if (attachment_is_shown($tags)) // to workaround weird diff bugs
+        if (_attachment_is_shown($tags)) // to workaround weird diff bugs
             difference() {
             cuboid(
                 size=[outsideSz.x, outsideSz.y, wall],

@@ -130,7 +130,7 @@ extra_height = Add_base ? Extra_height : 0;
 
 module edge_dovetail(type, length, spin=0) {
     dovetail(type,
-             length=length,
+             slide=length,
              height=wt/2,
              width=wt/2,
              chamfer=wt/16,

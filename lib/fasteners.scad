@@ -20,6 +20,11 @@ hole_d = Screw_hole_diameter;
 screw_head_h = Screw_head_height;
 screw_head_w = Screw_size + 2*screw_head_h;
 
+module m3_screw_hole(h, extra_height=0, outset=0, anchor=TOP, orient=TOP, spin=0) {
+    m3_screw_rail(l=0, h, extra_height, outset, anchor, orient, spin)
+        children();
+}
+
 module m3_screw_rail(l, h, extra_height=0, outset=0,
                      anchor=TOP, orient=TOP, spin=0) {
     size = [l + screw_head_w, screw_head_w, h+extra_height];
