@@ -2,6 +2,7 @@
 include <lib/BOSL2/std.scad>
 
 
+// Total thickness (z-direction) -- should probably be the screw (thread) length
 Thickness = 6;
 
 // How far into the PCB should the side wall extend
