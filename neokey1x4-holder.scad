@@ -10,7 +10,7 @@ Side_wall_height = 4;
 
 // x-dimension thickness of side wall
 Side_wall_thickness = 5;
-Front_wall_thickness = 2;
+Front_wall_thickness = 1.5;
 
 Slop = 0.1;
 
@@ -25,6 +25,9 @@ pcbsize = 25.4 * [0.85, 3.0, 0] + [0, 0, 2];
 hole_spacing = 25.4 * [0.65, 1.5, 0];
 screw_hole_d = 2.9;
 rounding = 0.25;
+
+// From the side of the PCB
+connector_cutout_width = 12;
 
 // Unused I think
 nut_size_across_corners = 5.77;
@@ -41,7 +44,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
             diff("neg") {
                 cuboid([size.x, size.y, size.z], rounding=rounding)
                     position(TOP)
-                    cuboid([pcbsize.x - 2*Side_wall_xoffset, pcbsize.y, Side_wall_height], anchor=TOP, $tags="neg");
+                    cuboid([pcbsize.x - 2*Side_wall_xoffset + 2*Slop, pcbsize.y + 2*Slop, Side_wall_height], anchor=TOP, $tags="neg");
             }
             children();
         }
@@ -56,17 +59,17 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                 // Cut out PCB
                 position(TOP)
                     up($eps)
-                    cuboid(pcbsize + Slop * [1, 1, 1], anchor=TOP, $tags="neg");
+                    cuboid(pcbsize + Slop * [2, 2, 1], anchor=TOP, $tags="neg");
 
                 // Cut out portion for connectors
                 mirror_copy(FRONT) position(FRONT+TOP)
-                    left(pcbsize.x/4)
+                    left(pcbsize.x/2)
                     fwd($eps)
                     up($eps)
-                    cuboid([pcbsize.x/2,
+                    cuboid([connector_cutout_width,
                             Front_wall_thickness + 2*$eps,
                             Side_wall_height],
-                           anchor=FRONT+TOP, $tags="neg");
+                           anchor=FRONT+TOP+LEFT, $tags="neg");
             }
 
             // Cut out screw holes, and spacers, and nut holder
