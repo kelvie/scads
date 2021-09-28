@@ -3,17 +3,19 @@ include <lib/BOSL2/std.scad>
 
 
 // Total thickness (z-direction) -- should probably be the screw (thread) length
-Thickness = 6;
+Thickness = 8;
 
 // How far into the PCB should the side wall extend
 Side_wall_xoffset = 3;
-Side_wall_height = 4;
+
+// How far the tallest bottom component on the pcb extends to
+Bottom_component_clearance = 3;
 
 // x-dimension thickness of side wall
 Side_wall_thickness = 5;
 Front_wall_thickness = 1.5;
 
-Slop = 0.1;
+Slop = 0.15;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -45,7 +47,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
             diff("neg") {
                 cuboid([size.x, size.y, size.z], rounding=rounding)
                     position(TOP)
-                    cuboid([pcbsize.x - 2*Side_wall_xoffset + 2*Slop, pcbsize.y + 2*Slop, Side_wall_height], anchor=TOP, $tags="neg");
+                    cuboid([pcbsize.x - 2*Side_wall_xoffset, pcbsize.y, pcbsize.z + Bottom_component_clearance] + Slop * [2, 2, 1], anchor=TOP, $tags="neg");
             }
             children();
         }
@@ -64,15 +66,16 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
 
                 // Cut out portion for connectors
                 mirror_copy(FRONT) position(FRONT+TOP)
-                    left(pcbsize.x/2)
+                    left(pcbsize.x/2 +  Slop)
                     fwd($eps)
                     up($eps)
-                    cuboid([connector_cutout_width,
-                            Front_wall_thickness + 2*$eps,
-                            Side_wall_height],
+                    cuboid([connector_cutout_width + Slop,
+                            Front_wall_thickness + 2*$eps - Slop,
+                            Bottom_component_clearance + pcbsize.z + Slop+ $eps],
                            anchor=FRONT+TOP+LEFT, $tags="neg");
             }
 
+            // TODO: only use 2 screws, and just use a plastic pole
             // Cut out screw holes, and spacers, and nut holder
             mirror_copy(BACK) mirror_copy(LEFT)
                 move(hole_spacing / 2) {
