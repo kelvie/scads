@@ -90,7 +90,17 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP) {
                 cyl(d=screw_hole_d, h = 2*Thickness, $tags="neg");
                 // Cut out nut hole on bottom
                 position(BOTTOM) down($eps)
-                    cyl(d1=nut_size_across_corners+1, d2=nut_size_across_corners, h=nut_height+Slop, anchor=BOTTOM, $tags="neg", $fn=6);
+                    cyl(d1=nut_size_across_corners+1, d2=nut_size_across_corners,
+                        h=nut_height+Slop, anchor=BOTTOM,
+                        $tags="neg", $fn=6) {
+
+                    // Cut out a slope on top of the nut hole if we're printing
+                    // with the bottom on the bottom, as there are no supports
+                    // here.
+                    if (Add_base)
+                        position(TOP)
+                            cyl(d1=nut_size_across_corners, d2=0, h=0.5, anchor=BOTTOM, $fn=20, $tags="neg");
+                }
             }
 
             /* // Nubs to go into the PCB screw hole (to save screws) */
@@ -143,11 +153,15 @@ module top_part(anchor=CENTER, spin=0, orient=TOP) {
 anchor = Add_base ? BOTTOM : CENTER;
 
 add_base(enable=Add_base)
-if (Part == "Top")
+if (Part == "Top") {
+    $suffix="top";
     top_part(anchor=anchor* -1, orient=BOTTOM);
-else if (Part == "Bottom")
+} else if (Part == "Bottom") {
+    $suffix="bottom";
     bottom_part(anchor=anchor);
-else {
+} else {
     top_part(anchor=TOP, orient=BOTTOM);
     color("green") bottom_part(anchor=TOP);
 }
+
+$export_suffix = str(Part, "-take3");
