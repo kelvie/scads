@@ -6,6 +6,7 @@ Part = "Top"; // [Top, Bottom, All]
 
 // Total thickness (z-direction) -- should probably be the screw (thread) length
 Thickness = 8;
+Screw_length = 12;
 
 // How far into the PCB should the side wall extend
 Side_wall_xoffset = 3;
@@ -123,12 +124,13 @@ module top_part(anchor=CENTER, spin=0, orient=TOP) {
                     cuboid([cherry_switch_hole_size, cherry_switch_hole_size, size.z+2*$eps], $tags="neg");
             }
 
-           move_copies([-hole_spacing / 2, hole_spacing / 2]) {
+            screw_head_hole_depth = cherry_key_height + Thickness - Screw_length;
+            mirror_copy(LEFT) move_copies([-hole_spacing / 2, hole_spacing / 2]) {
                 // Cut out screw hole
                 cyl(d=screw_hole_d, h = 2*Thickness, $tags="neg");
                 // Cut out nut hole on bottom
                 position(BOTTOM) down($eps)
-                    cyl(d1=nut_size_across_corners+1, d2=nut_size_across_corners, h=nut_height+Slop, anchor=BOTTOM, $tags="neg", $fn=6);
+                    cyl(d1=nut_size_across_corners+0.5, d2=nut_size_across_corners, h=screw_head_hole_depth+Slop, anchor=BOTTOM, $tags="neg", $fn=6);
             }
         }
     }
@@ -142,7 +144,7 @@ anchor = Add_base ? BOTTOM : CENTER;
 
 add_base(enable=Add_base)
 if (Part == "Top")
-    top_part(anchor=anchor);
+    top_part(anchor=anchor* -1, orient=BOTTOM);
 else if (Part == "Bottom")
     bottom_part(anchor=anchor);
 else {
