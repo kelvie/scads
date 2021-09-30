@@ -623,25 +623,8 @@ module pp15_cable_connector(wire_width=5.1, h=10,
         pp15_casing(legs="NONE", tolerance=tolerance, jack=false,
                     real_size=true, side_grip=true, wirehider=false,
                     half_height_pins=true) {
-            position(FRONT) {
+            position(FRONT) back(rounding) {
                 psz = $parent_size;
-                // Interface between the casing and the wire strain relief part
-                // has a weird indent, I think due to the fillets or tolerances
-                mirror_copy(RIGHT) back(wall/2) {
-                    left(psz.x/2)
-                        cuboid([wall, 2*wall, psz.z],
-                               anchor=LEFT,
-                               rounding=rounding,
-                               edges=FRONT
-                               );
-
-
-                    position(BOTTOM)
-                        up(wall/2)
-                        fwd(wall/2)
-                        cuboid([psz.x, wall, wall], rounding=rounding,
-                               edges=FRONT);
-                }
 
                 // Side walls for wire part
                 mirror_copy(RIGHT) hull() {
