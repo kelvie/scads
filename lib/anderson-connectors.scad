@@ -622,7 +622,7 @@ module pp15_cable_connector(wire_width=5.1, h=10,
 
         pp15_casing(legs="NONE", tolerance=tolerance, jack=false,
                     real_size=true, side_grip=true, wirehider=false,
-                    half_height_pins=true) {
+                    half_height_pins=true, rounding=rounding) {
             position(FRONT) back(rounding) {
                 psz = $parent_size;
 
