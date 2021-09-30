@@ -686,7 +686,7 @@ module pp15_cable_connector(wire_width=5.1, h=10,
         }
     }
     anchors = [
-        anchorpt("right-wall-top",
+        named_anchor("right-wall-top",
                  pos=[size.x - xoff - wall, -(size.y + h), size.z]/2, orient=UP,
                  spin=atan2(h, xoff))
                ];
@@ -737,7 +737,7 @@ module pp15_cable_connector(wire_width=5.1, h=10,
                anchors=anchors) {
         if (snaps == "male") {
             _attachable_part() {
-                mirror_copy(LEFT) attach("right-wall-top", overlap=0)
+                mirror_copy(LEFT) attach(from="right-wall-top", overlap=0)
                     _snap_clip(snaps, $eps);
             }
         } else if (snaps == "female") {
