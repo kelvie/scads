@@ -1,4 +1,10 @@
 include <lib/BOSL2/std.scad>
+include <lib/add-base.scad>
+
+Add_base = false;
+Part = "All"; // [All]
+
+Slop = 0.15;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -18,4 +24,11 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
     }
 }
 
-part();
+anchor = Add_base ? BOTTOM : CENTER;
+
+add_base(enable=Add_base)
+if (Part == "All") {
+    part(anchor=anchor);
+}
+
+$export_suffix = str(Part, "-take1");
