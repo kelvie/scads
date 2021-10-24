@@ -5,6 +5,7 @@ include <lib/add-base.scad>
 Wire_width = 5.1; // [2.0: "18AWG (red/black)", 2.2: "18AWG (2xblack)", 4.4: 22AWG - 2 conductors, 4.6: 20AWG - 2 conductors, 5.1: 18AWG - 2 conductors]
 Wires_per_column = 1; // [1:2]
 Wires_per_row = 1; // [1:3]
+Length = 10; // [5:20]
 
 // Won't show up on preview
 Add_base = true;
@@ -20,7 +21,7 @@ module make_connector(anchor, snaps) {
     add_base(enable=!$preview && Add_base)
         pp15_cable_connector(wire_width=Wire_width, wire_cols=Wires_per_row,
                              wire_rows=Wires_per_column,
-                             anchor=anchor, snaps=snaps, h=10) {
+                             anchor=anchor, snaps=snaps, h=Length) {
 
         // TODO: show individual wires as cylinders
         if (Preview_wire)
