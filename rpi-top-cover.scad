@@ -1,6 +1,11 @@
 include <lib/BOSL2/std.scad>
 include <lib/add-base.scad>
 
+// Raspberry Pi 4b top mount, using standoffs.
+// This supports mounting a 40mm noctua fan to roughly where the CPU is.
+// This was meant for a two-stack of raspberry pi 4's, and the fan is meant to
+// cool both at once.
+
 Add_base = false;
 Part = "All"; // [All]
 
