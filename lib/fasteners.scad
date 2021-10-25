@@ -246,3 +246,18 @@ module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, backwall=true
     }
 }
 
+module m2_nut(h, anchor=CENTER, spin=0, orient=TOP, taper=0.2) {
+    // 4mm (max) width to width, converted to a cylinder radius
+    d = 4 * 1.1547;
+    cyl(d1=d, d2=d+taper, h=h-0.5, anchor=anchor, spin=spin, orient=orient, $fn=6) {
+        attach(BOTTOM)
+            cyl(d1=d, d2=0, h=0.5, $fn=6);
+        children();
+    }
+}
+
+module m2_hole(h, anchor=CENTER, spin=0, orient=TOP) {
+    d = 2.4;
+    cyl(d=d, h=h, anchor=anchor, spin=spin, orient=orient)
+        children();
+}
