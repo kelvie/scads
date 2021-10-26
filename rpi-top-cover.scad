@@ -59,16 +59,11 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                 right(Screw_hole_X_spacing / 2)
                 fwd(Screw_hole_Y_spacing / 2)
                 _screw_hole($tags="neg");
-            position(FRONT)
+
+            mirror_copy(BACK) position(FRONT)
                 left(Screw_hole_X_spacing / 2 - Hole_to_CPU_spacing) {
                 _fan_mount();
             }
-
-            mirror(BACK) mirror(RIGHT) position(FRONT)
-                left(Screw_hole_X_spacing / 2 - Hole_to_CPU_spacing) {
-                _fan_mount();
-            }
-
         }
     }
 
