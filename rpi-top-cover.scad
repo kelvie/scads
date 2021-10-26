@@ -12,7 +12,7 @@ Part = "All"; // [All]
 X_size = 58 + 3.5 + 3.5;
 Y_size = 56;
 Thickness = 2;
-Fan_mount_thickness = 1.5;
+Fan_mount_thickness = 2;
 
 // 32mm for 40mm fan
 Fan_hole_spacing = 32;
