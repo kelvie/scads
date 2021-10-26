@@ -97,7 +97,7 @@ module _screw_holes(size, connector_type, spacing) {
                     } else if (connector_type == "side-slot") {
                         down(size.z - 2) hull() {
                             move_copies([CENTER, Side_wall_thickness * LEFT])
-                                m2_nut(h=Nut_hole_height, anchor=BOTTOM, taper=0);
+                                m2_nut(h=Nut_hole_height, anchor=BOTTOM);
                         }
                     }
                     up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP);
@@ -109,11 +109,11 @@ module _screw_holes(size, connector_type, spacing) {
 
 module _double_screw_holes(size, connector_type) {
     _screw_holes(size, connector_type, pcbsize.y/3);
-    mirror(UP) _screw_holes(size, connector_type, pcbsize.y/9);
+    mirror(UP) _screw_holes(size, "bottom", pcbsize.y/9);
 
     mirror(BACK) {
 
-        mirror(UP) _screw_holes(size, connector_type, pcbsize.y/3);
+        mirror(UP) _screw_holes(size, "bottom", pcbsize.y/3);
         _screw_holes(size, connector_type, pcbsize.y/9);
     }
 }
@@ -200,7 +200,7 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
                             _pcb_standoff(spec, anchor=BOTTOM+BACK+RIGHT, $tags="keep");
                     }
 
-                _double_screw_holes(size, connector);
+                _double_screw_holes(size, "side-slot");
             }
         }
     }
