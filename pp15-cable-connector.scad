@@ -4,7 +4,7 @@ include <lib/add-base.scad>
 
 Wire_width = 5.1; // [2.0: "18AWG (red/black)", 2.2: "18AWG (2xblack)", 4.4: 22AWG - 2 conductors, 4.6: 20AWG - 2 conductors, 5.1: 18AWG - 2 conductors]
 Wires_per_column = 1; // [1:2]
-Wires_per_row = 1; // [1:3]
+Wires_per_row = 1; // [1:4]
 Length = 10; // [5:20]
 Slop = 0.15;
 
