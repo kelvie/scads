@@ -4,17 +4,10 @@ include <lib/fasteners.scad>
 
 // Holder for the CTP2 DC quick charter buck adapters you can get cheap from
 // China.
-//
-// TODO:
-// - Figure out attachments between middle piece
-//   - maybe 8 nut holders in the middle piece?
-// - Remove holes on the inside of the middle piece
-// - How to print the middle part?? Split it into two with a middle screw
-//   holding it together?
 
 /* [General] */
 Add_base = false;
-Part = "All"; // [Top, Middle, Bottom, All]
+Part = "All"; // [Top, Bottom, All]
 // Just for "All"
 Explode_parts = 3; // [0:1:10]
 
@@ -23,6 +16,8 @@ Front_wall_thickness = 1;
 Back_wall_thickness = 4;
 Rounding = 3;
 
+// Height of the M2 nuts you have. Should be a press fit.
+Nut_hole_height = 1.55;
 Slop = 0.15;
 
 /* [Bottom] */
@@ -87,13 +82,52 @@ module _pcb_standoff(size, anchor, h=Bottom_component_clearance) {
 
 }
 
+module _screw_holes(size, connector_type, spacing) {
+    // M2 screw holes on side rails -- make sure they are the same
+    // position relative to the PCB size, so when I change other
+    // parameters later, I can still fit the top and bottom pieces
+    // together.
+    if (Side_wall_thickness >= 5) {
+        fwd((Back_wall_thickness - Front_wall_thickness)/2)
+            mirror_copy(RIGHT) tags("neg") {
+            left(Side_wall_thickness / 2) position(RIGHT) attach(BOTTOM) {
+                fwd(spacing) {
+                    if (connector_type == "bottom") {
+                        up($eps) m2_nut(h=size.z-2, anchor=TOP);
+                    } else if (connector_type == "side-slot") {
+                        down(size.z - 2) hull() {
+                            move_copies([CENTER, Side_wall_thickness * LEFT])
+                                m2_nut(h=Nut_hole_height, anchor=BOTTOM, taper=0);
+                        }
+                    }
+                    up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP);
+                }
+            }
+        }
+    }
+}
+
+module _double_screw_holes(size, connector_type) {
+    _screw_holes(size, connector_type, pcbsize.y/3);
+    mirror(UP) _screw_holes(size, connector_type, pcbsize.y/9);
+
+    mirror(BACK) {
+
+        mirror(UP) _screw_holes(size, connector_type, pcbsize.y/3);
+        _screw_holes(size, connector_type, pcbsize.y/9);
+    }
+}
+
 outer_size = [pcbsize.x + 2*Side_wall_thickness,
               pcbsize.y + Front_wall_thickness + Back_wall_thickness,
               0];
 
 // TODO: some type of adjustable clamp on the back, as it plays a little
-module bottom_part(anchor=CENTER, spin=0, orient=TOP, edges=edges("ALL", except=TOP)) {
-    extra_z = Bottom_component_clearance + Bottom_wall_thickness + pcbsize.z + Slop;
+module bottom_part(anchor=CENTER, spin=0, orient=TOP,
+                   edges=edges("ALL", except=[TOP,BOTTOM]),
+                   connector="bottom",
+                   bottom_wall=Bottom_wall_thickness) {
+    extra_z = Bottom_component_clearance + bottom_wall + pcbsize.z + Slop;
     size = outer_size + extra_z * [0, 0, 1];
 
     module _outer_part(anchor=CENTER, spin=0, orient=TOP) {
@@ -166,22 +200,7 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP, edges=edges("ALL", except=
                             _pcb_standoff(spec, anchor=BOTTOM+BACK+RIGHT, $tags="keep");
                     }
 
-                // M2 screw holes on side rails -- make sure they are the same
-                // position relative to the PCB size, so when I change other
-                // parameters later, I can still fit the top and bottom pieces
-                // together.
-                if (Side_wall_thickness >= 5) {
-                    fwd((Back_wall_thickness - Front_wall_thickness)/2)
-                    mirror_copy(RIGHT) tags("neg") {
-                        left(Side_wall_thickness / 2) position(RIGHT) attach(BOTTOM) {
-                            mirror_copy(BACK)
-                            fwd(pcbsize.y/4) {
-                                up($eps) m2_nut(h=size.z-2, anchor=TOP);
-                                up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP);
-                            }
-                        }
-                    }
-                }
+                _double_screw_holes(size, connector);
             }
         }
     }
@@ -191,7 +210,7 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP, edges=edges("ALL", except=
     }
 }
 
-// Attach using the sides for unlimited stacking?
+// Attach using the sides for unlimited stacking? Split bottom and top?
 module middle_part(anchor=CENTER, spin=0, orient=TOP) {
     shared_wall = max(Bottom_wall_thickness, Top_wall_thickness);
     extra_z = Top_component_clearance + shared_wall + Bottom_component_clearance + pcbsize.z + Slop;
@@ -200,9 +219,9 @@ module middle_part(anchor=CENTER, spin=0, orient=TOP) {
 
     module _part() {
         up(size.z / 2)
-            bottom_part(anchor=TOP, edges=edges("ALL", except=[TOP, BOTTOM]));
+            bottom_part(anchor=TOP, edges=edges("ALL", except=[TOP, BOTTOM]), connector="side-slot");
         down(size.z / 2)
-            top_part(anchor=TOP, orient=BOTTOM, edges=edges("ALL", except=[TOP, BOTTOM]));
+            top_part(anchor=TOP, orient=BOTTOM, edges=edges("ALL", except=[TOP, BOTTOM]), connector="side-slot");
     }
     attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
         _part();
@@ -211,8 +230,11 @@ module middle_part(anchor=CENTER, spin=0, orient=TOP) {
 }
 
 
-module top_part(anchor=CENTER, spin=0, orient=TOP, edges=edges("ALL", except=TOP)) {
-    extra_z = Top_component_clearance + Top_wall_thickness;
+module top_part(anchor=CENTER, spin=0, orient=TOP,
+                edges=edges("ALL", except=[TOP,BOTTOM]),
+                connector="bottom",
+                bottom_wall=Top_wall_thickness) {
+    extra_z = Top_component_clearance + bottom_wall;
     size = outer_size + extra_z * [0, 0, 1];
 
     module _outer_part(anchor=CENTER, spin=0, orient=TOP) {
@@ -282,22 +304,7 @@ module top_part(anchor=CENTER, spin=0, orient=TOP, edges=edges("ALL", except=TOP
                             _pcb_standoff_top(spec, anchor=BOTTOM+BACK+RIGHT, $tags="keep");
                     }
 
-                // M2 screw holes on side rails -- make sure they are the same
-                // position relative to the PCB size, so when I change other
-                // parameters later, I can still fit the top and bottom pieces
-                // together.
-                if (Side_wall_thickness >= 5) {
-                    fwd((Back_wall_thickness - Front_wall_thickness)/2)
-                    mirror_copy(RIGHT) tags("neg") {
-                        left(Side_wall_thickness / 2) position(RIGHT) attach(BOTTOM) {
-                            mirror_copy(BACK)
-                            fwd(pcbsize.y/4) {
-                                up($eps) m2_nut(h=size.z-2, anchor=TOP);
-                                up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP);
-                            }
-                        }
-                    }
-                }
+                _double_screw_holes(size, connector);
             }
         }
     }
@@ -312,20 +319,16 @@ anchor = Add_base ? BOTTOM : CENTER;
 
 add_base(enable=Add_base)
 if (Part == "Top") {
-    top_part(anchor=anchor* -1, orient=BOTTOM);
+    top_part(anchor=anchor, orient=TOP);
 } else if (Part == "Middle") {
     middle_part(anchor=anchor);
 } else if (Part == "Bottom") {
     bottom_part(anchor=anchor);
 } else {
-    middle_part(anchor=CENTER) {
-        up(Explode_parts)
-            attach(TOP)
-            color("pink") top_part(anchor=TOP, orient=BOTTOM);
-        down(Explode_parts)
-            attach(BOTTOM)
-            color("pink") bottom_part(anchor=TOP, orient=BOTTOM);
-    }
+    up(Explode_parts)
+        color("red") top_part(anchor=TOP, orient=BOTTOM);
+    down(Explode_parts)
+        color("white") bottom_part(anchor=TOP, orient=TOP);
 }
 
 $export_suffix = str(Part, "-take2");
