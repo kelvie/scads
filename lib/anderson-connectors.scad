@@ -566,9 +566,8 @@ module pp15_multi_holder(n=3, width=55, wall=default_wall, anchor=CENTER,
 // `wire_rows` and `wire_cols` determine the shape of the wire part
 module pp15_cable_connector(wire_width=5.1, h=10,
                             anchor=CENTER, spin=0, orient=TOP,
-                            wall=default_wall, snaps="none", wire_rows=1, wire_cols=1) {
+                            wall=default_wall, snaps="none", wire_rows=1, wire_cols=1, tolerance=default_tolerance) {
     eps=$fs/10;
-    tolerance = 0.1;
 
     rounding = wall/2;
     module _corner(anchor=CENTER) {
@@ -577,7 +576,7 @@ module pp15_cable_connector(wire_width=5.1, h=10,
         spheroid(d=wall, anchor=anchor, style="octa");
     }
 
-    wire_hole_zoff = (wire_rows - 1) * (wire_width+default_tolerance)/2;
+    wire_hole_zoff = (wire_rows - 1) * (wire_width+tolerance)/2;
     wire_hole_id = wire_width;
     wire_hole_od = wire_width + 2*wall;
     module _wire_hole(extra_od=0) {
@@ -586,7 +585,7 @@ module pp15_cable_connector(wire_width=5.1, h=10,
             mirror_copy(RIGHT)
             mirror_copy(DOWN)
             up(wire_hole_zoff)
-            left((wire_cols - 1) * (wire_width+default_tolerance)/2)
+            left((wire_cols - 1) * (wire_width+tolerance)/2)
             top_half()
             left_half()
             torus(id=wire_hole_id, od=wire_hole_od+extra_od, orient=FRONT);

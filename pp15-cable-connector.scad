@@ -6,6 +6,7 @@ Wire_width = 5.1; // [2.0: "18AWG (red/black)", 2.2: "18AWG (2xblack)", 4.4: 22A
 Wires_per_column = 1; // [1:2]
 Wires_per_row = 1; // [1:3]
 Length = 10; // [5:20]
+Slop = 0.15;
 
 // Won't show up on preview
 Add_base = true;
@@ -21,10 +22,10 @@ module make_connector(anchor, snaps) {
     add_base(enable=!$preview && Add_base)
         pp15_cable_connector(wire_width=Wire_width, wire_cols=Wires_per_row,
                              wire_rows=Wires_per_column,
-                             anchor=anchor, snaps=snaps, h=Length) {
+                             anchor=anchor, snaps=snaps, h=Length, tolerance=Slop) {
 
         // TODO: show individual wires as cylinders
-        if (Preview_wire)
+        if (Preview_wire && $preview)
             color("gray", 0.5) position(TOP)
                   cuboid([Wires_per_row*Wire_width, 50, Wires_per_column*Wire_width],
                          rounding=Wire_width/2);
@@ -41,5 +42,4 @@ if (Orientation == "Side-by-side") {
         make_connector(anchor=TOP);
  }
 
-
-$export_suffix = str(Wires_per_row*Wires_per_column, "x", Wire_width, "mm-wire");
+$export_suffix = str(Wires_per_row*Wires_per_column, "x", Wire_width, "mm-wire", "-take2");
