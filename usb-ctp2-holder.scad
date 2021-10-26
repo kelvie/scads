@@ -22,7 +22,7 @@ Slop = 0.15;
 
 /* [Bottom] */
 
-Bottom_wall_thickness = 2;
+Bottom_wall_thickness = 1;
 Bottom_component_clearance = 3.5;
 
 // [x, z, rounding]
@@ -41,7 +41,7 @@ Bottom_left_standoffs = [[2, 3, 30]];
 Bottom_back_standoffs = [[3, 2, 11.7]];
 
 /* [Top] */
-Top_wall_thickness = 2;
+Top_wall_thickness = 1;
 Top_component_clearance = 8.2;
 
 // [x, z, rounding]
