@@ -25,7 +25,7 @@ module make_connector(anchor, snaps) {
 
         // TODO: show individual wires as cylinders
         if (Preview_wire)
-            % position(TOP)
+            color("gray", 0.5) position(TOP)
                   cuboid([Wires_per_row*Wire_width, 50, Wires_per_column*Wire_width],
                          rounding=Wire_width/2);
     }

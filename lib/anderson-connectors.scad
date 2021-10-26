@@ -668,9 +668,11 @@ module pp15_cable_connector(wire_width=5.1, h=10,
             }
         }
     }
+    // Middle point on the "tail" part
+    anchor_xpos = size.x - xoff - wall;
     anchors = [
         named_anchor("right-wall-top",
-                 pos=[size.x - xoff - wall, -(size.y + h), size.z]/2, orient=UP,
+                 pos=[anchor_xpos, -(size.y + h - wall), size.z]/2, orient=UP,
                  spin=atan2(h, xoff))
                ];
     module _attachable_part() {
@@ -690,11 +692,13 @@ module pp15_cable_connector(wire_width=5.1, h=10,
         snap_depth = wall/2;
         height = wall;
 
-        anchor = FRONT + BOTTOM;
+        anchor = FRONT+BOTTOM;
         cyl_anchor = TOP;
         pos = FRONT + TOP;
 
         prismoid_taper = 2*tolerance;
+        // For debugging the position
+        // # cyl(d=0.1, h=100);
         module _clip() {
             d = wall/4;
             prismoid(size1=[snap_length + wall, snap_depth],
