@@ -30,7 +30,10 @@ Fan_hole_diameter = 4.3;
 // From Pi 4 schematics
 Screw_hole_Y_spacing = 49;
 Screw_hole_X_spacing = 58;
-Screw_hole_size = 2.7;
+
+// RPi4 uses 2.7 apparently, but we should be using nuts, and if this warps even
+// a little, the screws get hard to insert
+Screw_hole_size = 3;
 Hole_to_CPU_spacing = 25.75;
 
 module part(anchor=CENTER, spin=0, orient=TOP) {
