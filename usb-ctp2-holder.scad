@@ -13,8 +13,11 @@ Explode_parts = 3; // [0:1:10]
 
 Side_wall_thickness = 5.5;
 Front_wall_thickness = 1;
-Back_wall_thickness = 4;
+Back_wall_thickness = 6;
 Rounding = 3;
+
+// Minimum wall (primarily used for the back set-screw)
+Min_wall_thickness = 1;
 
 // Height of the M2 nuts you have
 Nut_hole_height = 1.6;
@@ -45,7 +48,7 @@ Top_wall_thickness = 1;
 Top_component_clearance = 8.2;
 
 // [x, z, rounding]
-Top_front_cutout = [14, 6.5, 0.15];
+Top_front_cutout = [14, 5.5, 0.15];
 
 // [x, z, rounding] -- mirrored left and right
 Top_back_side_cutout = [4, 1, 1];
@@ -118,11 +121,22 @@ module _double_screw_holes(size, connector_type) {
     }
 }
 
+module _back_nut_holder() {
+    position(BACK+TOP)
+        fwd(Back_wall_thickness-Min_wall_thickness)
+        xrot(90) {
+        m2_nut(h=Nut_hole_height + Slop, anchor=TOP, spin=360/6/2, slop=Slop, taper=0);
+
+        down(Min_wall_thickness+ Nut_hole_height + Slop)
+            m2_nut(h=Back_wall_thickness, anchor=TOP, spin=360/6/2, slop=Slop, taper=0);
+        m2_hole(h=Back_wall_thickness+$eps);
+    }
+}
+
 outer_size = [pcbsize.x + 2*Side_wall_thickness,
               pcbsize.y + Front_wall_thickness + Back_wall_thickness,
               0];
 
-// TODO: some type of adjustable clamp on the back, as it plays a little
 module bottom_part(anchor=CENTER, spin=0, orient=TOP,
                    edges=edges("ALL", except=[TOP,BOTTOM]),
                    connector="bottom",
@@ -201,6 +215,9 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
                     }
 
                 _double_screw_holes(size, "side-slot");
+
+                tags("neg")
+                    _back_nut_holder();
             }
         }
     }
@@ -305,6 +322,9 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                     }
 
                 _double_screw_holes(size, connector);
+
+                tags("neg")
+                    _back_nut_holder();
             }
         }
     }
@@ -331,4 +351,4 @@ if (Part == "Top") {
         color("white") bottom_part(anchor=TOP, orient=TOP);
 }
 
-$export_suffix = str(Part, "-take3");
+$export_suffix = str(Part, "-take4");
