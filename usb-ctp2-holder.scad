@@ -16,8 +16,8 @@ Front_wall_thickness = 1;
 Back_wall_thickness = 4;
 Rounding = 3;
 
-// Height of the M2 nuts you have. Should be a press fit.
-Nut_hole_height = 1.55;
+// Height of the M2 nuts you have
+Nut_hole_height = 1.6;
 Slop = 0.15;
 
 /* [Bottom] */
@@ -93,11 +93,11 @@ module _screw_holes(size, connector_type, spacing) {
             left(Side_wall_thickness / 2) position(RIGHT) attach(BOTTOM) {
                 fwd(spacing) {
                     if (connector_type == "bottom") {
-                        up($eps) m2_nut(h=size.z-2, anchor=TOP);
+                        up($eps) m2_nut(h=size.z-2, anchor=TOP, slop=Slop);
                     } else if (connector_type == "side-slot") {
                         down(size.z - 2) hull() {
                             move_copies([CENTER, Side_wall_thickness * LEFT])
-                                m2_nut(h=Nut_hole_height, anchor=BOTTOM);
+                                m2_nut(h=Nut_hole_height + Slop, anchor=BOTTOM, slop=Slop);
                         }
                     }
                     up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP);
@@ -181,7 +181,7 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
                     back(Front_wall_thickness)
                     for (spec = Bottom_left_standoffs) {
                         back(spec[2])
-                            _pcb_standoff(spec, anchor=BOTTOM+FRONT+LEFT, $tags="keep");
+                            _pcb_standoff(spec, anchor=BOTTOM+LEFT, $tags="keep");
                     }
 
                 position(BOTTOM+FRONT+RIGHT)
@@ -189,7 +189,7 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
                     back(Front_wall_thickness)
                     for (spec = Bottom_right_standoffs) {
                         back(spec[2])
-                            _pcb_standoff(spec, anchor=BOTTOM+FRONT+RIGHT, $tags="keep");
+                            _pcb_standoff(spec, anchor=BOTTOM+RIGHT, $tags="keep");
                     }
 
                 position(BOTTOM+BACK+RIGHT)
@@ -285,7 +285,7 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                     back(Front_wall_thickness)
                     for (spec = Top_left_standoffs) {
                         back(spec[2])
-                            _pcb_standoff_top(spec, anchor=BOTTOM+FRONT+LEFT, $tags="keep");
+                            _pcb_standoff_top(spec, anchor=BOTTOM+LEFT, $tags="keep");
                     }
 
                 position(BOTTOM+FRONT+RIGHT)
@@ -293,7 +293,7 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                     back(Front_wall_thickness)
                     for (spec = Top_right_standoffs) {
                         back(spec[2])
-                            _pcb_standoff_top(spec, anchor=BOTTOM+FRONT+RIGHT, $tags="keep");
+                            _pcb_standoff_top(spec, anchor=BOTTOM+RIGHT, $tags="keep");
                     }
 
                 position(BOTTOM+BACK+RIGHT)
@@ -331,4 +331,4 @@ if (Part == "Top") {
         color("white") bottom_part(anchor=TOP, orient=TOP);
 }
 
-$export_suffix = str(Part, "-take2");
+$export_suffix = str(Part, "-take3");
