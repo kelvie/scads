@@ -28,8 +28,8 @@ Slop = 0.15;
 Bottom_wall_thickness = 1;
 Bottom_component_clearance = 3.5;
 
-// [x, z, rounding]
-Bottom_front_cutout = [9, 3.3, 1];
+// [x, z, rounding] -- z doesn't include pcb
+Bottom_front_cutout = [9, 3.8, 1];
 // [x, z, rounding] -- mirrored left and right
 Bottom_back_side_cutout = [4, 1, 1];
 
@@ -48,10 +48,10 @@ Top_wall_thickness = 1;
 Top_component_clearance = 8.2;
 
 // [x, z, rounding]
-Top_front_cutout = [14, 5.5, 0.15];
+Top_front_cutout = [14, 7, 0.15];
 
 // [x, z, rounding] -- mirrored left and right
-Top_back_side_cutout = [4, 1, 1];
+Top_back_side_cutout = [4, 2, 1];
 
 // [x size, y size]
 Top_front_side_standoffs = [1.5, 10];
@@ -75,9 +75,18 @@ rounding = Rounding;
 pcbsize = [18.24, 49.3, 1.2];
 
 // Specs are [x, z, rounding]
-module _cutout(specs, anchor, t=Front_wall_thickness) {
-    cutsize = [specs[0], t + 2*$eps, pcbsize.z + specs[1]] + Slop*[2, 2, 0];
-    cuboid(cutsize, anchor=anchor, rounding=specs[2], edges=edges([BOTTOM], except=[FRONT, BACK]));
+module _cutout(specs, anchor, t=Front_wall_thickness, top_taper=0) {
+    cutsize = [specs[0], t + 2*$eps, specs[1]] + Slop*[2, 2, 0];
+    round_edges = top_taper > 0 ? "ALL" : BOTTOM;
+    cuboid(cutsize, anchor=anchor, rounding=specs[2], edges=edges(round_edges, except=[FRONT, BACK])) {
+    // Taper top to allow horizontal printing
+        if (top_taper > 0) {
+            position(TOP)
+                down($eps)
+                prismoid(size1=[cutsize.x - 2*specs[2], cutsize.y], size2=[0, cutsize.y], h=top_taper+$eps, anchor=BOTTOM);
+
+        }
+    }
 }
 
 module _pcb_standoff(size, anchor, h=Bottom_component_clearance) {
@@ -178,16 +187,16 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
 
                 // cut out bottom front connector
                 position(FRONT + TOP)
-                    up($eps)
                     fwd($eps)
-                    _cutout(Bottom_front_cutout, anchor=TOP+FRONT, $tags="neg");
+                    down(pcbsize.z)
+                    _cutout(Bottom_front_cutout, anchor=TOP+FRONT, top_taper=0.2, $tags="neg");
 
                 // Cut out bottom back connector (right and left)
                 mirror_copy(LEFT) position(BACK + TOP + RIGHT)
                     up($eps)
                     back($eps)
                     left(Side_wall_thickness)
-                    _cutout(Bottom_back_side_cutout, anchor=BACK+TOP+RIGHT, t=Back_wall_thickness, $tags="neg");
+                    _cutout(Bottom_back_side_cutout + pcbsize.z * [0, 1, 0], anchor=BACK+TOP+RIGHT, t=Back_wall_thickness, $tags="neg");
 
                 // Various standoffs
                 mirror_copy(LEFT)
@@ -357,4 +366,4 @@ if (Part == "Top") {
         color("white") bottom_part(anchor=TOP, orient=TOP);
 }
 
-$export_suffix = str(Part, "-take5");
+$export_suffix = str(Part, "-take6");
