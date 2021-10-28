@@ -81,26 +81,29 @@ module _cutout(specs, anchor, t=Front_wall_thickness) {
 }
 
 module _pcb_standoff(size, anchor, h=Bottom_component_clearance) {
-    up(Bottom_wall_thickness - $eps) cuboid([size.x, size.y, h + $eps], anchor=anchor);
+    rounding = min(size.x, size.y) / 4;
+    up(Bottom_wall_thickness - $eps)
+        cuboid([size.x, size.y, h + $eps], anchor=anchor,
+               rounding=rounding, edges=edges("ALL", except=[TOP, BOTTOM, [anchor.x, 0, 0], [0, anchor.y, 0]]));
 
 }
 
-module _screw_holes(size, connector_type, spacing) {
-    // M2 screw holes on side rails -- make sure they are the same
-    // position relative to the PCB size, so when I change other
-    // parameters later, I can still fit the top and bottom pieces
-    // together.
+module _screw_holes(size, connector_type, spacing, flip=false) {
+    // M2 screw holes on side rails
     if (Side_wall_thickness >= 5) {
         fwd((Back_wall_thickness - Front_wall_thickness)/2)
             mirror_copy(RIGHT) tags("neg") {
             left(Side_wall_thickness / 2) position(RIGHT) attach(BOTTOM) {
                 fwd(spacing) {
                     if (connector_type == "bottom") {
-                        up($eps) m2_nut(h=size.z-2, anchor=TOP, slop=Slop);
+                        up($eps) m2_nut(h=size.z - 2, anchor=TOP, slop=Slop);
                     } else if (connector_type == "side-slot") {
                         down(size.z - 2) hull() {
                             move_copies([CENTER, Side_wall_thickness * LEFT])
-                                m2_nut(h=Nut_hole_height + Slop, anchor=BOTTOM, slop=Slop);
+                                m2_nut(h=Nut_hole_height + Slop,
+                                       anchor=flip ? TOP : BOTTOM,
+                                       orient=flip ? BOTTOM : TOP,
+                                       slop=Slop);
                         }
                     }
                     up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP);
@@ -110,14 +113,12 @@ module _screw_holes(size, connector_type, spacing) {
     }
 }
 
-module _double_screw_holes(size, connector_type) {
-    _screw_holes(size, connector_type, pcbsize.y/3);
-    mirror(UP) _screw_holes(size, "bottom", pcbsize.y/9);
-
-    mirror(BACK) {
-
-        mirror(UP) _screw_holes(size, "bottom", pcbsize.y/3);
-        _screw_holes(size, connector_type, pcbsize.y/9);
+module _double_screw_holes(size, invert=false) {
+    // This uses pcbsize cause I thought I could adjust the wall thicknesses
+    // and keep the same screw layouts, but the mirror(BACK) messes that up
+    move_copies([CENTER, pcbsize.y / 2 * BACK]) {
+        _screw_holes(size, invert ? "bottom" : "side-slot", pcbsize.y/3);
+        mirror(UP) _screw_holes(size, invert ? "side-slot": "bottom", pcbsize.y/9, flip=invert);
     }
 }
 
@@ -129,7 +130,12 @@ module _back_nut_holder() {
 
         down(Min_wall_thickness+ Nut_hole_height + Slop)
             m2_nut(h=Back_wall_thickness, anchor=TOP, spin=360/6/2, slop=Slop, taper=0);
-        m2_hole(h=Back_wall_thickness+$eps);
+
+        // Withuot this hull, the screw hole creates a little hook that'll just
+        // break off anyway.
+        hull()
+            move_copies([CENTER, 1*BACK])
+            m2_hole(h=Back_wall_thickness+$eps);
     }
 }
 
@@ -214,10 +220,10 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
                             _pcb_standoff(spec, anchor=BOTTOM+BACK+RIGHT, $tags="keep");
                     }
 
-                _double_screw_holes(size, "side-slot");
+                _double_screw_holes(size);
 
                 tags("neg")
-                    _back_nut_holder();
+                    down(pcbsize.z/2) _back_nut_holder();
             }
         }
     }
@@ -321,10 +327,10 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                             _pcb_standoff_top(spec, anchor=BOTTOM+BACK+RIGHT, $tags="keep");
                     }
 
-                _double_screw_holes(size, connector);
+                _double_screw_holes(size, invert=true);
 
                 tags("neg")
-                    _back_nut_holder();
+                    up(pcbsize.z/2) _back_nut_holder();
             }
         }
     }
@@ -351,4 +357,4 @@ if (Part == "Top") {
         color("white") bottom_part(anchor=TOP, orient=TOP);
 }
 
-$export_suffix = str(Part, "-take4");
+$export_suffix = str(Part, "-take5");
