@@ -258,8 +258,14 @@ module m2_nut(h, anchor=CENTER, spin=0, orient=TOP, taper=0.4, slop=0.1) {
     }
 }
 
-module m2_hole(h, anchor=CENTER, spin=0, orient=TOP) {
+module m2_hole(h, anchor=CENTER, spin=0, orient=TOP, taper=0) {
     d = 2.4;
-    cyl(d=d, h=h, anchor=anchor, spin=spin, orient=orient)
+    cyl(d=d, h=h, anchor=anchor, spin=spin, orient=orient) {
+        if (taper > 0)
+            mirror_copy(TOP)
+            attach(BOTTOM)
+                cyl(h=taper, d1=d, d2=d+taper, anchor=TOP);
+
         children();
+    }
 }

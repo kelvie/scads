@@ -106,7 +106,7 @@ module _screw_holes(size, connector_type, spacing, flip=false) {
                                        slop=Slop);
                         }
                     }
-                    up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP);
+                    up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP, taper=0.4);
                 }
             }
         }
