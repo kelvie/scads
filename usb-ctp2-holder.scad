@@ -1,6 +1,7 @@
 include <lib/BOSL2/std.scad>
 include <lib/add-base.scad>
 include <lib/fasteners.scad>
+include <lib/text.scad>
 
 // Holder for the CTP2 DC quick charter buck adapters you can get cheap from
 // China.
@@ -18,8 +19,10 @@ Front_wall_thickness = 1;
 Back_wall_thickness = 6;
 Rounding = 3;
 
+Back_label = "24V";
+
 // Add some through holes in the back for wiring up the modules together
-Wire_through_holes = false;
+Wire_through_holes = true;
 
 // Minimum wall (primarily used for the back set-screw)
 Min_wall_thickness = 1;
@@ -174,14 +177,13 @@ module _outer_part(size, edges, anchor=CENTER, spin=0, orient=TOP) {
 
 }
 
-module _wire_through_hole(d, h, taper=1) {
+module _wire_through_hole(h, taper=1) {
+    d = max(Top_back_side_cutout[0], Bottom_back_side_cutout[0]) + 2*Slop;
     if (Wire_through_holes)
-        tags("neg") mirror_copy(LEFT) position(BACK + RIGHT)
+       tags("neg") mirror_copy(LEFT) position(BACK+RIGHT)
             left(Side_wall_thickness)
-            fwd(Back_wall_thickness/2)
-            cyl(d=d, h=h+$eps, anchor=RIGHT) {
-            attach(BOTTOM)
-                cyl(d2=d+taper, d1=0, h=taper, anchor=TOP);
+            fwd(Back_wall_thickness/2 - $eps)
+            cuboid([d, Back_wall_thickness /2+$eps, h+$eps], anchor=FRONT+RIGHT, rounding=Top_back_side_cutout[2], edges=edges("ALL", except=[TOP, BOTTOM, BACK])) {
         }
 }
 
@@ -257,7 +259,7 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
 
                 _double_screw_holes(size);
 
-                _wire_through_hole(d=Bottom_back_side_cutout[0], h=size.z);
+                _wire_through_hole(h=size.z);
 
                 tags("neg")
                     down(pcbsize.z/2) _back_nut_holder();
@@ -307,6 +309,10 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
             // shit out of it.
             _outer_part(size, edges) {
 
+                attach(BACK)
+                    label(Back_label, spin=180);
+
+
                 // Cut out part for pcb components
                 position(TOP)
                     up($eps)
@@ -326,7 +332,7 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                     left(Side_wall_thickness)
                     _cutout(Top_back_side_cutout, anchor=BACK+TOP+RIGHT, t=Back_wall_thickness, $tags="neg");
 
-                _wire_through_hole(d=Top_back_side_cutout[0], h=size.z);
+                _wire_through_hole(h=size.z);
 
                 // Various standoffs
                 mirror_copy(LEFT)
