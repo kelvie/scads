@@ -18,6 +18,9 @@ Front_wall_thickness = 1;
 Back_wall_thickness = 6;
 Rounding = 3;
 
+// Add some through holes in the back for wiring up the modules together
+Wire_through_holes = false;
+
 // Minimum wall (primarily used for the back set-screw)
 Min_wall_thickness = 1;
 
@@ -47,7 +50,7 @@ Bottom_back_standoffs = [[3, 2, 11.7]];
 
 /* [Top] */
 Top_wall_thickness = 1;
-Top_component_clearance = 8.2;
+Top_component_clearance = 9;
 
 // [x, z, rounding]
 Top_front_cutout = [14, 7, 0.15];
@@ -110,11 +113,17 @@ module _screw_holes(size, connector_type, spacing, flip=false) {
                         up($eps) m2_nut(h=size.z - 2, anchor=TOP, slop=Slop);
                     } else if (connector_type == "side-slot") {
                         down(size.z - 2) hull() {
-                            move_copies([CENTER, Side_wall_thickness * LEFT])
+                            m2_nut(h=Nut_hole_height + Slop,
+                                   anchor=flip ? TOP : BOTTOM,
+                                   orient=flip ? BOTTOM : TOP,
+                                   slop=Slop);
+
+                            // This has 4x the slop to make them easier to insert.
+                            left(Side_wall_thickness/2)
                                 m2_nut(h=Nut_hole_height + Slop,
                                        anchor=flip ? TOP : BOTTOM,
                                        orient=flip ? BOTTOM : TOP,
-                                       slop=Slop);
+                                       slop=4*Slop);
                         }
                     }
                     up($eps) m2_hole(h=size.z+2*$eps, anchor=TOP, taper=0.4);
@@ -164,6 +173,18 @@ module _outer_part(size, edges, anchor=CENTER, spin=0, orient=TOP) {
     }
 
 }
+
+module _wire_through_hole(d, h, taper=1) {
+    if (Wire_through_holes)
+        tags("neg") mirror_copy(LEFT) position(BACK + RIGHT)
+            left(Side_wall_thickness)
+            fwd(Back_wall_thickness/2)
+            cyl(d=d, h=h+$eps, anchor=RIGHT) {
+            attach(BOTTOM)
+                cyl(d2=d+taper, d1=0, h=taper, anchor=TOP);
+        }
+}
+
 module bottom_part(anchor=CENTER, spin=0, orient=TOP,
                    edges=edges("ALL", except=[TOP,BOTTOM]),
                    connector="bottom",
@@ -236,6 +257,8 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
 
                 _double_screw_holes(size);
 
+                _wire_through_hole(d=Bottom_back_side_cutout[0], h=size.z);
+
                 tags("neg")
                     down(pcbsize.z/2) _back_nut_holder();
             }
@@ -303,6 +326,8 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                     left(Side_wall_thickness)
                     _cutout(Top_back_side_cutout, anchor=BACK+TOP+RIGHT, t=Back_wall_thickness, $tags="neg");
 
+                _wire_through_hole(d=Top_back_side_cutout[0], h=size.z);
+
                 // Various standoffs
                 mirror_copy(LEFT)
                 position(BOTTOM+FRONT+RIGHT)
@@ -364,4 +389,4 @@ if (Part == "Top") {
         color("white") bottom_part(anchor=TOP, orient=TOP);
 }
 
-$export_suffix = str(Part, "-take7");
+$export_suffix = str(Part, "-take8");
