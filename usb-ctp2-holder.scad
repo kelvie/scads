@@ -6,7 +6,9 @@ include <lib/fasteners.scad>
 // China.
 
 /* [General] */
-Add_base = false;
+
+// Only active with $preview
+Add_base = true;
 Part = "All"; // [Top, Bottom, All]
 // Just for "All"
 Explode_parts = 3; // [0:1:10]
@@ -126,8 +128,8 @@ module _double_screw_holes(size, invert=false) {
     // This uses pcbsize cause I thought I could adjust the wall thicknesses
     // and keep the same screw layouts, but the mirror(BACK) messes that up
     move_copies([CENTER, pcbsize.y / 2 * BACK]) {
-        _screw_holes(size, invert ? "bottom" : "side-slot", pcbsize.y/3);
-        mirror(UP) _screw_holes(size, invert ? "side-slot": "bottom", pcbsize.y/9, flip=invert);
+        _screw_holes(size, invert ? "bottom" : "side-slot", pcbsize.y/9);
+        mirror(UP) _screw_holes(size, invert ? "side-slot": "bottom", pcbsize.y/3, flip=invert);
     }
 }
 
@@ -152,6 +154,16 @@ outer_size = [pcbsize.x + 2*Side_wall_thickness,
               pcbsize.y + Front_wall_thickness + Back_wall_thickness,
               0];
 
+module _outer_part(size, edges, anchor=CENTER, spin=0, orient=TOP) {
+    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
+        intersection() {
+            cuboid([size.x, size.y, size.z], rounding=rounding, edges=edges);
+            // cuboid([size.x, size.y, size.z], chamfer=rounding/8, edges=edges(BOTTOM));
+        }
+        children();
+    }
+
+}
 module bottom_part(anchor=CENTER, spin=0, orient=TOP,
                    edges=edges("ALL", except=[TOP,BOTTOM]),
                    connector="bottom",
@@ -159,18 +171,11 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
     extra_z = Bottom_component_clearance + bottom_wall + pcbsize.z + Slop;
     size = outer_size + extra_z * [0, 0, 1];
 
-    module _outer_part(anchor=CENTER, spin=0, orient=TOP) {
-        attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
-            cuboid([size.x, size.y, size.z], rounding=rounding, edges=edges);
-            children();
-        }
-
-    }
     module _part() {
         diff("neg", keep="keep") {
             // Like we're milling it, let's start with the main block and cut
             // shit out of it.
-            _outer_part() {
+            _outer_part(size, edges) {
 
                 // Cut out PCB
                 position(TOP)
@@ -269,13 +274,6 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
     extra_z = Top_component_clearance + bottom_wall;
     size = outer_size + extra_z * [0, 0, 1];
 
-    module _outer_part(anchor=CENTER, spin=0, orient=TOP) {
-        attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
-            cuboid([size.x, size.y, size.z], rounding=rounding, edges=edges);
-            children();
-        }
-
-    }
     module _pcb_standoff_top(size, anchor) {
         _pcb_standoff(size=size, anchor=anchor, h=Top_component_clearance);
     }
@@ -284,7 +282,7 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
         diff("neg", keep="keep") {
             // Like we're milling it, let's start with the main block and cut
             // shit out of it.
-            _outer_part() {
+            _outer_part(size, edges) {
 
                 // Cut out part for pcb components
                 position(TOP)
@@ -350,9 +348,9 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
     }
 }
 
-anchor = Add_base ? BOTTOM : CENTER;
+anchor = (Add_base && !$preview) ? BOTTOM : CENTER;
 
-add_base(enable=Add_base)
+add_base(enable=Add_base && !$preview)
 if (Part == "Top") {
     top_part(anchor=anchor, orient=TOP);
 } else if (Part == "Middle") {
@@ -366,4 +364,4 @@ if (Part == "Top") {
         color("white") bottom_part(anchor=TOP, orient=TOP);
 }
 
-$export_suffix = str(Part, "-take6");
+$export_suffix = str(Part, "-take7");
