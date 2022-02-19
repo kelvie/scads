@@ -170,7 +170,7 @@ module _outer_part(size, edges, anchor=CENTER, spin=0, orient=TOP) {
     attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
         intersection() {
             cuboid([size.x, size.y, size.z], rounding=rounding, edges=edges);
-            // cuboid([size.x, size.y, size.z], chamfer=rounding/8, edges=edges(BOTTOM));
+            // cuboid([size.x, size.y, size.z], chamfer=0.4, edges=edges(BOTTOM));
         }
         children();
     }
@@ -188,7 +188,7 @@ module _wire_through_hole(h, taper=1) {
 }
 
 module bottom_part(anchor=CENTER, spin=0, orient=TOP,
-                   edges=edges("ALL", except=[TOP,BOTTOM]),
+                   edges=edges("ALL", except=[TOP, BOTTOM]),
                    connector="bottom",
                    bottom_wall=Bottom_wall_thickness) {
     extra_z = Bottom_component_clearance + bottom_wall + pcbsize.z + Slop;
