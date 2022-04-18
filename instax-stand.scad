@@ -72,12 +72,6 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
     rounding=Height_off_floor;
 
     module _part() {
-        // TODO: nut pocket on both sides to keep it up? or maybe 2 parts to
-        //       claim the whole thing (needs a middle piece too), but how is it
-        //       even possible to make it printable?
-        // TODO: how do we ensure Height_off_floor is consistent while printing?
-        //       Print with the x-dimension on the bottom?
-        // TODO: maybe a two piece that attaches to the slots on the back?
         diff(neg="neg")
             down(size.z / 2) prismoid(size1=[size.x, size.y], size2=[size.x, Max_thickness+2*Stand_offset],
                                       h=Height_off_floor + Stand_inset, rounding=rounding, anchor=BOTTOM) {
@@ -96,16 +90,20 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                         position(BOTTOM) up($eps)
                             cuboid([size.x, size.y, size.z], anchor=TOP, rounding=rounding, edges=edges("ALL", except=[TOP, BOTTOM]));
 
+                pillar_size =  [Cartridge_slot_size, Stand_offset, Cartridge_slot_height + Cartridge_slot_size / 2 - Stand_inset];
+
                 // Make two pillars in the back to hold up the cartridge (and insert into the slot)
-                // TODO: how does this keep the cartridge from flippping over? it doesn't seem to.
-                // Front flaps? then the back at least secures movement in the X direction.
-                // Why not just 2 triangles then?
                 position(TOP) position(BACK) mirror_copy(LEFT) left(Cartridge_slot_offset/2)
-                    cuboid([Cartridge_slot_size, Stand_offset, Cartridge_slot_height + Cartridge_slot_size / 2 - Stand_inset],
-                           anchor=BOTTOM+BACK, rounding=rounding/2, edges=edges("ALL", except=[BOTTOM])) {
+                    cuboid(pillar_size,
+                           anchor=BOTTOM+BACK, rounding=rounding/2, edges=edges("ALL", except=[BOTTOM, BACK])) {
                     position(TOP+BACK)
-                        cuboid([Cartridge_slot_size, Back_bump_offset + Stand_offset, Cartridge_slot_size], anchor=TOP+BACK,
+                        cuboid([pillar_size.x, Back_bump_offset + Stand_offset, Cartridge_slot_size], anchor=TOP+BACK,
                                rounding=rounding/2);
+
+
+                if (Tilt_angle != 0)
+                        position(TOP+BACK) fwd($eps)
+                            cuboid([pillar_size.x, size.y, size.z], anchor=FRONT+TOP, rounding=rounding/2, edges=edges("ALL", except=[ BOTTOM, FRONT]));
                 }
         }
 
@@ -115,7 +113,10 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
         // Cut off the excess, but leave the front bit
         intersection() {
             xrot(-Tilt_angle) _part();
-            cuboid(rotated_size + [0, size.y, 0]);
+            cuboid(rotated_size) {
+                position(FRONT)
+                    cuboid(rotated_size, anchor=BACK);
+            };
         }
 
         children();
@@ -126,7 +127,7 @@ anchor = BOTTOM;
 
 add_base(enable=Add_base)
 if (Part == "All") {
-    part(anchor=CENTER);
+    part(anchor=anchor);
     if ($preview) {
        // color("green", alpha=0.2) up(Height_off_floor) instax_wide_case(anchor=BOTTOM);
     }
