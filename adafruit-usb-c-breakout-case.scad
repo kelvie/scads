@@ -29,6 +29,20 @@ Pin_header_cutout = [5.09, 4.03, 0];
 Resistor_cutout = [3.9, 3.24, 0.5];
 Resistor_cutout_yoffset_from_bottom = 4.876;
 
+module tapered_cuboid(size, slop=0.3, anchor, orient, spin, flip=false) {
+  attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
+    prismoid(size1=[size.x, size.y] + slop*[1, 1], size2=[size.x, size.y],
+              h=size.z, anchor=CENTER) {
+      // Add a taper at the top for more easy printing as well
+      size2 = flip ? [size.x, 0] : [0, size.y];
+      position(TOP)
+        prismoid(size1=[size.x, size.y], size2=size2, h=slop);
+    }
+
+    children();
+  }
+
+}
 module part(anchor=CENTER, spin=0, orient=TOP) {
     size = [Board_width, Board_height, USB_port_height + Min_wall_thickness];
 
@@ -46,14 +60,14 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
 
         // Cutout for the USB port
         tags("cutme") position(BOTTOM+BACK) back($eps) down($eps)
-          cuboid([USB_cutout_width, USB_port_depth, USB_port_height], anchor=BOTTOM+BACK);
-
+          tapered_cuboid([USB_cutout_width, USB_port_depth, USB_port_height],
+          anchor=BOTTOM+BACK);
 
         tags("cutme") position(FRONT+RIGHT) fwd($eps) right($eps)
           cuboid([Pin_header_cutout.x, Pin_header_cutout.y, size.z + 2*$eps], anchor=FRONT+RIGHT);
 
         tags("cutme") position(BOTTOM+LEFT+FRONT) down($eps) left($eps) back(Resistor_cutout_yoffset_from_bottom)
-          cuboid(Resistor_cutout, anchor=BOTTOM+LEFT+FRONT);
+          tapered_cuboid(Resistor_cutout, anchor=BOTTOM+LEFT+FRONT, flip=true);
       }
     }
 
@@ -63,11 +77,12 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
     }
 }
 
-anchor = Add_base ? TOP : CENTER;
+anchor = Add_base ? BOTTOM : CENTER;
 
 add_base(enable=Add_base)
 if (Part == "All") {
-    part(orient=BOTTOM, anchor=anchor);
+    part(orient=TOP, anchor=anchor);
 }
 
-$export_suffix = str(Part, "-take1");
+
+$export_suffix = str(Part, "-take2");
