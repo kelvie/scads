@@ -253,18 +253,36 @@ module m2_nut(h, anchor=CENTER, spin=0, orient=TOP, taper=0.4, slop=0.1) {
     // This adds a little dome on bottom to make it easier to fit
     cyl(d1=d, d2=d+taper, h=h, anchor=anchor, spin=spin, orient=orient, $fn=6) {
         attach(BOTTOM)
-            cyl(d1=d, d2=0, h=slop, $fn=6);
+            cyl(d1=d, d2=0, h=slop, $fn=6, anchor=BOTTOM);
         children();
     }
 }
 
-module m2_hole(h, anchor=CENTER, spin=0, orient=TOP, taper=0) {
+module m2dot5_nut(h, anchor=CENTER, spin=0, orient=TOP, taper=0.4, slop=0.1) {
+    // 5mm (max) width to width, converted to a cylinder radius
+    d = 5 * 1.1547 + slop;
+    eps = $fs/12;
+
+    // This adds a little dome on bottom to make it easier to fit
+    cyl(d1=d, d2=d+taper, h=h, anchor=anchor, spin=spin, orient=orient, $fn=6) {
+        attach(BOTTOM)
+            down(eps) cyl(d1=d, d2=0, h=slop, $fn=6, anchor=BOTTOM);
+        children();
+    }
+}
+
+module m2_hole(h, anchor=CENTER, spin=0, orient=TOP, taper=0, countersunk_h=0) {
     d = 2.4;
     cyl(d=d, h=h, anchor=anchor, spin=spin, orient=orient) {
         if (taper > 0)
             mirror_copy(TOP)
             attach(BOTTOM)
                 cyl(h=taper, d1=d, d2=d+taper, anchor=TOP);
+        // Assumes 90 degree coutnersunk angle
+        if (countersunk_h > 0) {
+            position(TOP)
+                cyl(h=countersunk_h, d2=d + 2* countersunk_h /* * tan(45) */, d1=d, anchor=TOP);
+        }
 
         children();
     }

@@ -13,8 +13,11 @@ Max_thickness = 19.6;
 // thickness on the top
 Min_thickness = 14.4;
 
-// The amount the stand covers the case
+// The amount the stand covers the case in the front
 Stand_inset = 5;
+
+// The amount in the back that the stand covers.
+Stand_inset_back = 10;
 
 // How far this lifts the frame off the floor. Also decides the bottom thickness.
 Height_off_floor = 3;
@@ -40,6 +43,7 @@ M2_nut_height = 1.6;
 
 // 0 is straight up, more tilts back further
 Tilt_angle = 10;
+
 
 /* [Hidden] */
 $fs = 0.025;
@@ -101,9 +105,15 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                                rounding=rounding/2);
 
 
-                if (Tilt_angle != 0)
-                        position(TOP+BACK) fwd($eps)
-                            cuboid([pillar_size.x, size.y, size.z], anchor=FRONT+TOP, rounding=rounding/2, edges=edges("ALL", except=[ BOTTOM, FRONT]));
+                    if (Tilt_angle != 0)
+                            position(TOP+BACK) fwd($eps)
+                                cuboid([pillar_size.x, size.y, size.z], anchor=FRONT+TOP, rounding=rounding/2, edges=edges("ALL", except=[ BOTTOM, FRONT]));
+                }
+
+                // Put a back-stand between it.
+                position(TOP+BACK) {
+                    cuboid([Cartridge_slot_offset, Stand_offset, Stand_inset_back - Stand_inset], anchor=BACK+BOTTOM,
+                           rounding=rounding/4, edges=TOP);
                 }
         }
 
@@ -133,4 +143,4 @@ if (Part == "All") {
     }
 }
 
-$export_suffix = str(Part, "-take1");
+$export_suffix = str(Part, "-take2");
