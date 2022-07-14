@@ -287,3 +287,20 @@ module m2_hole(h, anchor=CENTER, spin=0, orient=TOP, taper=0, countersunk_h=0) {
         children();
     }
 }
+
+module m2dot5_hole(h, anchor=CENTER, spin=0, orient=TOP, taper=0, countersunk_h=0) {
+    d = 2.9;
+    cyl(d=d, h=h, anchor=anchor, spin=spin, orient=orient) {
+        if (taper > 0)
+            mirror_copy(TOP)
+            attach(BOTTOM)
+                cyl(h=taper, d1=d, d2=d+taper, anchor=TOP);
+        // Assumes 90 degree coutnersunk angle
+        if (countersunk_h > 0) {
+            position(TOP)
+                cyl(h=countersunk_h, d2=d + 2* countersunk_h /* * tan(45) */, d1=d, anchor=TOP);
+        }
+
+        children();
+    }
+}

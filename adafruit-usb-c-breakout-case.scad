@@ -10,7 +10,7 @@ Part = "All"; // [All]
 
 Board_height=13.97;
 Slop = 0.15;
-Min_wall_thickness = 2;
+Min_wall_thickness = 1;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -23,10 +23,9 @@ USB_cutout_width = 8.94;
 USB_port_height = 3.4;
 USB_port_depth = 8;
 Hole_spacing = 15.24;
-Hole_diameter = 2.5;
 Hole_yoffset_from_top = 2.54;
 Pin_header_cutout = [5.09, 4.03, 0];
-Resistor_cutout = [3.9, 3.24, 0.5];
+Resistor_cutout = [3.9, 3.5, 0.5];
 Resistor_cutout_yoffset_from_bottom = 4.876;
 
 module tapered_cuboid(size, slop=0.3, anchor, orient, spin, flip=false) {
@@ -55,7 +54,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
           fwd(Hole_yoffset_from_top)
           position(BACK) {
           position(TOP) up($eps) m2dot5_nut(h=2, anchor=TOP);
-          cyl(d=Hole_diameter, h=size.z*2);
+          m2dot5_hole(h=size.z*2);
         }
 
         // Cutout for the USB port
@@ -85,4 +84,4 @@ if (Part == "All") {
 }
 
 
-$export_suffix = str(Part, "-take2");
+$export_suffix = str(Part, "-take3");
