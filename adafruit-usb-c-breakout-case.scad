@@ -1,6 +1,7 @@
 include <lib/BOSL2/std.scad>
 include <lib/add-base.scad>
 include <lib/fasteners.scad>
+include <lib/text.scad>
 // a case for the https://www.adafruit.com/product/4090
 // to make it easier to plug in and out
 
@@ -67,6 +68,12 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
 
         tags("cutme") position(BOTTOM+LEFT+FRONT) down($eps) left($eps) back(Resistor_cutout_yoffset_from_bottom)
           tapered_cuboid(Resistor_cutout, anchor=BOTTOM+LEFT+FRONT, flip=true);
+
+        margin=0.5;
+        tags("cutme") position(TOP+RIGHT) up($eps) {
+          left(margin) label("G", h=1, anchor=TOP, halign="right");
+          right(margin) left(Pin_header_cutout.x) label("V", h=1, anchor=TOP, halign="left");
+        }
       }
     }
 
@@ -84,4 +91,4 @@ if (Part == "All") {
 }
 
 
-$export_suffix = str(Part, "-take3");
+$export_suffix = str(Part, "-take4");
