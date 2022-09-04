@@ -70,9 +70,12 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
           tapered_cuboid(Resistor_cutout, anchor=BOTTOM+LEFT+FRONT, flip=true);
 
         margin=0.5;
+        tags("cutme") position(TOP) up($eps) {
+          label("5 VDC", anchor=TOP);
+        }
         tags("cutme") position(TOP+RIGHT) up($eps) {
-          left(margin) label("G", h=1, anchor=TOP, halign="right");
-          right(margin) left(Pin_header_cutout.x) label("V", h=1, anchor=TOP, halign="left");
+          left(margin) label("-", h=1, anchor=TOP, halign="right");
+          right(margin) left(Pin_header_cutout.x) label("+", h=1, anchor=TOP, halign="left");
         }
       }
     }
