@@ -86,6 +86,7 @@ module hookPeg(pegTolerance=defaultPegTolerance,
     negativeChamfer(t, rounding);
 }
 
+
 module straightPeg(pegTolerance=defaultPegTolerance, rounding=defaultRounding) {
     pegHoleThickness = 5;
     t = pegHoleThickness - pegTolerance;
@@ -96,5 +97,17 @@ module straightPeg(pegTolerance=defaultPegTolerance, rounding=defaultRounding) {
                rounding=rounding, roundFront=false);
 
         negativeChamfer(t, rounding);
+    }
+}
+
+// An attachable, anchored at the top peg
+module hook_peg(anchor=CENTER, spin=0, orient=TOP) {
+    size = [5, 10, 5];
+    attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
+        fwd(5) {
+            hookPeg();
+            down(30) straightPeg();
+        }
+        children();
     }
 }
