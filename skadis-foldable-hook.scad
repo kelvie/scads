@@ -43,7 +43,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
             up(Hole_z_offset) {
                 position(BACK) {
                     // TODO: collision detection with the screw holes
-                    hook_peg(anchor=FRONT);
+                    hook_peg(peg_angle=67, anchor=FRONT);
                 }
                 // Screw holes, distributed around centre to avoid collision
                 // TODO: need some way to not poke out the back, as that's where

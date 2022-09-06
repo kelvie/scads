@@ -101,11 +101,11 @@ module straightPeg(pegTolerance=defaultPegTolerance, rounding=defaultRounding) {
 }
 
 // An attachable, anchored at the top peg
-module hook_peg(anchor=CENTER, spin=0, orient=TOP) {
+module hook_peg(peg_angle=67.5, anchor=CENTER, spin=0, orient=TOP) {
     size = [5, 10, 5];
     attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
         fwd(5) {
-            hookPeg();
+            hookPeg(pegAngle=peg_angle, backLength=10);
             down(30) straightPeg();
         }
         children();
