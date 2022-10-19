@@ -3,7 +3,7 @@ include <lib/fasteners.scad>
 include <lib/add-base.scad>
 include <lib/text.scad>
 
-Add_base = false;
+Add_base = true;
 Part = "All"; // [All]
 
 Height = 25;
@@ -57,16 +57,21 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                           w1=V_width_bottom + 2*Slop);
             }
 
-            // Add an extension at the top with some text
+            // Add a part to the top with some text explaining what this is
             text_height = Wall_thickness / 2 * sqrt(2);
-            position(BACK+BOTTOM) fwd(2*rounding) cuboid([size.x, Wall_thickness+2*rounding, Wall_thickness], anchor=BOTTOM+FRONT,
-                                                         rounding=rounding, edges=edges("ALL", except=TOP));
+
+            // Part that sticks out the top
+            position(BACK+BOTTOM) fwd(2*rounding)
+                cuboid([size.x, Wall_thickness+2*rounding, Wall_thickness], anchor=BOTTOM+FRONT,
+                       rounding=rounding, edges=edges("ALL", except=TOP));
+
+            // Text, cut at a 45° angle so that it prints better and is still legible
             position(BACK+TOP) down(V_depth-2*$eps) xrot(-45) {
                 tags("cutme") {
                     cuboid([size.x+2*$eps, Wall_thickness*sqrt(2), Wall_thickness+2*rounding], anchor=BOTTOM+FRONT);
                     up($eps) back(text_height/2) label("V-mount battery", font="PragmataPro", anchor=FRONT, h=text_height, valign="center");
                 }
-        }
+            }
 
             // Hole(s) for https://www.printables.com/model/228663-t-nuts-for-ikea-skadis-pegboards
             down(size.z / 2) cuboid([outer_sz.x, outer_sz.y, outer_sz.z], anchor=BOTTOM, rounding=rounding) {
@@ -79,9 +84,17 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                         m2dot5_hole(h=2*Wall_thickness, anchor=TOP, countersunk_h=1.25);
 
                     }
+
+                    // Guide for the t-nuts, as mentioned in
+                    // https://www.printables.com/model/228663-t-nuts-for-ikea-skadis-pegboards
                     position(BOTTOM) {
+                        // The shape that fits into the pegboard hole
+                        hull() mirror_copy(FRONT)
+                            fwd(5) // center of circles are 10mm apart
+                            zcyl(r2=2.5+0.8, r1=2.5, h=0.8, anchor=TOP);
+
+                        // Cutout a 3.5mm (with chamfer) hole for the nut to go into
                         zcyl(r2=3.5, r1=3.5+0.8, h=0.8+$eps, anchor=TOP, $tags="cutme");
-                        hull() mirror_copy(FRONT) fwd(5) zcyl(r2=2.5+0.8, r1=2.5, h=0.8, anchor=TOP);
                     }
                 }
             }
@@ -100,7 +113,8 @@ orient = Add_base ? FRONT : TOP;
 
 // Inset needs to be at least 0.2
 inset = min((Wall_thickness - rounding) / 2 - 0.2, 1.5);
-echo("Inset is ", inset);
+echo("Inset to remove elephant's foot is ", inset);
+
 add_base(enable=Add_base, inset=inset)
 if (Part == "All") {
     part(anchor=anchor, orient=orient);
