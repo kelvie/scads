@@ -7,7 +7,7 @@ Add_base = false;
 Part = "All"; // [All]
 
 Height = 25;
-Wall_thickness = 3.5;
+Wall_thickness = 2.0;
 Slop = 0.15;
 
 /* [Hidden] */
@@ -26,22 +26,18 @@ Thickness = V_depth + Wall_thickness;
 
 outer_sz = [40-2*Slop, Height, Thickness];
 inner_sz = [40-2*Slop, Height, Thickness];
+rounding=0.5;
 
 module part(anchor=CENTER, spin=0, orient=TOP) {
     size = outer_sz;
 
     module _part() {
-        rounding=0.5;
         // #cuboid([13.8, 35, size.z]);
         diff("cutme") {
             fwd((outer_sz.y - inner_sz.y)/2) cuboid(inner_sz, rounding=rounding) {
             // should actually be 15°
             scale_factor = (V_width_top - V_width_bottom) / 2 / V_height;
 
-            // TODO: chamfer the top and add some text at an angle
-            //
-            // TODO: chamfer sharp edges, maybe redraw this whole thing using
-            // the angle, and some hulled spheres?
             position(TOP) tags("cutme")
                 up($eps)
                 fwd(V_height/2) // Anchor the front edge to center
@@ -61,22 +57,26 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                           w1=V_width_bottom + 2*Slop);
             }
 
-            // Hard coded numbers her due to to text sizing -- maybe extend this further back?
-            position(BACK+TOP) fwd(3) down(V_depth-2*$eps) tags("cutme") xrot(-45) {
-                cuboid([V_width_top-6, 5, 4], anchor=BOTTOM+FRONT);
-                up($eps) back(1) label("V-mount battery", font="PragmataPro", anchor=FRONT+TOP);
-            }
+            // Add an extension at the top with some text
+            text_height = Wall_thickness / 2 * sqrt(2);
+            position(BACK+BOTTOM) fwd(2*rounding) cuboid([size.x, Wall_thickness+2*rounding, Wall_thickness], anchor=BOTTOM+FRONT,
+                                                         rounding=rounding, edges=edges("ALL", except=TOP));
+            position(BACK+TOP) down(V_depth-2*$eps) xrot(-45) {
+                tags("cutme") {
+                    cuboid([size.x+2*$eps, Wall_thickness*sqrt(2), Wall_thickness+2*rounding], anchor=BOTTOM+FRONT);
+                    up($eps) back(text_height/2) label("V-mount battery", font="PragmataPro", anchor=FRONT, h=text_height, valign="center");
+                }
+        }
 
             // Hole(s) for https://www.printables.com/model/228663-t-nuts-for-ikea-skadis-pegboards
             down(size.z / 2) cuboid([outer_sz.x, outer_sz.y, outer_sz.z], anchor=BOTTOM, rounding=rounding) {
-
                 // 40mm spacing for skadis, uncomment if you want two
                 // mirror_copy(LEFT) right(20)
                 {
-                    up($eps) position(TOP) tags("cutme") {
+                    up(2*$eps) down(V_depth) position(TOP) tags("cutme") {
                         down($eps) cyl(d=5, h=size.z, anchor=BOTTOM);
 
-                        m2dot5_hole(h=2*size.z, anchor=TOP, countersunk_h=1.25);
+                        m2dot5_hole(h=2*Wall_thickness, anchor=TOP, countersunk_h=1.25);
 
                     }
                     position(BOTTOM) {
@@ -98,7 +98,10 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
 anchor = Add_base ? FRONT : CENTER;
 orient = Add_base ? FRONT : TOP;
 
-add_base(enable=Add_base)
+// Inset needs to be at least 0.2
+inset = min((Wall_thickness - rounding) / 2 - 0.2, 1.5);
+echo("Inset is ", inset);
+add_base(enable=Add_base, inset=inset)
 if (Part == "All") {
     part(anchor=anchor, orient=orient);
 }
