@@ -38,7 +38,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
             // should actually be 15°
             scale_factor = (V_width_top - V_width_bottom) / 2 / V_height;
 
-            position(TOP) tags("cutme")
+            position(TOP) tag("cutme")
                 up($eps)
                 fwd(V_height/2) // Anchor the front edge to center
                 back(Height/2) // align front edge with overall height
@@ -63,13 +63,13 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
             // Part that sticks out the top
             position(BACK+BOTTOM) fwd(2*rounding)
                 cuboid([size.x, Wall_thickness+2*rounding, Wall_thickness], anchor=BOTTOM+FRONT,
-                       rounding=rounding, edges=edges("ALL", except=TOP));
+                       rounding=rounding, edges="ALL", except=TOP);
 
             // Text, cut at a 45° angle so that it prints better and is still legible
             position(BACK+TOP) down(V_depth-2*$eps) xrot(-45) {
-                tags("cutme") {
+                tag("cutme") {
                     cuboid([size.x+2*$eps, Wall_thickness*sqrt(2), Wall_thickness+2*rounding], anchor=BOTTOM+FRONT);
-                    up($eps) back(text_height/2) label("V-mount battery", t=0.6, font="PragmataPro", anchor=FRONT, h=text_height, valign="center");
+                    up($eps) back(text_height/2) label("V-mount battery", t=0.6, font="PragmataPro:style=Bold", anchor=FRONT, h=text_height, valign="center");
                 }
             }
 
@@ -78,7 +78,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                 // 40mm spacing for skadis, uncomment if you want two
                 // mirror_copy(LEFT) right(20)
                 {
-                    up(2*$eps) down(V_depth) position(TOP) tags("cutme") {
+                    up(2*$eps) down(V_depth) position(TOP) tag("cutme") {
                         down($eps) cyl(d=5, h=size.z, anchor=BOTTOM);
 
                         m2dot5_hole(h=2*Wall_thickness, anchor=TOP, countersunk_h=1.25);
@@ -94,7 +94,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                             zcyl(r2=2.5+0.8, r1=2.5, h=0.8, anchor=TOP);
 
                         // Cutout a 3.5mm (with chamfer) hole for the nut to go into
-                        zcyl(r2=3.5, r1=3.5+0.8, h=0.8+$eps, anchor=TOP, $tags="cutme");
+                        tag("cutme") zcyl(r2=3.5, r1=3.5+0.8, h=0.8+$eps, anchor=TOP );
                     }
                 }
             }
@@ -120,4 +120,4 @@ if (Part == "All") {
     part(anchor=anchor, orient=orient);
 }
 
-$export_suffix = str(Part, "-take1");
+$export_suffix = str(Part, "-take2");
