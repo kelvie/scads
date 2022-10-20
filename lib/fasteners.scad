@@ -258,7 +258,7 @@ module m2_nut(h, anchor=CENTER, spin=0, orient=TOP, taper=0.4, slop=0.1) {
     }
 }
 
-module m2dot5_nut(h, anchor=CENTER, spin=0, orient=TOP, taper=0.4, slop=0.1) {
+module m2dot5_nut(h=2, anchor=CENTER, spin=0, orient=TOP, taper=0.4, slop=0.1) {
     // 5mm (max) width to width, converted to a cylinder radius
     d = 5 * 1.1547 + slop;
     eps = $fs/12;
