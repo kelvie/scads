@@ -69,7 +69,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
             position(BACK+TOP) down(V_depth-2*$eps) xrot(-45) {
                 tags("cutme") {
                     cuboid([size.x+2*$eps, Wall_thickness*sqrt(2), Wall_thickness+2*rounding], anchor=BOTTOM+FRONT);
-                    up($eps) back(text_height/2) label("V-mount battery", font="PragmataPro", anchor=FRONT, h=text_height, valign="center");
+                    up($eps) back(text_height/2) label("V-mount battery", t=0.6, font="PragmataPro", anchor=FRONT, h=text_height, valign="center");
                 }
             }
 
