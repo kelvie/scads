@@ -14,7 +14,7 @@ Slop = 0.15;
 Height = 40;
 Width = 25;
 // TODO calculate thickness based on min thickness + nut height
-Min_thickness = 2;
+Min_thickness = 1;
 
 Hole_z_offset = 7;
 Screw_size = 4;
@@ -43,6 +43,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
         diff("cutme") cuboid(size, rounding=Thickness/4) {
             up(Hole_z_offset) {
 
+                // TODO: combine holes? I'll need a washer of some type though
                 // Screw hole for the m2.5 skadis tnut
                 position(FRONT) {
                     // TODO: collision detection with the screw holes
