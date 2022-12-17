@@ -9,6 +9,9 @@ Slop = 0.15;
 Knife_angle = 15;
 Width = 40;
 Length = 50;
+Chamfer = 2;
+Notch_depth = 3;
+Notch_size = 5;
 
 // For add_base, the minimum bottom thickness
 Min_bottom_thickness = 4;
@@ -18,24 +21,38 @@ $fs = 0.025;
 $fa = $preview ? 10 : 5;
 $eps = $fs/4;
 
-// TODO: how to mount to the block, either have it on the side somehow? or take
-// up some of the space by using a rbber band (in which case cut a groove for
-// it)
-//
-// TODO: Make less sharp and prone to chipping (chop off the front and top bit)
 module part(anchor=CENTER, spin=0, orient=TOP) {
     height = Length * tan(Knife_angle);
-    size = [Width, Length, height];
+    size_after_chamfer = [Width, Length, height];
+    size = size_after_chamfer + Chamfer * [1, 0, 1];
 
     module _part() {
-        diff("remove") cuboid(size, rounding=size.z / 8) {
+        diff("remove") cuboid(size, rounding=size.z / 8) tag("remove") {
 
-            position(RIGHT+BOTTOM)
-                tag("remove") yrot(Knife_angle) cuboid(2*size, anchor=RIGHT+BOTTOM);
+            // Cut off the correct angle from the top
+            up(height/2)
+                yrot(Knife_angle)
+                cuboid(size + [Width, 2*$eps, 0]) {
+                    // Additionally, in the center, cut out a notch for a rubber band
+                    position(BOTTOM)
+                        up($eps) cuboid([Notch_size, 2*size.y,
+                                         Notch_depth+$eps], anchor=TOP,
+                                         rounding=Notch_depth/4, edges=BOTTOM);
+                                         };
 
             attach(LEFT)
-                tag("remove") up($eps) label(str(Knife_angle, "°",), h=size.z/2, font="PragamataPro", anchor=TOP);
-                }
+                up($eps) label(str(Knife_angle, "°",), h=size_after_chamfer.z/2, font="PragamataPro", anchor=TOP);
+
+            position(BOTTOM)
+                up(height-Chamfer)
+                cuboid(size + 2*$eps*[1, 1, 0], anchor=BOTTOM);
+
+            position(RIGHT)
+                left(Chamfer)
+                cuboid(size, anchor=LEFT);
+        }
+
+
 
     }
 
