@@ -11,6 +11,7 @@ Slop = 0.15;
 
 // For add_base, the minimum bottom thickness
 Min_bottom_thickness = 4;
+Drain_hole_size = 1.5;
 
 /* [Hidden] */
 $fs = 0.025;
@@ -46,14 +47,23 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
 
     module _part() {
         diff("remove") {
+            // Add /remove items starting from the front plate (which is
+            // oriented on the bottom in this file)
             cuboid(size, rounding=Rounding) {
 
                 // Switch holes
                 tag("remove") {
                     position(BACK) fwd(Switch_hole_y_offset)
-                        zcyl(h=2*size.z, d = Switch_hole_diameter, $fn=100);
+                        zcyl(h=2*size.z, d = Switch_hole_diameter + 2*Slop, $fn=100);
                 }
                 mirror_copy(LEFT) {
+                    // Cut out resin holes
+                    tag("remove") {
+                        position(TOP+LEFT) left((Mounting_hole_width - size.x)/2)
+                            pie_slice(ang=180, d=Drain_hole_size, l=size.y, orient=FRONT);
+
+                        position(TOP+LEFT) left($eps) pie_slice(ang=180, spin=90, d=Drain_hole_size, l=2*Thickness, orient=RIGHT);
+                    }
                     position(LEFT+BOTTOM+BACK) {
                         // Support
                         up(Rounding)
@@ -64,6 +74,7 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                                  shift=[0, -(Mounting_hole_position.y - Thickness)/2],
                                  rounding=Rounding,
                                  anchor=LEFT+BOTTOM+BACK);
+
 
                         // Flap for the screw below
                         fwd(Mounting_hole_position.y)
@@ -77,19 +88,50 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                     position(BOTTOM) left(Mounting_hole_width/2)
                         up(Mounting_hole_position.z) {
 
-                        // Nut pocket holder
-                        position(BACK) fwd(Mounting_hole_position.y)
-                        cuboid([Nut_width + 2*Min_thickness,
-                                Nut_height + 2*Min_thickness,
-                                (Nut_width + 2*Min_thickness)/2],
-                               rounding=Rounding,
-                               anchor=FRONT+TOP);
-                        // TODO: cut out nut pocket
-                        // TODO: Taper the back upward with a prismoid
+                        nut_holder_height = Nut_width + 1.5*Min_thickness;
+                        nut_coverage = 0.75;
+                        nut_holder_size = [
+                            (size.x - Mounting_hole_width)/2 + Thickness + Rounding/2,
+                            Nut_height + 1.5*Min_thickness,
+                            nut_holder_height * nut_coverage
+                        ];
 
-                        // Mounting holes
-                        tag("remove")
+                        // Nut pocket holder
+                        position(BACK)
+                            fwd(Mounting_hole_position.y)
+                            down(nut_holder_height * (1-nut_coverage))
+                        cuboid(nut_holder_size,
+                               rounding=Rounding,
+                               edges="ALL", except=BOTTOM,
+                               anchor=FRONT) {
+
+                            // resin drain holes
+                            position(TOP+FRONT) back(Thickness + Slop) tag("remove")
+                                zcyl(h=nut_holder_size.z * 1.5, d=Drain_hole_size, $fn=20, anchor=TOP+FRONT);
+
+                            // TODO: Taper the back upward with a prismoid
+                            position(BOTTOM+BACK)
+                                prismoid(h=nut_holder_size.z/2,
+                                         size1=[nut_holder_size.x, Thickness],
+                                         size2=[nut_holder_size.x, nut_holder_size.y],
+                                         shift=[0, Thickness/2],
+                                         rounding=Rounding,
+                                         anchor=TOP+BACK);
+                        }
+
+                        tag("remove") {
+                            position(BACK)
+                                fwd(Mounting_hole_position.y - Min_thickness) {
+
+
+                                // nut pocket
+                                hull() move_copies([[0,0,0], [0,0,2.4]])
+                                    m3_nut(orient=FRONT, taper=0, anchor=TOP, spin=30);
+                            }
+
+                            // Mounting holes
                             ycyl(h=2*size.y, d = Screw_hole_size, $fn=100);
+                        }
                     }
                 }
             }
@@ -115,4 +157,4 @@ if (Part == "All") {
     part(anchor=anchor);
 }
 
-$export_suffix = str(Part, "-take1.beta");
+$export_suffix = str(Part, "-take1");

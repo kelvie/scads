@@ -246,9 +246,24 @@ module m3_sqnut_rail(l, wall=2, anchor=CENTER, spin=0, orient=TOP, backwall=true
     }
 }
 
+
 module m2_nut(h, anchor=CENTER, spin=0, orient=TOP, taper=0.4, slop=0.1) {
     // 4mm (max) width to width, converted to a cylinder radius
     d = 4 * 1.1547 + slop;
+
+    // This adds a little dome on bottom to make it easier to fit
+    cyl(d1=d, d2=d+taper, h=h, anchor=anchor, spin=spin, orient=orient, $fn=6) {
+        attach(BOTTOM)
+            cyl(d1=d, d2=0, h=slop, $fn=6, anchor=BOTTOM);
+        children();
+    }
+}
+
+// m3 nut height is 2.4mm
+module m3_nut(h=2.4, anchor=CENTER, spin=0, orient=TOP, taper=0.4, slop=0.1) {
+    // 5mm (max) width to width, converted to a cylinder radius
+    d = 5.5 * 1.1547 + slop;
+
 
     // This adds a little dome on bottom to make it easier to fit
     cyl(d1=d, d2=d+taper, h=h, anchor=anchor, spin=spin, orient=orient, $fn=6) {
