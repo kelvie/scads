@@ -46,7 +46,8 @@ module part(anchor=CENTER, spin=0, orient=TOP) {
                     // cutout for the panel
                     cuboid(size=[Bottom_diameter, Panel_thickness + 2*Slop, size.z],
                            rounding=-0.5, edges=TOP, anchor=TOP);
-                    // cutout for the peg
+                    // cutout for the peg (Peg_height starts from the side of the panel)
+                    fwd(Panel_thickness/2)
                     cuboid(size=[Peg_diameter + 2*Slop, Peg_height + Slop, total_z - Panel_edge_to_peg - Panel_edge_to_ground], anchor=BACK+TOP,
                            rounding=-0.5, edges=TOP);
                 }
@@ -73,4 +74,4 @@ if (Part == "All") {
     part(anchor=anchor);
 }
 
-$export_suffix = str(Part, "-take1");
+$export_suffix = str(Part, "-take2");
