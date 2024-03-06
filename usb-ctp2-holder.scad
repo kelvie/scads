@@ -86,7 +86,7 @@ pcbsize = [18.24, 49.3, 1.2];
 module _cutout(specs, anchor, t=Front_wall_thickness, top_taper=0) {
     cutsize = [specs[0], t + 2*$eps, specs[1]] + Slop*[2, 2, 0];
     round_edges = top_taper > 0 ? "ALL" : BOTTOM;
-    cuboid(cutsize, anchor=anchor, rounding=specs[2], edges=edges(round_edges, except=[FRONT, BACK])) {
+    cuboid(cutsize, anchor=anchor, rounding=specs[2], edges=round_edges, except=[FRONT, BACK]) {
     // Taper top to allow horizontal printing
         if (top_taper > 0) {
             position(TOP)
@@ -101,7 +101,7 @@ module _pcb_standoff(size, anchor, h=Bottom_component_clearance) {
     rounding = min(size.x, size.y) / 4;
     up(Bottom_wall_thickness - $eps)
         cuboid([size.x, size.y, h + $eps], anchor=anchor,
-               rounding=rounding, edges=edges("ALL", except=[TOP, BOTTOM, [anchor.x, 0, 0], [0, anchor.y, 0]]));
+               rounding=rounding, edges="ALL", except=[TOP, BOTTOM, [anchor.x, 0, 0], [0, anchor.y, 0]]);
 
 }
 
@@ -109,7 +109,7 @@ module _screw_holes(size, connector_type, spacing, flip=false) {
     // M2 screw holes on side rails
     if (Side_wall_thickness >= 5) {
         fwd((Back_wall_thickness - Front_wall_thickness)/2)
-            mirror_copy(RIGHT) tags("neg") {
+            mirror_copy(RIGHT) tag("neg") {
             left(Side_wall_thickness / 2) position(RIGHT) attach(BOTTOM) {
                 fwd(spacing) {
                     if (connector_type == "bottom") {
@@ -166,10 +166,10 @@ outer_size = [pcbsize.x + 2*Side_wall_thickness,
               pcbsize.y + Front_wall_thickness + Back_wall_thickness,
               0];
 
-module _outer_part(size, edges, anchor=CENTER, spin=0, orient=TOP) {
+module _outer_part(size, edges, except, anchor=CENTER, spin=0, orient=TOP) {
     attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
         intersection() {
-            cuboid([size.x, size.y, size.z], rounding=rounding, edges=edges);
+            cuboid([size.x, size.y, size.z], rounding=rounding, edges=edges, except=except);
             // cuboid([size.x, size.y, size.z], chamfer=0.4, edges=edges(BOTTOM));
         }
         children();
@@ -180,15 +180,15 @@ module _outer_part(size, edges, anchor=CENTER, spin=0, orient=TOP) {
 module _wire_through_hole(h, taper=1) {
     d = max(Top_back_side_cutout[0], Bottom_back_side_cutout[0]) + 2*Slop;
     if (Wire_through_holes)
-       tags("neg") mirror_copy(LEFT) position(BACK+RIGHT)
+       tag("neg") mirror_copy(LEFT) position(BACK+RIGHT)
             left(Side_wall_thickness)
             fwd(Back_wall_thickness/2 - $eps)
-            cuboid([d, Back_wall_thickness /2+$eps, h+$eps], anchor=FRONT+RIGHT, rounding=Top_back_side_cutout[2], edges=edges("ALL", except=[TOP, BOTTOM, BACK])) {
+            cuboid([d, Back_wall_thickness /2+$eps, h+$eps], anchor=FRONT+RIGHT, rounding=Top_back_side_cutout[2], edges="ALL", except=[TOP, BOTTOM, BACK]) {
         }
 }
 
 module bottom_part(anchor=CENTER, spin=0, orient=TOP,
-                   edges=edges("ALL", except=[TOP, BOTTOM]),
+                   edges="ALL", except=[TOP, BOTTOM],
                    connector="bottom",
                    bottom_wall=Bottom_wall_thickness) {
     extra_z = Bottom_component_clearance + bottom_wall + pcbsize.z + Slop;
@@ -198,70 +198,78 @@ module bottom_part(anchor=CENTER, spin=0, orient=TOP,
         diff("neg", keep="keep") {
             // Like we're milling it, let's start with the main block and cut
             // shit out of it.
-            _outer_part(size, edges) {
+            _outer_part(size, edges, except) {
 
                 // Cut out PCB
                 position(TOP)
                     up($eps)
                     fwd((Back_wall_thickness - Front_wall_thickness)/2)
-                    cuboid(pcbsize + Slop * [2, 2, 1], anchor=TOP, $tags="neg");
+                    tag("neg")
+                    cuboid(pcbsize + Slop * [2, 2, 1], anchor=TOP);
 
                 // cut out space for PCB components
                 position(TOP)
                     down(pcbsize.z)
                     up($eps)
                     fwd((Back_wall_thickness - Front_wall_thickness)/2)
-                    cuboid([pcbsize.x, pcbsize.y, Bottom_component_clearance + $eps],  anchor=TOP, $tags="neg");
+                    tag("neg")
+                    cuboid([pcbsize.x, pcbsize.y, Bottom_component_clearance + $eps],  anchor=TOP);
 
                 // cut out bottom front connector
                 position(FRONT + TOP)
                     fwd($eps)
                     down(pcbsize.z)
-                    _cutout(Bottom_front_cutout, anchor=TOP+FRONT, top_taper=0.2, $tags="neg");
+                    tag("neg")
+                    _cutout(Bottom_front_cutout, anchor=TOP+FRONT, top_taper=0.2);
 
                 // Cut out bottom back connector (right and left)
                 mirror_copy(LEFT) position(BACK + TOP + RIGHT)
                     up($eps)
                     back($eps)
                     left(Side_wall_thickness)
-                    _cutout(Bottom_back_side_cutout + pcbsize.z * [0, 1, 0], anchor=BACK+TOP+RIGHT, t=Back_wall_thickness, $tags="neg");
+                    tag("neg")
+                    _cutout(Bottom_back_side_cutout + pcbsize.z * [0, 1, 0], anchor=BACK+TOP+RIGHT, t=Back_wall_thickness);
 
                 // Various standoffs
                 mirror_copy(LEFT)
                 position(BOTTOM+FRONT+RIGHT)
                     left(Side_wall_thickness)
                     back(Front_wall_thickness)
-                    _pcb_standoff(Bottom_front_side_standoffs, anchor=BOTTOM+FRONT+RIGHT, $tags="keep");
+                    tag("neg")
+                    _pcb_standoff(Bottom_front_side_standoffs, anchor=BOTTOM+FRONT+RIGHT);
 
                 position(BOTTOM+FRONT+LEFT)
                     right(Side_wall_thickness)
                     back(Front_wall_thickness)
+                    tag("keep")
                     for (spec = Bottom_left_standoffs) {
                         back(spec[2])
-                            _pcb_standoff(spec, anchor=BOTTOM+LEFT, $tags="keep");
+                            _pcb_standoff(spec, anchor=BOTTOM+LEFT);
                     }
 
                 position(BOTTOM+FRONT+RIGHT)
                     left(Side_wall_thickness)
                     back(Front_wall_thickness)
                     for (spec = Bottom_right_standoffs) {
+                        tag("keep")
                         back(spec[2])
-                            _pcb_standoff(spec, anchor=BOTTOM+RIGHT, $tags="keep");
+                            _pcb_standoff(spec, anchor=BOTTOM+RIGHT);
                     }
 
                 position(BOTTOM+BACK+RIGHT)
                     left(Side_wall_thickness)
                     fwd(Back_wall_thickness)
+                    tag("keep")
                     for (spec = Bottom_back_standoffs) {
                         left(spec[2])
-                            _pcb_standoff(spec, anchor=BOTTOM+BACK+RIGHT, $tags="keep");
+                            _pcb_standoff(spec, anchor=BOTTOM+BACK+RIGHT);
                     }
 
                 _double_screw_holes(size);
 
                 _wire_through_hole(h=size.z);
 
-                tags("neg")
+                tag("neg")
                     down(pcbsize.z/2) _back_nut_holder();
             }
         }
@@ -281,9 +289,9 @@ module middle_part(anchor=CENTER, spin=0, orient=TOP) {
 
     module _part() {
         up(size.z / 2)
-            bottom_part(anchor=TOP, edges=edges("ALL", except=[TOP, BOTTOM]), connector="side-slot");
+            bottom_part(anchor=TOP, edges="ALL", except=[TOP, BOTTOM], connector="side-slot");
         down(size.z / 2)
-            top_part(anchor=TOP, orient=BOTTOM, edges=edges("ALL", except=[TOP, BOTTOM]), connector="side-slot");
+            top_part(anchor=TOP, orient=BOTTOM, edges="ALL", except=[TOP, BOTTOM], connector="side-slot");
     }
     attachable(size=size, anchor=anchor, spin=spin, orient=orient) {
         _part();
@@ -293,7 +301,7 @@ module middle_part(anchor=CENTER, spin=0, orient=TOP) {
 
 
 module top_part(anchor=CENTER, spin=0, orient=TOP,
-                edges=edges("ALL", except=[TOP,BOTTOM]),
+                edges="ALL", except=[TOP,BOTTOM],
                 connector="bottom",
                 bottom_wall=Top_wall_thickness) {
     extra_z = Top_component_clearance + bottom_wall;
@@ -307,7 +315,7 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
         diff("neg", keep="keep") {
             // Like we're milling it, let's start with the main block and cut
             // shit out of it.
-            _outer_part(size, edges) {
+            _outer_part(size, edges, except) {
 
                 attach(BACK)
                     label(Back_label, spin=180);
@@ -317,20 +325,23 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                 position(TOP)
                     up($eps)
                     fwd((Back_wall_thickness - Front_wall_thickness)/2)
-                    cuboid([pcbsize.x, pcbsize.y, 0] + Top_component_clearance * [0, 0, 1], anchor=TOP, $tags="neg");
+                    tag("neg")
+                    cuboid([pcbsize.x, pcbsize.y, 0] + Top_component_clearance * [0, 0, 1], anchor=TOP);
 
                 // cut out bottom front connector
                 position(FRONT + TOP)
                     up($eps)
                     fwd($eps)
-                    _cutout(Top_front_cutout, anchor=TOP+FRONT, $tags="neg");
+                    tag("neg")
+                    _cutout(Top_front_cutout, anchor=TOP+FRONT);
 
                 // Cut out bottom back connector (right and left)
                 mirror_copy(LEFT) position(BACK + TOP + RIGHT)
                     up($eps)
                     back($eps)
                     left(Side_wall_thickness)
-                    _cutout(Top_back_side_cutout, anchor=BACK+TOP+RIGHT, t=Back_wall_thickness, $tags="neg");
+                    tag("neg")
+                    _cutout(Top_back_side_cutout, anchor=BACK+TOP+RIGHT, t=Back_wall_thickness);
 
                 _wire_through_hole(h=size.z);
 
@@ -339,14 +350,16 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                 position(BOTTOM+FRONT+RIGHT)
                     left(Side_wall_thickness)
                     back(Front_wall_thickness)
-                    _pcb_standoff_top(Top_front_side_standoffs, anchor=BOTTOM+FRONT+RIGHT, $tags="keep");
+                    tag("keep")
+                    _pcb_standoff_top(Top_front_side_standoffs, anchor=BOTTOM+FRONT+RIGHT);
 
                 position(BOTTOM+FRONT+LEFT)
                     right(Side_wall_thickness)
                     back(Front_wall_thickness)
                     for (spec = Top_left_standoffs) {
+                        tag("keep")
                         back(spec[2])
-                            _pcb_standoff_top(spec, anchor=BOTTOM+LEFT, $tags="keep");
+                            _pcb_standoff_top(spec, anchor=BOTTOM+LEFT);
                     }
 
                 position(BOTTOM+FRONT+RIGHT)
@@ -354,7 +367,8 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                     back(Front_wall_thickness)
                     for (spec = Top_right_standoffs) {
                         back(spec[2])
-                            _pcb_standoff_top(spec, anchor=BOTTOM+RIGHT, $tags="keep");
+                            tag("keep")
+                            _pcb_standoff_top(spec, anchor=BOTTOM+RIGHT);
                     }
 
                 position(BOTTOM+BACK+RIGHT)
@@ -362,12 +376,13 @@ module top_part(anchor=CENTER, spin=0, orient=TOP,
                     fwd(Back_wall_thickness)
                     for (spec = Top_back_standoffs) {
                         left(spec[2])
-                            _pcb_standoff_top(spec, anchor=BOTTOM+BACK+RIGHT, $tags="keep");
+                            tag("keep")
+                            _pcb_standoff_top(spec, anchor=BOTTOM+BACK+RIGHT);
                     }
 
                 _double_screw_holes(size, invert=true);
 
-                tags("neg")
+                tag("neg")
                     up(pcbsize.z/2) _back_nut_holder();
             }
         }
